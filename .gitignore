@@ -1,0 +1,25 @@
+# Local dependencies and generated output
+node_modules/
+client/dist/
+server/dist/
+coverage/
+playwright-report/
+test-results/
+*.tsbuildinfo
+
+# Local secrets; tracked examples contain no real credentials
+.env
+.env.*
+!.env.example
+
+# Local databases, caches, logs and editor state
+*.log
+*.sqlite
+*.sqlite3
+.cache/
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+desktop.ini
+~$*

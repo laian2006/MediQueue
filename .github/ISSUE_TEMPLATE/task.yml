@@ -1,0 +1,45 @@
+name: Task theo kế hoạch
+description: Theo dõi một task WBS của MediQueue
+title: "[WBS] Tên task"
+body:
+  - type: input
+    id: wbs
+    attributes:
+      label: Mã WBS
+      description: Lấy đúng mã trong Excel, ví dụ 1.13. Khác số Issue GitHub.
+    validations:
+      required: true
+  - type: input
+    id: owner
+    attributes:
+      label: Người phụ trách và reviewer
+    validations:
+      required: true
+  - type: input
+    id: sprint
+    attributes:
+      label: Sprint, thời hạn và giờ ước lượng
+      description: Lấy theo Excel; ngày là khoảng lịch, giờ là công sức.
+    validations:
+      required: true
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Phụ thuộc và đầu vào
+      description: Ghi WBS, FS hoặc FF và phần cần nhận từ ai.
+    validations:
+      required: true
+  - type: textarea
+    id: output
+    attributes:
+      label: Đầu ra và vị trí tệp
+      description: Theo hướng dẫn thư mục và task, ghi cả tài liệu/test cần bàn giao.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Tiêu chí nghiệm thu và cách kiểm tra
+      description: Chuyển AC thành checklist; chưa chạy thì không ghi đạt.
+    validations:
+      required: true

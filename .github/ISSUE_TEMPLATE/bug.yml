@@ -1,0 +1,29 @@
+name: Báo lỗi
+description: Lỗi có thể tái hiện trên MediQueue
+title: "[Bug] Mô tả ngắn"
+body:
+  - type: input
+    id: context
+    attributes:
+      label: WBS, commit và môi trường
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Dữ liệu đầu và các bước tái hiện
+      description: Chỉ dùng dữ liệu giả, không chèn mật khẩu/token.
+    validations:
+      required: true
+  - type: textarea
+    id: result
+    attributes:
+      label: Mong đợi, thực tế và bằng chứng
+    validations:
+      required: true
+  - type: textarea
+    id: impact
+    attributes:
+      label: Mức ảnh hưởng, người cần xử lý và WBS liên quan
+    validations:
+      required: true
