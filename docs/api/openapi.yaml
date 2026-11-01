@@ -1,0 +1,1669 @@
+openapi: "3.0.3"
+info:
+  title: "MediQueue API — hợp đồng triển khai"
+  version: "1.0.0"
+  description: "Thiết kế phiên bản 1.0 ban hành ngày 01/11/2026, áp dụng triển khai trong nhóm. Tài liệu không xác nhận API đã được lập trình. Quy ước UUID dạng chuỗi, JSON camelCase, thời gian UTC ISO 8601. Áp dụng cookie/server session và T=60 giây theo thiết kế chung."
+servers:
+  -
+    url: "/api/v1"
+    description: "Tiền tố API chung"
+x-design-status: "ISSUED_FOR_IMPLEMENTATION"
+x-no-show-timeout-seconds: 60
+security:
+  -
+    sessionCookie: []
+paths:
+  "/auth/login":
+    post:
+      summary: "Đăng nhập tài khoản giả lập đã được cấp"
+      operationId: "post_auth_login"
+      tags:
+        - "auth"
+      x-owner: "Hưng"
+      x-wbs: "1.4"
+      x-access: "PUBLIC"
+      responses:
+        "200":
+          description: "Thành công"
+          content:
+            "application/json":
+              schema:
+                type: "object"
+                additionalProperties: false
+                properties:
+                  data:
+                    "$ref": "#/components/schemas/LoginData"
+                required:
+                  - "data"
+        "400":
+          description: "Đầu vào không hợp lệ"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "401":
+          description: "Chưa xác thực"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "403":
+          description: "Không có quyền"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "500":
+          description: "Lỗi hệ thống"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+      description: "Thiết kế phiên bản 1.0 ban hành ngày 01/11/2026, áp dụng triển khai trong nhóm. Tài liệu không xác nhận API đã được lập trình. Chủ trì: Hưng; WBS 1.4. Không cần đăng nhập."
+      security: []
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              "$ref": "#/components/schemas/LoginInput"
+  "/auth/me":
+    get:
+      summary: "Đọc tài khoản hiện tại"
+      operationId: "get_auth_me"
+      tags:
+        - "auth"
+      x-owner: "Hưng"
+      x-wbs: "1.4"
+      x-access: "AUTH"
+      responses:
+        "200":
+          description: "Thành công"
+          content:
+            "application/json":
+              schema:
+                type: "object"
+                additionalProperties: false
+                properties:
+                  data:
+                    "$ref": "#/components/schemas/User"
+                required:
+                  - "data"
+        "400":
+          description: "Đầu vào không hợp lệ"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "401":
+          description: "Chưa xác thực"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "403":
+          description: "Không có quyền"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "404":
+          description: "Không tìm thấy"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "409":
+          description: "Xung đột nghiệp vụ; xem bảng mã lỗi trong thiết kế chung"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "500":
+          description: "Lỗi hệ thống"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+      description: "Thiết kế phiên bản 1.0 ban hành ngày 01/11/2026, áp dụng triển khai trong nhóm. Tài liệu không xác nhận API đã được lập trình. Chủ trì: Hưng; WBS 1.4. Cần tài khoản đã đăng nhập."
+  "/auth/logout":
+    post:
+      summary: "Hủy phiên đăng nhập phía server và cookie"
+      operationId: "post_auth_logout"
+      tags:
+        - "auth"
+      x-owner: "Hưng"
+      x-wbs: "2.5"
+      x-access: "AUTH"
+      responses:
+        "200":
+          description: "Thành công"
+          content:
+            "application/json":
+              schema:
+                type: "object"
+                additionalProperties: false
+                properties:
+                  data:
+                    type: "object"
+                    nullable: true
+                    enum:
+                      - null
+                required:
+                  - "data"
+        "400":
+          description: "Đầu vào không hợp lệ"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "401":
+          description: "Chưa xác thực"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "403":
+          description: "Không có quyền"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "404":
+          description: "Không tìm thấy"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "409":
+          description: "Xung đột nghiệp vụ; xem bảng mã lỗi trong thiết kế chung"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "500":
+          description: "Lỗi hệ thống"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+      description: "Thiết kế phiên bản 1.0 ban hành ngày 01/11/2026, áp dụng triển khai trong nhóm. Tài liệu không xác nhận API đã được lập trình. Chủ trì: Hưng; WBS 2.5. Cần tài khoản đã đăng nhập."
+  "/patients":
+    get:
+      summary: "Danh sách hồ sơ người gửi được cấp quyền"
+      operationId: "get_patients"
+      tags:
+        - "patients"
+      x-owner: "Hưng"
+      x-wbs: "1.5"
+      x-access: "REP"
+      responses:
+        "200":
+          description: "Thành công"
+          content:
+            "application/json":
+              schema:
+                type: "object"
+                additionalProperties: false
+                properties:
+                  data:
+                    type: "array"
+                    items:
+                      "$ref": "#/components/schemas/Patient"
+                required:
+                  - "data"
+        "400":
+          description: "Đầu vào không hợp lệ"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "401":
+          description: "Chưa xác thực"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "403":
+          description: "Không có quyền"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "404":
+          description: "Không tìm thấy"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "409":
+          description: "Xung đột nghiệp vụ; xem bảng mã lỗi trong thiết kế chung"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "500":
+          description: "Lỗi hệ thống"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+      description: "Thiết kế phiên bản 1.0 ban hành ngày 01/11/2026, áp dụng triển khai trong nhóm. Tài liệu không xác nhận API đã được lập trình. Chủ trì: Hưng; WBS 1.5. Chỉ REPRESENTATIVE; API hồ sơ/phiếu kiểm tra PatientAccess ở server."
+  "/sessions/current":
+    get:
+      summary: "Phiên OPEN hoặc STOPPED hiện tại; không có trả null"
+      operationId: "get_sessions_current"
+      tags:
+        - "sessions"
+      x-owner: "An"
+      x-wbs: "1.1"
+      x-access: "AUTH"
+      responses:
+        "200":
+          description: "Thành công"
+          content:
+            "application/json":
+              schema:
+                type: "object"
+                additionalProperties: false
+                properties:
+                  data:
+                    "$ref": "#/components/schemas/SessionOrNull"
+                required:
+                  - "data"
+        "400":
+          description: "Đầu vào không hợp lệ"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "401":
+          description: "Chưa xác thực"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "403":
+          description: "Không có quyền"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "404":
+          description: "Không tìm thấy"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "409":
+          description: "Xung đột nghiệp vụ; xem bảng mã lỗi trong thiết kế chung"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "500":
+          description: "Lỗi hệ thống"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+      description: "Thiết kế phiên bản 1.0 ban hành ngày 01/11/2026, áp dụng triển khai trong nhóm. Tài liệu không xác nhận API đã được lập trình. Chủ trì: An; WBS 1.1. Cần tài khoản đã đăng nhập."
+  "/sessions":
+    post:
+      summary: "Mở một phiên OPEN, bộ đếm ban đầu bằng 0"
+      operationId: "post_sessions"
+      tags:
+        - "sessions"
+      x-owner: "An"
+      x-wbs: "1.1"
+      x-access: "STAFF"
+      responses:
+        "201":
+          description: "Thành công"
+          content:
+            "application/json":
+              schema:
+                type: "object"
+                additionalProperties: false
+                properties:
+                  data:
+                    "$ref": "#/components/schemas/Session"
+                required:
+                  - "data"
+        "400":
+          description: "Đầu vào không hợp lệ"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "401":
+          description: "Chưa xác thực"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "403":
+          description: "Không có quyền"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "404":
+          description: "Không tìm thấy"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "409":
+          description: "Xung đột nghiệp vụ; xem bảng mã lỗi trong thiết kế chung"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "500":
+          description: "Lỗi hệ thống"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+      description: "Thiết kế phiên bản 1.0 ban hành ngày 01/11/2026, áp dụng triển khai trong nhóm. Tài liệu không xác nhận API đã được lập trình. Chủ trì: An; WBS 1.1. Chỉ STAFF."
+  "/sessions/{sessionId}/stop":
+    post:
+      summary: "OPEN sang STOPPED; STOPPED gọi lại trả nguyên phiên"
+      operationId: "post_sessions__sessionId__stop"
+      tags:
+        - "sessions"
+      x-owner: "An"
+      x-wbs: "2.1"
+      x-access: "STAFF"
+      responses:
+        "200":
+          description: "Thành công"
+          content:
+            "application/json":
+              schema:
+                type: "object"
+                additionalProperties: false
+                properties:
+                  data:
+                    "$ref": "#/components/schemas/Session"
+                required:
+                  - "data"
+        "400":
+          description: "Đầu vào không hợp lệ"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "401":
+          description: "Chưa xác thực"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "403":
+          description: "Không có quyền"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "404":
+          description: "Không tìm thấy"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "409":
+          description: "Xung đột nghiệp vụ; xem bảng mã lỗi trong thiết kế chung"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "500":
+          description: "Lỗi hệ thống"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+      description: "Thiết kế phiên bản 1.0 ban hành ngày 01/11/2026, áp dụng triển khai trong nhóm. Tài liệu không xác nhận API đã được lập trình. Chủ trì: An; WBS 2.1. Chỉ STAFF. CLOSED trả 409 INVALID_STATE; không có API mở lại STOPPED trong phạm vi hiện tại."
+      parameters:
+        -
+          name: "sessionId"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+  "/sessions/{sessionId}/close":
+    post:
+      summary: "Đóng STOPPED khi không còn phiếu hoạt động; CLOSED gọi lại trả nguyên phiên"
+      operationId: "post_sessions__sessionId__close"
+      tags:
+        - "sessions"
+      x-owner: "An"
+      x-wbs: "2.1"
+      x-access: "STAFF"
+      responses:
+        "200":
+          description: "Thành công"
+          content:
+            "application/json":
+              schema:
+                type: "object"
+                additionalProperties: false
+                properties:
+                  data:
+                    "$ref": "#/components/schemas/Session"
+                required:
+                  - "data"
+        "400":
+          description: "Đầu vào không hợp lệ"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "401":
+          description: "Chưa xác thực"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "403":
+          description: "Không có quyền"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "404":
+          description: "Không tìm thấy"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "409":
+          description: "Xung đột nghiệp vụ; xem bảng mã lỗi trong thiết kế chung"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "500":
+          description: "Lỗi hệ thống"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+      description: "Thiết kế phiên bản 1.0 ban hành ngày 01/11/2026, áp dụng triển khai trong nhóm. Tài liệu không xác nhận API đã được lập trình. Chủ trì: An; WBS 2.1. Chỉ STAFF. Chỉ đóng từ STOPPED; OPEN trả 409 INVALID_STATE, STOPPED còn phiếu hoạt động trả 409 ACTIVE_TICKETS_REMAIN."
+      parameters:
+        -
+          name: "sessionId"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+  "/tickets":
+    post:
+      summary: "Cấp số hoặc trả cùng phiếu khi gửi lại cùng thao tác"
+      operationId: "post_tickets"
+      tags:
+        - "tickets"
+      x-owner: "Đức Anh"
+      x-wbs: "1.8; 2.7; 2.8"
+      x-access: "REP"
+      responses:
+        "201":
+          description: "Thành công"
+          content:
+            "application/json":
+              schema:
+                type: "object"
+                additionalProperties: false
+                properties:
+                  data:
+                    "$ref": "#/components/schemas/TicketView"
+                required:
+                  - "data"
+        "200":
+          description: "Gửi lại cùng người gửi/requestId/nội dung: trả cùng ticketId với trạng thái hiện tại, kể cả phiếu đã kết thúc. Kiểm tra xác thực/quyền trước khi trả dữ liệu; không cấp số hoặc thêm sự kiện mới."
+          content:
+            "application/json":
+              schema:
+                type: "object"
+                additionalProperties: false
+                properties:
+                  data:
+                    "$ref": "#/components/schemas/TicketView"
+                required:
+                  - "data"
+        "400":
+          description: "Đầu vào không hợp lệ"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "401":
+          description: "Chưa xác thực"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "403":
+          description: "Không có quyền"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "404":
+          description: "Không tìm thấy"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "409":
+          description: "Xung đột nghiệp vụ; xem bảng mã lỗi trong thiết kế chung"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "500":
+          description: "Lỗi hệ thống"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+      description: "Thiết kế phiên bản 1.0 ban hành ngày 01/11/2026, áp dụng triển khai trong nhóm. Tài liệu không xác nhận API đã được lập trình. Chủ trì: Đức Anh; WBS 1.8; 2.7; 2.8. Chỉ REPRESENTATIVE; API hồ sơ/phiếu kiểm tra PatientAccess ở server. Body phải giữ nguyên patientId, sessionId, requestId khi thử lại. Tra yêu cầu cũ trước điều kiện OPEN; yêu cầu mới chỉ được cấp trong OPEN. Trùng khóa khác nội dung: 409 IDEMPOTENCY_CONFLICT. Đã có phiếu hoạt động với khóa mới: 409 ACTIVE_TICKET_EXISTS."
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              "$ref": "#/components/schemas/IssueTicketInput"
+  "/tickets/active":
+    get:
+      summary: "Tìm phiếu hoạt động của hồ sơ trong phiên"
+      operationId: "get_tickets_active"
+      tags:
+        - "tickets"
+      x-owner: "Đức Anh"
+      x-wbs: "1.8"
+      x-access: "REP"
+      responses:
+        "200":
+          description: "Thành công"
+          content:
+            "application/json":
+              schema:
+                type: "object"
+                additionalProperties: false
+                properties:
+                  data:
+                    "$ref": "#/components/schemas/TicketViewOrNull"
+                required:
+                  - "data"
+        "400":
+          description: "Đầu vào không hợp lệ"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "401":
+          description: "Chưa xác thực"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "403":
+          description: "Không có quyền"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "404":
+          description: "Không tìm thấy"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "409":
+          description: "Xung đột nghiệp vụ; xem bảng mã lỗi trong thiết kế chung"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "500":
+          description: "Lỗi hệ thống"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+      description: "Thiết kế phiên bản 1.0 ban hành ngày 01/11/2026, áp dụng triển khai trong nhóm. Tài liệu không xác nhận API đã được lập trình. Chủ trì: Đức Anh; WBS 1.8. Chỉ REPRESENTATIVE; API hồ sơ/phiếu kiểm tra PatientAccess ở server. data=null nếu không có phiếu hoạt động; quyền theo patientId được kiểm tra trước truy vấn."
+      parameters:
+        -
+          name: "patientId"
+          in: "query"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+        -
+          name: "sessionId"
+          in: "query"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+  "/tickets/{ticketId}":
+    get:
+      summary: "Đọc phiếu riêng, gồm phiếu đã kết thúc nếu còn quyền"
+      operationId: "get_tickets__ticketId_"
+      tags:
+        - "tickets"
+      x-owner: "Đức Anh"
+      x-wbs: "1.8"
+      x-access: "REP"
+      responses:
+        "200":
+          description: "Thành công"
+          content:
+            "application/json":
+              schema:
+                type: "object"
+                additionalProperties: false
+                properties:
+                  data:
+                    "$ref": "#/components/schemas/TicketView"
+                required:
+                  - "data"
+        "400":
+          description: "Đầu vào không hợp lệ"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "401":
+          description: "Chưa xác thực"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "403":
+          description: "Không có quyền"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "404":
+          description: "Không tìm thấy"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "409":
+          description: "Xung đột nghiệp vụ; xem bảng mã lỗi trong thiết kế chung"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "500":
+          description: "Lỗi hệ thống"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+      description: "Thiết kế phiên bản 1.0 ban hành ngày 01/11/2026, áp dụng triển khai trong nhóm. Tài liệu không xác nhận API đã được lập trình. Chủ trì: Đức Anh; WBS 1.8. Chỉ REPRESENTATIVE; API hồ sơ/phiếu kiểm tra PatientAccess ở server."
+      parameters:
+        -
+          name: "ticketId"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+  "/tickets/{ticketId}/cancel":
+    post:
+      summary: "Hủy phiếu WAITING của hồ sơ được phép"
+      operationId: "post_tickets__ticketId__cancel"
+      tags:
+        - "tickets"
+      x-owner: "Đạt"
+      x-wbs: "2.13"
+      x-access: "REP"
+      responses:
+        "200":
+          description: "Thành công"
+          content:
+            "application/json":
+              schema:
+                type: "object"
+                additionalProperties: false
+                properties:
+                  data:
+                    "$ref": "#/components/schemas/TicketView"
+                required:
+                  - "data"
+        "400":
+          description: "Đầu vào không hợp lệ"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "401":
+          description: "Chưa xác thực"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "403":
+          description: "Không có quyền"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "404":
+          description: "Không tìm thấy"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "409":
+          description: "Xung đột nghiệp vụ; xem bảng mã lỗi trong thiết kế chung"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "500":
+          description: "Lỗi hệ thống"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+      description: "Thiết kế phiên bản 1.0 ban hành ngày 01/11/2026, áp dụng triển khai trong nhóm. Tài liệu không xác nhận API đã được lập trình. Chủ trì: Đạt; WBS 2.13. Chỉ REPRESENTATIVE; API hồ sơ/phiếu kiểm tra PatientAccess ở server. Chỉ WAITING trong phiên OPEN/STOPPED; trạng thái khác trả 409 INVALID_STATE; không xóa Ticket."
+      parameters:
+        -
+          name: "ticketId"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+  "/queue/waiting":
+    get:
+      summary: "Danh sách WAITING theo number tăng dần"
+      operationId: "get_queue_waiting"
+      tags:
+        - "queue"
+      x-owner: "Hoàng Anh"
+      x-wbs: "1.11"
+      x-access: "STAFF"
+      responses:
+        "200":
+          description: "Thành công"
+          content:
+            "application/json":
+              schema:
+                type: "object"
+                additionalProperties: false
+                properties:
+                  data:
+                    "$ref": "#/components/schemas/WaitingQueue"
+                required:
+                  - "data"
+        "400":
+          description: "Đầu vào không hợp lệ"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "401":
+          description: "Chưa xác thực"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "403":
+          description: "Không có quyền"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "404":
+          description: "Không tìm thấy"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "409":
+          description: "Xung đột nghiệp vụ; xem bảng mã lỗi trong thiết kế chung"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "500":
+          description: "Lỗi hệ thống"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+      description: "Thiết kế phiên bản 1.0 ban hành ngày 01/11/2026, áp dụng triển khai trong nhóm. Tài liệu không xác nhận API đã được lập trình. Chủ trì: Hoàng Anh; WBS 1.11. Chỉ STAFF."
+      parameters:
+        -
+          name: "sessionId"
+          in: "query"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+  "/queue/current":
+    get:
+      summary: "Lượt CALLED hoặc REGISTERING hiện tại và tham số T"
+      operationId: "get_queue_current"
+      tags:
+        - "queue"
+      x-owner: "Hoàng Anh"
+      x-wbs: "1.11"
+      x-access: "STAFF"
+      responses:
+        "200":
+          description: "Thành công"
+          content:
+            "application/json":
+              schema:
+                type: "object"
+                additionalProperties: false
+                properties:
+                  data:
+                    "$ref": "#/components/schemas/CurrentQueue"
+                required:
+                  - "data"
+        "400":
+          description: "Đầu vào không hợp lệ"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "401":
+          description: "Chưa xác thực"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "403":
+          description: "Không có quyền"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "404":
+          description: "Không tìm thấy"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "409":
+          description: "Xung đột nghiệp vụ; xem bảng mã lỗi trong thiết kế chung"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "500":
+          description: "Lỗi hệ thống"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+      description: "Thiết kế phiên bản 1.0 ban hành ngày 01/11/2026, áp dụng triển khai trong nhóm. Tài liệu không xác nhận API đã được lập trình. Chủ trì: Hoàng Anh; WBS 1.11. Chỉ STAFF."
+      parameters:
+        -
+          name: "sessionId"
+          in: "query"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+  "/queue/call-next":
+    post:
+      summary: "Gọi phiếu WAITING sớm nhất khi quầy rảnh"
+      operationId: "post_queue_call_next"
+      tags:
+        - "queue"
+      x-owner: "Hoàng Anh"
+      x-wbs: "1.11"
+      x-access: "STAFF"
+      responses:
+        "200":
+          description: "Thành công"
+          content:
+            "application/json":
+              schema:
+                type: "object"
+                additionalProperties: false
+                properties:
+                  data:
+                    "$ref": "#/components/schemas/Ticket"
+                required:
+                  - "data"
+        "400":
+          description: "Đầu vào không hợp lệ"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "401":
+          description: "Chưa xác thực"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "403":
+          description: "Không có quyền"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "404":
+          description: "Không tìm thấy"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "409":
+          description: "Xung đột nghiệp vụ; xem bảng mã lỗi trong thiết kế chung"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "500":
+          description: "Lỗi hệ thống"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+      description: "Thiết kế phiên bản 1.0 ban hành ngày 01/11/2026, áp dụng triển khai trong nhóm. Tài liệu không xác nhận API đã được lập trình. Chủ trì: Hoàng Anh; WBS 1.11. Chỉ STAFF. Phiên phải OPEN hoặc STOPPED; thay đổi và TicketEvent cùng giao dịch, khóa QueueSession trước Ticket."
+      requestBody:
+        required: true
+        content:
+          "application/json":
+            schema:
+              "$ref": "#/components/schemas/SessionInput"
+  "/queue/tickets/{ticketId}/recall":
+    post:
+      summary: "Gọi lại CALLED, giữ phiếu/số và đổi lastCalledAt"
+      operationId: "post_queue_tickets__ticketId__recall"
+      tags:
+        - "queue"
+      x-owner: "Hoàng Anh"
+      x-wbs: "2.10"
+      x-access: "STAFF"
+      responses:
+        "200":
+          description: "Thành công"
+          content:
+            "application/json":
+              schema:
+                type: "object"
+                additionalProperties: false
+                properties:
+                  data:
+                    "$ref": "#/components/schemas/Ticket"
+                required:
+                  - "data"
+        "400":
+          description: "Đầu vào không hợp lệ"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "401":
+          description: "Chưa xác thực"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "403":
+          description: "Không có quyền"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "404":
+          description: "Không tìm thấy"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "409":
+          description: "Xung đột nghiệp vụ; xem bảng mã lỗi trong thiết kế chung"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "500":
+          description: "Lỗi hệ thống"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+      description: "Thiết kế phiên bản 1.0 ban hành ngày 01/11/2026, áp dụng triển khai trong nhóm. Tài liệu không xác nhận API đã được lập trình. Chủ trì: Hoàng Anh; WBS 2.10. Chỉ STAFF. Phiên phải OPEN hoặc STOPPED; thay đổi và TicketEvent cùng giao dịch, khóa QueueSession trước Ticket."
+      parameters:
+        -
+          name: "ticketId"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+  "/queue/tickets/{ticketId}/start":
+    post:
+      summary: "CALLED sang REGISTERING"
+      operationId: "post_queue_tickets__ticketId__start"
+      tags:
+        - "queue"
+      x-owner: "Hoàng Anh"
+      x-wbs: "2.10"
+      x-access: "STAFF"
+      responses:
+        "200":
+          description: "Thành công"
+          content:
+            "application/json":
+              schema:
+                type: "object"
+                additionalProperties: false
+                properties:
+                  data:
+                    "$ref": "#/components/schemas/Ticket"
+                required:
+                  - "data"
+        "400":
+          description: "Đầu vào không hợp lệ"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "401":
+          description: "Chưa xác thực"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "403":
+          description: "Không có quyền"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "404":
+          description: "Không tìm thấy"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "409":
+          description: "Xung đột nghiệp vụ; xem bảng mã lỗi trong thiết kế chung"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "500":
+          description: "Lỗi hệ thống"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+      description: "Thiết kế phiên bản 1.0 ban hành ngày 01/11/2026, áp dụng triển khai trong nhóm. Tài liệu không xác nhận API đã được lập trình. Chủ trì: Hoàng Anh; WBS 2.10. Chỉ STAFF. Phiên phải OPEN hoặc STOPPED; thay đổi và TicketEvent cùng giao dịch, khóa QueueSession trước Ticket."
+      parameters:
+        -
+          name: "ticketId"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+  "/queue/tickets/{ticketId}/complete":
+    post:
+      summary: "REGISTERING sang COMPLETED, giải phóng quầy"
+      operationId: "post_queue_tickets__ticketId__complete"
+      tags:
+        - "queue"
+      x-owner: "Hoàng Anh"
+      x-wbs: "2.10"
+      x-access: "STAFF"
+      responses:
+        "200":
+          description: "Thành công"
+          content:
+            "application/json":
+              schema:
+                type: "object"
+                additionalProperties: false
+                properties:
+                  data:
+                    "$ref": "#/components/schemas/Ticket"
+                required:
+                  - "data"
+        "400":
+          description: "Đầu vào không hợp lệ"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "401":
+          description: "Chưa xác thực"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "403":
+          description: "Không có quyền"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "404":
+          description: "Không tìm thấy"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "409":
+          description: "Xung đột nghiệp vụ; xem bảng mã lỗi trong thiết kế chung"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "500":
+          description: "Lỗi hệ thống"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+      description: "Thiết kế phiên bản 1.0 ban hành ngày 01/11/2026, áp dụng triển khai trong nhóm. Tài liệu không xác nhận API đã được lập trình. Chủ trì: Hoàng Anh; WBS 2.10. Chỉ STAFF. Phiên phải OPEN hoặc STOPPED; thay đổi và TicketEvent cùng giao dịch, khóa QueueSession trước Ticket."
+      parameters:
+        -
+          name: "ticketId"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+  "/queue/tickets/{ticketId}/no-show":
+    post:
+      summary: "Nhân viên ghi vắng CALLED khi đủ T từ lần gọi gần nhất"
+      operationId: "post_queue_tickets__ticketId__no_show"
+      tags:
+        - "queue"
+      x-owner: "Hoàng Anh"
+      x-wbs: "2.11"
+      x-access: "STAFF"
+      responses:
+        "200":
+          description: "Thành công"
+          content:
+            "application/json":
+              schema:
+                type: "object"
+                additionalProperties: false
+                properties:
+                  data:
+                    "$ref": "#/components/schemas/Ticket"
+                required:
+                  - "data"
+        "400":
+          description: "Đầu vào không hợp lệ"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "401":
+          description: "Chưa xác thực"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "403":
+          description: "Không có quyền"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "404":
+          description: "Không tìm thấy"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "409":
+          description: "Xung đột nghiệp vụ; xem bảng mã lỗi trong thiết kế chung"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "500":
+          description: "Lỗi hệ thống"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+      description: "Thiết kế phiên bản 1.0 ban hành ngày 01/11/2026, áp dụng triển khai trong nhóm. Tài liệu không xác nhận API đã được lập trình. Chủ trì: Hoàng Anh; WBS 2.11. Chỉ STAFF. T=60 giây từ cấu hình chung; thời gian máy chủ quyết định. Trước T trả 409 NO_SHOW_TOO_EARLY; gọi lại bắt đầu T mới; không tự động ghi vắng. Phiên phải OPEN hoặc STOPPED; thay đổi và TicketEvent cùng giao dịch, khóa QueueSession trước Ticket."
+      parameters:
+        -
+          name: "ticketId"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+  "/public/board":
+    get:
+      summary: "Bản chụp công khai chỉ gồm số, trạng thái và thời điểm"
+      operationId: "get_public_board"
+      tags:
+        - "public"
+      x-owner: "Trực"
+      x-wbs: "1.20; 2.19"
+      x-access: "PUBLIC"
+      responses:
+        "200":
+          description: "Thành công"
+          content:
+            "application/json":
+              schema:
+                type: "object"
+                additionalProperties: false
+                properties:
+                  data:
+                    "$ref": "#/components/schemas/Board"
+                required:
+                  - "data"
+        "400":
+          description: "Đầu vào không hợp lệ"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "403":
+          description: "Không có quyền"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+        "500":
+          description: "Lỗi hệ thống"
+          content:
+            "application/json":
+              schema:
+                "$ref": "#/components/schemas/Error"
+      description: "Thiết kế phiên bản 1.0 ban hành ngày 01/11/2026, áp dụng triển khai trong nhóm. Tài liệu không xác nhận API đã được lập trình. Chủ trì: Trực; WBS 1.20; 2.19. Không cần đăng nhập. Không trả ticketId, sessionId, patientId, tên hay thông tin sức khỏe. Khi không có phiên chưa đóng: currentTicket=null và waitingNumbers=[]. updatedAt là thời điểm tạo bản chụp trên server."
+      security: []
+components:
+  securitySchemes:
+    sessionCookie:
+      type: "apiKey"
+      in: "cookie"
+      name: "mediqueue.sid"
+      description: "Cookie HttpOnly chứa định danh phiên đăng nhập phía server; Hưng/Trực triển khai store PostgreSQL theo thiết kế chung."
+  schemas:
+    User:
+      type: "object"
+      additionalProperties: false
+      properties:
+        userId:
+          type: "string"
+          format: "uuid"
+        displayName:
+          type: "string"
+        role:
+          type: "string"
+          enum:
+            - "REPRESENTATIVE"
+            - "STAFF"
+      required:
+        - "userId"
+        - "displayName"
+        - "role"
+    Patient:
+      type: "object"
+      additionalProperties: false
+      properties:
+        patientId:
+          type: "string"
+          format: "uuid"
+        code:
+          type: "string"
+        displayName:
+          type: "string"
+      required:
+        - "patientId"
+        - "code"
+        - "displayName"
+    Session:
+      type: "object"
+      additionalProperties: false
+      properties:
+        sessionId:
+          type: "string"
+          format: "uuid"
+        status:
+          type: "string"
+          enum:
+            - "OPEN"
+            - "STOPPED"
+            - "CLOSED"
+        lastIssuedNumber:
+          type: "integer"
+          minimum: 0
+        openedAt:
+          type: "string"
+          format: "date-time"
+        stoppedAt:
+          type: "string"
+          format: "date-time"
+          nullable: true
+        closedAt:
+          type: "string"
+          format: "date-time"
+          nullable: true
+      required:
+        - "sessionId"
+        - "status"
+        - "lastIssuedNumber"
+        - "openedAt"
+        - "stoppedAt"
+        - "closedAt"
+    Ticket:
+      type: "object"
+      additionalProperties: false
+      properties:
+        ticketId:
+          type: "string"
+          format: "uuid"
+        sessionId:
+          type: "string"
+          format: "uuid"
+        patientId:
+          type: "string"
+          format: "uuid"
+        number:
+          type: "integer"
+          minimum: 1
+        status:
+          type: "string"
+          enum:
+            - "WAITING"
+            - "CALLED"
+            - "REGISTERING"
+            - "COMPLETED"
+            - "CANCELLED"
+            - "NO_SHOW"
+        lastCalledAt:
+          type: "string"
+          format: "date-time"
+          nullable: true
+        createdAt:
+          type: "string"
+          format: "date-time"
+        updatedAt:
+          type: "string"
+          format: "date-time"
+      required:
+        - "ticketId"
+        - "sessionId"
+        - "patientId"
+        - "number"
+        - "status"
+        - "lastCalledAt"
+        - "createdAt"
+        - "updatedAt"
+    TicketView:
+      type: "object"
+      additionalProperties: false
+      properties:
+        ticket:
+          "$ref": "#/components/schemas/Ticket"
+        waitingAhead:
+          type: "integer"
+          minimum: 0
+          nullable: true
+      required:
+        - "ticket"
+        - "waitingAhead"
+    PublicTicket:
+      type: "object"
+      additionalProperties: false
+      properties:
+        number:
+          type: "integer"
+          minimum: 1
+        status:
+          type: "string"
+          enum:
+            - "CALLED"
+            - "REGISTERING"
+      required:
+        - "number"
+        - "status"
+    Board:
+      type: "object"
+      additionalProperties: false
+      properties:
+        currentTicket:
+          "$ref": "#/components/schemas/PublicTicketOrNull"
+        waitingNumbers:
+          type: "array"
+          items:
+            type: "integer"
+            minimum: 1
+        updatedAt:
+          type: "string"
+          format: "date-time"
+      required:
+        - "currentTicket"
+        - "waitingNumbers"
+        - "updatedAt"
+    Error:
+      type: "object"
+      additionalProperties: false
+      properties:
+        error:
+          type: "object"
+          additionalProperties: false
+          properties:
+            code:
+              type: "string"
+            message:
+              type: "string"
+            details:
+              type: "object"
+              additionalProperties: true
+          required:
+            - "code"
+            - "message"
+      required:
+        - "error"
+    LoginInput:
+      type: "object"
+      additionalProperties: false
+      properties:
+        username:
+          type: "string"
+          minLength: 1
+        password:
+          type: "string"
+          minLength: 1
+      required:
+        - "username"
+        - "password"
+    IssueTicketInput:
+      type: "object"
+      additionalProperties: false
+      properties:
+        patientId:
+          type: "string"
+          format: "uuid"
+        sessionId:
+          type: "string"
+          format: "uuid"
+        requestId:
+          type: "string"
+          format: "uuid"
+      required:
+        - "patientId"
+        - "sessionId"
+        - "requestId"
+    SessionInput:
+      type: "object"
+      additionalProperties: false
+      properties:
+        sessionId:
+          type: "string"
+          format: "uuid"
+      required:
+        - "sessionId"
+    LoginData:
+      type: "object"
+      additionalProperties: false
+      properties:
+        user:
+          "$ref": "#/components/schemas/User"
+        expiresAt:
+          type: "string"
+          format: "date-time"
+      required:
+        - "user"
+        - "expiresAt"
+    CurrentQueue:
+      type: "object"
+      additionalProperties: false
+      properties:
+        ticket:
+          "$ref": "#/components/schemas/TicketOrNull"
+        noShowTimeoutSeconds:
+          type: "integer"
+          minimum: 1
+        serverTime:
+          type: "string"
+          format: "date-time"
+      required:
+        - "ticket"
+        - "noShowTimeoutSeconds"
+        - "serverTime"
+    WaitingQueue:
+      type: "object"
+      additionalProperties: false
+      properties:
+        tickets:
+          type: "array"
+          items:
+            "$ref": "#/components/schemas/Ticket"
+      required:
+        - "tickets"
+    PublicTicketOrNull:
+      type: "object"
+      additionalProperties: false
+      properties:
+        number:
+          type: "integer"
+          minimum: 1
+        status:
+          type: "string"
+          enum:
+            - "CALLED"
+            - "REGISTERING"
+      required:
+        - "number"
+        - "status"
+      nullable: true
+    TicketOrNull:
+      type: "object"
+      additionalProperties: false
+      properties:
+        ticketId:
+          type: "string"
+          format: "uuid"
+        sessionId:
+          type: "string"
+          format: "uuid"
+        patientId:
+          type: "string"
+          format: "uuid"
+        number:
+          type: "integer"
+          minimum: 1
+        status:
+          type: "string"
+          enum:
+            - "WAITING"
+            - "CALLED"
+            - "REGISTERING"
+            - "COMPLETED"
+            - "CANCELLED"
+            - "NO_SHOW"
+        lastCalledAt:
+          type: "string"
+          format: "date-time"
+          nullable: true
+        createdAt:
+          type: "string"
+          format: "date-time"
+        updatedAt:
+          type: "string"
+          format: "date-time"
+      required:
+        - "ticketId"
+        - "sessionId"
+        - "patientId"
+        - "number"
+        - "status"
+        - "lastCalledAt"
+        - "createdAt"
+        - "updatedAt"
+      nullable: true
+    SessionOrNull:
+      type: "object"
+      additionalProperties: false
+      properties:
+        sessionId:
+          type: "string"
+          format: "uuid"
+        status:
+          type: "string"
+          enum:
+            - "OPEN"
+            - "STOPPED"
+            - "CLOSED"
+        lastIssuedNumber:
+          type: "integer"
+          minimum: 0
+        openedAt:
+          type: "string"
+          format: "date-time"
+        stoppedAt:
+          type: "string"
+          format: "date-time"
+          nullable: true
+        closedAt:
+          type: "string"
+          format: "date-time"
+          nullable: true
+      required:
+        - "sessionId"
+        - "status"
+        - "lastIssuedNumber"
+        - "openedAt"
+        - "stoppedAt"
+        - "closedAt"
+      nullable: true
+    TicketViewOrNull:
+      type: "object"
+      additionalProperties: false
+      properties:
+        ticket:
+          "$ref": "#/components/schemas/Ticket"
+        waitingAhead:
+          type: "integer"
+          minimum: 0
+          nullable: true
+      required:
+        - "ticket"
+        - "waitingAhead"
+      nullable: true
