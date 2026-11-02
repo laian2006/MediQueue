@@ -2,6 +2,8 @@
 
 Nguồn: [Sprint Plan VI](MediQueue_Group11_Sprint_Plan_VI.xlsx). Giữ WBS làm mã trao đổi. FS: xong trước khi bắt đầu; FF: xong trước khi nghiệm thu. Task 8 giờ gồm tài liệu 2 giờ, review/phối hợp 4 giờ, sự kiện 2 giờ.
 
+Tên nhánh theo [quy định nhánh chung](branch-names.md). Task họp/review thuần không tạo nhánh/PR rỗng.
+
 Đường dẫn dưới đây là nơi triển khai dự kiến. Các tệp code/SQL chưa được tạo; tác giả tạo trong task, theo hướng dẫn thư mục.
 
 ## Sprint 1 — Tuần 10–11
@@ -10,6 +12,7 @@ Nguồn: [Sprint Plan VI](MediQueue_Group11_Sprint_Plan_VI.xlsx). Giữ WBS làm
 Reviewer: Phan Trung Trực.
 
 #### 1.1 — Thiết kế phiên và API mở phiên
+- Nhánh cố định: `task/1.1`.
 - Giờ: 6. Phụ thuộc: —.
 - AC: Mở được một phiên; mở phiên thứ hai bị từ chối.
 - Đầu ra: Migration QueueSession; API mở/xem phiên; kiểm thử một phiên chưa đóng.
@@ -18,6 +21,7 @@ Reviewer: Phan Trung Trực.
 - Kiểm tra/bàn giao: Mở một phiên được; mở thêm khi có OPEN hoặc STOPPED bị từ chối. Kiểm tra gọi đồng thời và quyền nhân viên trước khi bàn giao API cho Đức Anh, Trung.
 
 #### 1.2 — Giao diện quản lý phiên cơ bản
+- Nhánh cố định: `task/1.2`.
 - Giờ: 6. Phụ thuộc: 1.1 FS; 1.4 FS.
 - AC: Nhân viên xem được phiên; người dùng thường không mở được phiên.
 - Đầu ra: Giao diện quản lý phiên; kiểm thử vai trò và tích hợp.
@@ -26,6 +30,7 @@ Reviewer: Phan Trung Trực.
 - Kiểm tra/bàn giao: Nhân viên xem/mở phiên được, người đại diện không mở được. Hai cửa sổ phản ánh cùng phiên thật; API lỗi không được báo thành công.
 
 #### 1.3 — Yêu cầu, kiến trúc và review sprint
+- Nhánh cố định: `task/1.3`.
 - Giờ: 8. Phụ thuộc: 1.1 FF; 1.2 FF; 1.4 FF; 1.5 FF.
 - AC: Yêu cầu/kiến trúc 2 h đầu tuần 10 trước code; review/điều phối 4 h; sự kiện 2 h. Duyệt backlog và API v1.
 - Đầu ra: Backlog/AC đã review; sơ đồ UI/API/DB; ranh giới mô đun và API v1; review và demo/retro.
@@ -35,6 +40,7 @@ Reviewer: Phan Trung Trực.
 Reviewer: Lại Quốc Bình An.
 
 #### 1.4 — Dữ liệu tài khoản và kiểm tra quyền nền
+- Nhánh cố định: `task/1.4`.
 - Giờ: 6. Phụ thuộc: —.
 - AC: Có tài khoản thử cho hai người đại diện và nhân viên; API nhận diện được người gửi.
 - Đầu ra: Schema User/PatientProfile/PatientAccess; seed giả lập; đăng nhập và middleware quyền.
@@ -43,6 +49,7 @@ Reviewer: Lại Quốc Bình An.
 - Kiểm tra/bàn giao: API nhận đúng người gửi và vai trò; hai đại diện chung hồ sơ dùng cùng patientId. Gửi hợp đồng xác thực/quyền cho An, Đức Anh, Hoàng Anh, Đạt.
 
 #### 1.5 — Đăng nhập và danh sách hồ sơ được phép
+- Nhánh cố định: `task/1.5`.
 - Giờ: 6. Phụ thuộc: 1.4 FS.
 - AC: Một người đại diện thấy đúng hồ sơ; xem hồ sơ ngoài quyền bị từ chối.
 - Đầu ra: Giao diện đăng nhập; API hồ sơ được phép; kiểm thử quyền đọc.
@@ -51,6 +58,7 @@ Reviewer: Lại Quốc Bình An.
 - Kiểm tra/bàn giao: Chỉ trả hồ sơ được phép; thay patientId ngoài quyền bị từ chối. Kiểm tra điều hướng nhân viên/người đại diện và tình huống không có hồ sơ.
 
 #### 1.6 — Yêu cầu mô đun, tài liệu và review
+- Nhánh cố định: `task/1.6`.
 - Giờ: 8. Phụ thuộc: 1.4 FF; 1.5 FF; 1.7 FF; 1.8 FF.
 - AC: Yêu cầu 1 h đầu tuần 10 trước code; tài liệu 1 h; review 4 h; sự kiện 2 h. Duyệt user stories/AC mô đun.
 - Đầu ra: User stories/AC mô đun; tài liệu mô đun/API; review chéo; kiểm tra tích hợp; demo/retro.
@@ -60,6 +68,7 @@ Reviewer: Lại Quốc Bình An.
 Reviewer: Lê Gia Hưng.
 
 #### 1.7 — Dữ liệu phiếu và cấp số nền
+- Nhánh cố định: `task/1.7`.
 - Giờ: 6. Phụ thuộc: 1.1 FS; 1.4 FS; 1.19 FS.
 - AC: Lưu được phiếu WAITING, số không trùng; yêu cầu ngoài phiên hợp lệ bị từ chối.
 - Đầu ra: Migration Ticket; ràng buộc; API cấp số nền; kiểm thử.
@@ -68,6 +77,7 @@ Reviewer: Lê Gia Hưng.
 - Kiểm tra/bàn giao: Số duy nhất theo phiên, một phiếu hoạt động theo hồ sơ/phiên; lỗi hoàn tác cả phiếu và sự kiện. Bàn giao cấu trúc Ticket cho Hoàng Anh, Đạt và Trực.
 
 #### 1.8 — API cấp số và xem phiếu riêng
+- Nhánh cố định: `task/1.8`.
 - Giờ: 6. Phụ thuộc: 1.7 FS; 1.19 FS.
 - AC: Người dùng lấy và xem đúng phiếu, vị trí bỏ qua phiếu đã hủy hoặc kết thúc.
 - Đầu ra: API cấp và tra cứu phiếu riêng; vị trí chờ; nhật ký.
@@ -76,6 +86,7 @@ Reviewer: Lê Gia Hưng.
 - Kiểm tra/bàn giao: Đọc đúng phiếu của hồ sơ được phép; vị trí không tính phiếu đã hủy/kết thúc. Xác nhận với Đạt trước khi 1.14 bắt đầu.
 
 #### 1.9 — Yêu cầu mô đun, tài liệu và review
+- Nhánh cố định: `task/1.9`.
 - Giờ: 8. Phụ thuộc: 1.7 FF; 1.8 FF; 1.10 FF; 1.11 FF.
 - AC: Yêu cầu 1 h đầu tuần 10 trước code; tài liệu 1 h; review 4 h; sự kiện 2 h. Duyệt user stories/AC mô đun.
 - Đầu ra: User stories/AC mô đun; tài liệu mô đun/API; review chéo; kiểm tra tích hợp; demo/retro.
@@ -85,6 +96,7 @@ Reviewer: Lê Gia Hưng.
 Reviewer: Lê Đức Anh.
 
 #### 1.10 — Quy tắc trạng thái và gọi FIFO cơ bản
+- Nhánh cố định: `task/1.10`.
 - Giờ: 6. Phụ thuộc: —.
 - AC: Unit test phân biệt trạng thái hợp lệ, không hợp lệ và thứ tự FIFO.
 - Đầu ra: Sơ đồ trạng thái; hàm chọn FIFO/quầy rảnh; unit test.
@@ -93,6 +105,7 @@ Reviewer: Lê Đức Anh.
 - Kiểm tra/bàn giao: Chọn WAITING sớm nhất còn hợp lệ; CALLED hoặc REGISTERING làm quầy bận. Cấm chuyển ngược trạng thái cuối và xử lý hàng rỗng rõ ràng.
 
 #### 1.11 — API gọi lượt tích hợp
+- Nhánh cố định: `task/1.11`.
 - Giờ: 6. Phụ thuộc: 1.10 FS; 1.7 FS; 1.19 FS.
 - AC: Quầy rảnh gọi đúng phiếu; quầy bận không gọi thêm; TV5 thao tác được.
 - Đầu ra: API danh sách chờ, lượt hiện tại, gọi tiếp; nhật ký và test.
@@ -101,6 +114,7 @@ Reviewer: Lê Đức Anh.
 - Kiểm tra/bàn giao: Gọi đúng FIFO, quầy bận không gọi thêm; hai yêu cầu chỉ tạo một lượt chiếm quầy. Trung phải dùng được API thật ở 1.17.
 
 #### 1.12 — Yêu cầu mô đun, tài liệu và review
+- Nhánh cố định: `task/1.12`.
 - Giờ: 8. Phụ thuộc: 1.10 FF; 1.11 FF; 1.13 FF; 1.14 FF.
 - AC: Yêu cầu 1 h đầu tuần 10 trước code; tài liệu 1 h; review 4 h; sự kiện 2 h. Duyệt user stories/AC mô đun.
 - Đầu ra: User stories/AC mô đun; tài liệu mô đun/API; review chéo; kiểm tra tích hợp; demo/retro.
@@ -110,6 +124,7 @@ Reviewer: Lê Đức Anh.
 Reviewer: Hồ Sỹ Hoàng Anh.
 
 #### 1.13 — Thiết kế và dựng giao diện người bệnh
+- Nhánh cố định: `task/1.13`.
 - Giờ: 6. Phụ thuộc: —.
 - AC: Có màn hình đọc được trên điện thoại; phân biệt chờ, đang gọi và lỗi.
 - Đầu ra: Wireframe và giao diện chọn hồ sơ/lấy số/xem phiếu dùng mock.
@@ -118,6 +133,7 @@ Reviewer: Hồ Sỹ Hoàng Anh.
 - Kiểm tra/bàn giao: Màn hình nhỏ đọc được; đổi hồ sơ không giữ phiếu cũ; WAITING, CALLED, tải và lỗi phân biệt bằng chữ. Ghi rõ bằng chứng ở bước này dùng mock.
 
 #### 1.14 — Kết nối luồng lấy số và xem phiếu
+- Nhánh cố định: `task/1.14`.
 - Giờ: 6. Phụ thuộc: 1.13 FS; 1.5 FS; 1.8 FS.
 - AC: Demo đăng nhập, chọn hồ sơ, lấy và xem phiếu bằng dữ liệu thật trong PostgreSQL.
 - Đầu ra: Luồng người bệnh kết nối API thật và dữ liệu PostgreSQL.
@@ -126,6 +142,7 @@ Reviewer: Hồ Sỹ Hoàng Anh.
 - Kiểm tra/bàn giao: Đăng nhập → chọn hồ sơ → lấy/xem số trên PostgreSQL thật. Reload không tạo phiếu mới; lỗi mạng hoặc ngoài quyền không làm UI báo thành công giả.
 
 #### 1.15 — Yêu cầu mô đun, tài liệu và review
+- Nhánh cố định: `task/1.15`.
 - Giờ: 8. Phụ thuộc: 1.13 FF; 1.14 FF; 1.16 FF; 1.17 FF.
 - AC: Yêu cầu 1 h đầu tuần 10 trước code; tài liệu 1 h; review 4 h; sự kiện 2 h. Duyệt user stories/AC mô đun.
 - Đầu ra: User stories/AC mô đun; tài liệu mô đun/API; review chéo; kiểm tra tích hợp; demo/retro.
@@ -135,6 +152,7 @@ Reviewer: Hồ Sỹ Hoàng Anh.
 Reviewer: Đặng Thành Đạt.
 
 #### 1.16 — Thiết kế màn hình vận hành quầy
+- Nhánh cố định: `task/1.16`.
 - Giờ: 6. Phụ thuộc: —.
 - AC: Nhân viên phân biệt được danh sách chờ và lượt đang được gọi.
 - Đầu ra: Wireframe và giao diện nhân viên với dữ liệu mock.
@@ -143,6 +161,7 @@ Reviewer: Đặng Thành Đạt.
 - Kiểm tra/bàn giao: Phân biệt hàng chờ/lượt hiện tại, quầy bận/rảnh và hàng rỗng. Nút cùng thông báo khớp sơ đồ trạng thái, chưa ghi mock là API thật.
 
 #### 1.17 — Kết nối gọi lượt cơ bản
+- Nhánh cố định: `task/1.17`.
 - Giờ: 6. Phụ thuộc: 1.16 FS; 1.11 FS; 1.4 FS.
 - AC: Gọi số từ giao diện đổi trạng thái thật trong cơ sở dữ liệu.
 - Đầu ra: Màn hình danh sách/lượt hiện tại/gọi số kết nối API thật.
@@ -151,6 +170,7 @@ Reviewer: Đặng Thành Đạt.
 - Kiểm tra/bàn giao: Lấy số thật rồi gọi từ UI làm Ticket đổi CALLED trong DB. Hai cửa sổ xung đột phải tải lại; tài khoản thường không vận hành quầy được.
 
 #### 1.18 — Yêu cầu mô đun, tài liệu và review
+- Nhánh cố định: `task/1.18`.
 - Giờ: 8. Phụ thuộc: 1.16 FF; 1.17 FF; 1.19 FF; 1.20 FF.
 - AC: Yêu cầu 1 h đầu tuần 10 trước code; tài liệu 1 h; review 4 h; sự kiện 2 h. Duyệt user stories/AC mô đun.
 - Đầu ra: User stories/AC mô đun; tài liệu mô đun/API; review chéo; kiểm tra tích hợp; demo/retro.
@@ -160,6 +180,7 @@ Reviewer: Đặng Thành Đạt.
 Reviewer: Trần Quang Trung.
 
 #### 1.19 — Khung dự án và hàm nhật ký dùng chung
+- Nhánh cố định: `task/1.19`.
 - Giờ: 6. Phụ thuộc: —.
 - AC: Nhóm khởi động được khung; helper nhận cùng giao dịch, không tự commit riêng.
 - Đầu ra: Repo và khung chạy React/Express/PostgreSQL; helper TicketEvent cùng giao dịch.
@@ -168,6 +189,7 @@ Reviewer: Trần Quang Trung.
 - Kiểm tra/bàn giao: Clone mới chạy được khung; helper nhận đối tượng giao dịch từ nghiệp vụ và không tự commit. Bàn giao sớm; không chờ hoàn tất mọi màn hình/API mới ghép khung.
 
 #### 1.20 — Bảng gọi số và API công khai cơ bản
+- Nhánh cố định: `task/1.20`.
 - Giờ: 6. Phụ thuộc: 1.19 FS; 1.8 FS; 1.11 FS.
 - AC: Bảng hiển thị số lấy từ API; phản hồi không có tên, mã hồ sơ hay thông tin sức khỏe.
 - Đầu ra: API và bảng gọi số công khai không có danh tính.
@@ -176,6 +198,7 @@ Reviewer: Trần Quang Trung.
 - Kiểm tra/bàn giao: Số khớp lượt được gọi; JSON không chứa tên, patientId hay dữ liệu sức khỏe. Trung đối chiếu bảng quầy, Hưng hỗ trợ rà trường công khai.
 
 #### 1.21 — Yêu cầu mô đun, tài liệu và review
+- Nhánh cố định: `task/1.21`.
 - Giờ: 8. Phụ thuộc: 1.19 FF; 1.20 FF; 1.1 FF; 1.2 FF.
 - AC: Yêu cầu 1 h đầu tuần 10 trước code; tài liệu 1 h; review 4 h; sự kiện 2 h. Duyệt user stories/AC mô đun.
 - Đầu ra: User stories/AC mô đun; tài liệu mô đun/API; review chéo; kiểm tra tích hợp; demo/retro.
@@ -187,6 +210,7 @@ Reviewer: Trần Quang Trung.
 Reviewer: Phan Trung Trực.
 
 #### 2.1 — Ngừng cấp số và điều kiện đóng phiên
+- Nhánh cố định: `task/2.1`.
 - Giờ: 6. Phụ thuộc: 1.2 FS; 1.8 FS.
 - AC: Ngừng cấp số mới nhưng vẫn xử lý phiếu cũ; còn phiếu hoạt động thì chưa đóng.
 - Đầu ra: API ngừng nhận số/đóng phiên; kiểm thử điều kiện đóng.
@@ -195,6 +219,7 @@ Reviewer: Phan Trung Trực.
 - Kiểm tra/bàn giao: Cấp sau STOPPED bị từ chối; còn WAITING/CALLED/REGISTERING thì chưa đóng. Gửi điều kiện và lỗi cho Đức Anh, Đạt, Trung để nối tuần 13.
 
 #### 2.2 — Hoàn thiện quản lý phiên trên giao diện
+- Nhánh cố định: `task/2.2`.
 - Giờ: 6. Phụ thuộc: 2.1 FS; 2.11 FF; 2.13 FS.
 - AC: Trạng thái phiên và quyền thao tác nhất quán giữa API và giao diện.
 - Đầu ra: Giao diện quản lý phiên đầy đủ; bộ ca ngừng/cấp/hủy đồng thời.
@@ -203,6 +228,7 @@ Reviewer: Phan Trung Trực.
 - Kiểm tra/bàn giao: UI khớp server; STOPPED vẫn xử lý phiếu cũ; đóng còn phiếu bị từ chối. Trung chạy lại phần phiên trong toàn màn hình quầy.
 
 #### 2.3 — Thiết kế, điều phối và review sprint
+- Nhánh cố định: `task/2.3`.
 - Giờ: 8. Phụ thuộc: 2.1 FF; 2.2 FF; 2.4 FF; 2.5 FF.
 - AC: Tài liệu 2 giờ; phối hợp/review 4 giờ; sự kiện 2 giờ. Có bằng chứng.
 - Đầu ra: Tài liệu cập nhật; review; kiểm tra tích hợp; demo/retro
@@ -212,6 +238,7 @@ Reviewer: Phan Trung Trực.
 Reviewer: Lại Quốc Bình An.
 
 #### 2.4 — Áp dụng quyền cho toàn bộ nghiệp vụ
+- Nhánh cố định: `task/2.4`.
 - Giờ: 6. Phụ thuộc: 1.5 FS; 1.8 FS; 1.11 FS.
 - AC: API lấy, xem, hủy và API nhân viên có kiểm tra quyền ở máy chủ.
 - Đầu ra: Middleware quyền dùng chung và kiểm thử trên từng API nghiệp vụ.
@@ -220,6 +247,7 @@ Reviewer: Lại Quốc Bình An.
 - Kiểm tra/bàn giao: API lấy/xem/hủy và API nhân viên đều kiểm tra server; sửa userId/role/patientId không tăng quyền. Ghi ma trận tại docs/testing/cases/2-4.md.
 
 #### 2.5 — Kiểm thử quyền với nhiều người đại diện
+- Nhánh cố định: `task/2.5`.
 - Giờ: 6. Phụ thuộc: 2.4 FS; 2.13 FS.
 - AC: Quyền đúng theo mã hồ sơ; dữ liệu giữa các tài khoản không lẫn nhau.
 - Đầu ra: Bộ ca nhiều người đại diện; kiểm thử đăng xuất.
@@ -228,6 +256,7 @@ Reviewer: Lại Quốc Bình An.
 - Kiểm tra/bàn giao: Đúng quyền theo patientId; người ngoài quyền bị từ chối với dữ liệu không đổi. Không giữ nội dung riêng của tài khoản cũ sau chuyển tài khoản.
 
 #### 2.6 — Tài liệu, review chéo và sự kiện sprint
+- Nhánh cố định: `task/2.6`.
 - Giờ: 8. Phụ thuộc: 2.4 FF; 2.5 FF; 2.7 FF; 2.8 FF.
 - AC: Tài liệu 2 giờ; phối hợp/review 4 giờ; sự kiện 2 giờ. Có bằng chứng.
 - Đầu ra: Tài liệu cập nhật; review; kiểm tra tích hợp; demo/retro
@@ -237,6 +266,7 @@ Reviewer: Lại Quốc Bình An.
 Reviewer: Lê Gia Hưng.
 
 #### 2.7 — Yêu cầu gửi lại không sinh phiếu mới
+- Nhánh cố định: `task/2.7`.
 - Giờ: 6. Phụ thuộc: 1.8 FS.
 - AC: Cùng khóa và dữ liệu trả cùng phiếu; cùng khóa khác dữ liệu báo xung đột.
 - Đầu ra: Xử lý requestId và dữ liệu xung đột; kiểm thử gửi lại.
@@ -245,6 +275,7 @@ Reviewer: Lê Gia Hưng.
 - Kiểm tra/bàn giao: Cùng khóa/nội dung trả cùng phiếu kể cả đã kết thúc; khác nội dung báo 409. Đức Anh đưa hướng xử lý gửi lại, Đạt tự sửa client và giữ requestId cùng thao tác.
 
 #### 2.8 — Kiểm tra đồng thời và ngừng nhận số
+- Nhánh cố định: `task/2.8`.
 - Giờ: 6. Phụ thuộc: 2.7 FS; 2.1 FS.
 - AC: Không cấp khi phiên ngừng nhận số; không tạo hai phiếu hoạt động cho cùng người bệnh.
 - Đầu ra: Giao dịch cấp số tích hợp trạng thái phiên và phiếu.
@@ -253,6 +284,7 @@ Reviewer: Lê Gia Hưng.
 - Kiểm tra/bàn giao: Hai đại diện chung hồ sơ chỉ có một phiếu hoạt động; STOPPED không cấp mới. Kiểm tra dữ liệu cuối, phản hồi và sự kiện sau các yêu cầu cạnh tranh.
 
 #### 2.9 — Tài liệu, review chéo và sự kiện sprint
+- Nhánh cố định: `task/2.9`.
 - Giờ: 8. Phụ thuộc: 2.7 FF; 2.8 FF; 2.10 FF; 2.11 FF.
 - AC: Tài liệu 2 giờ; phối hợp/review 4 giờ; sự kiện 2 giờ. Có bằng chứng.
 - Đầu ra: Tài liệu cập nhật; review; kiểm tra tích hợp; demo/retro
@@ -262,6 +294,7 @@ Reviewer: Lê Gia Hưng.
 Reviewer: Lê Đức Anh.
 
 #### 2.10 — Gọi lại và tiếp nhận đến hoàn tất
+- Nhánh cố định: `task/2.10`.
 - Giờ: 6. Phụ thuộc: 1.11 FS.
 - AC: Đúng vòng đời; gọi lại giữ mã phiếu; hoàn tất giải phóng quầy.
 - Đầu ra: API gọi lại/bắt đầu/hoàn tất; kiểm thử chuyển trạng thái.
@@ -270,6 +303,7 @@ Reviewer: Lê Đức Anh.
 - Kiểm tra/bàn giao: Hoàn tất giải phóng quầy; chuyển sai trạng thái bị từ chối. Không tạo phiếu mới khi gọi lại và không diễn giải COMPLETED là khám bệnh xong.
 
 #### 2.11 — Ghi vắng và kiểm tra ranh giới thời gian
+- Nhánh cố định: `task/2.11`.
 - Giờ: 6. Phụ thuộc: 2.10 FS; 2.1 FS; 2.13 FS.
 - AC: Trước T bị từ chối; gọi lại bắt đầu tính T mới; chuyển trạng thái không chồng nhau.
 - Đầu ra: API ghi vắng; kiểm thử trước/sau T và hủy/gọi đồng thời.
@@ -278,6 +312,7 @@ Reviewer: Lê Đức Anh.
 - Kiểm tra/bàn giao: Trước T bị từ chối, đúng/sau T được phép nếu còn CALLED; gọi lại tính T mới. Test dùng thời gian kiểm soát được, không bắt người chạy chờ lâu.
 
 #### 2.12 — Tài liệu, review chéo và sự kiện sprint
+- Nhánh cố định: `task/2.12`.
 - Giờ: 8. Phụ thuộc: 2.10 FF; 2.11 FF; 2.13 FF; 2.14 FF.
 - AC: Tài liệu 2 giờ; phối hợp/review 4 giờ; sự kiện 2 giờ. Có bằng chứng.
 - Đầu ra: Tài liệu cập nhật; review; kiểm tra tích hợp; demo/retro
@@ -287,6 +322,7 @@ Reviewer: Lê Đức Anh.
 Reviewer: Hồ Sỹ Hoàng Anh.
 
 #### 2.13 — API hủy phiếu và kiểm thử quyền
+- Nhánh cố định: `task/2.13`.
 - Giờ: 6. Phụ thuộc: 1.14 FS; 1.8 FS; 1.19 FS.
 - AC: Chỉ người có quyền hủy phiếu còn chờ; không hủy được phiếu đã gọi.
 - Đầu ra: API hủy WAITING có kiểm tra quyền và sự kiện; test.
@@ -295,6 +331,7 @@ Reviewer: Hồ Sỹ Hoàng Anh.
 - Kiểm tra/bàn giao: Chỉ đại diện có quyền hủy WAITING; đã gọi thì từ chối. Gọi/hủy đồng thời chỉ có trạng thái cuối hợp lệ; An nhận kết quả để thử đóng phiên.
 
 #### 2.14 — Giao diện hủy và cập nhật trạng thái
+- Nhánh cố định: `task/2.14`.
 - Giờ: 6. Phụ thuộc: 2.13 FS; 2.11 FF.
 - AC: Sau hủy hiển thị đúng; vị trí cập nhật; mất mạng không hiển thị như vừa đồng bộ.
 - Đầu ra: Giao diện hủy, polling 3 giây, báo mất mạng và xử lý xung đột.
@@ -303,6 +340,7 @@ Reviewer: Hồ Sỹ Hoàng Anh.
 - Kiểm tra/bàn giao: Hủy thành công hiển thị CANCELLED; vừa gọi thì tải trạng thái mới. Mất mạng ghi rõ dữ liệu cũ; cùng thao tác thử lại không tạo phiếu trùng.
 
 #### 2.15 — Tài liệu, review chéo và sự kiện sprint
+- Nhánh cố định: `task/2.15`.
 - Giờ: 8. Phụ thuộc: 2.13 FF; 2.14 FF; 2.16 FF; 2.17 FF.
 - AC: Tài liệu 2 giờ; phối hợp/review 4 giờ; sự kiện 2 giờ. Có bằng chứng.
 - Đầu ra: Tài liệu cập nhật; review; kiểm tra tích hợp; demo/retro
@@ -312,6 +350,7 @@ Reviewer: Hồ Sỹ Hoàng Anh.
 Reviewer: Đặng Thành Đạt.
 
 #### 2.16 — Giao diện đầy đủ thao tác tiếp nhận
+- Nhánh cố định: `task/2.16`.
 - Giờ: 6. Phụ thuộc: 1.17 FS; 2.10 FF.
 - AC: Nhân viên hoàn thành được một lượt; gọi lại không sinh số mới.
 - Đầu ra: Giao diện gọi lại/bắt đầu/hoàn tất kết nối API.
@@ -320,6 +359,7 @@ Reviewer: Đặng Thành Đạt.
 - Kiểm tra/bàn giao: Một lượt đi từ CALLED qua REGISTERING đến COMPLETED, quầy rảnh mới gọi tiếp. Gọi lại giữ số; API từ chối thì UI không báo thành công.
 
 #### 2.17 — Giao diện ghi vắng và xử lý xung đột
+- Nhánh cố định: `task/2.17`.
 - Giờ: 6. Phụ thuộc: 2.16 FS; 2.11 FF; 2.2 FF.
 - AC: Không báo hoàn tất giả khi API từ chối; hai màn hình nhân viên không làm lệch quầy.
 - Đầu ra: Giao diện ghi vắng, thời gian T, lỗi và tải lại trạng thái.
@@ -328,6 +368,7 @@ Reviewer: Đặng Thành Đạt.
 - Kiểm tra/bàn giao: Trước T không báo NO_SHOW; gọi lại tính thời gian mới; hai cửa sổ không làm UI lệch server. STOPPED vẫn tiếp nhận phiếu cũ và đóng sai điều kiện bị báo rõ.
 
 #### 2.18 — Tài liệu, review chéo và sự kiện sprint
+- Nhánh cố định: `task/2.18`.
 - Giờ: 8. Phụ thuộc: 2.16 FF; 2.17 FF; 2.19 FF; 2.20 FF.
 - AC: Tài liệu 2 giờ; phối hợp/review 4 giờ; sự kiện 2 giờ. Có bằng chứng.
 - Đầu ra: Tài liệu cập nhật; review; kiểm tra tích hợp; demo/retro
@@ -337,6 +378,7 @@ Reviewer: Đặng Thành Đạt.
 Reviewer: Trần Quang Trung.
 
 #### 2.19 — Hoàn thiện nhật ký và bảo vệ dữ liệu công khai
+- Nhánh cố định: `task/2.19`.
 - Giờ: 6. Phụ thuộc: 1.20 FS; 2.10 FF; 2.13 FF.
 - AC: Sự kiện có người, thời điểm, hành động; bảng chỉ có dữ liệu đã cho phép.
 - Đầu ra: Nhật ký nghiệp vụ đã tích hợp; bảng polling và báo mất mạng.
@@ -345,6 +387,7 @@ Reviewer: Trần Quang Trung.
 - Kiểm tra/bàn giao: Cấp/gọi/gọi lại/bắt đầu/hoàn tất/hủy/ghi vắng có sự kiện đúng; rollback không để sự kiện thành công riêng. JSON công khai không lộ danh tính.
 
 #### 2.20 — Kiểm tra tự động và môi trường tích hợp
+- Nhánh cố định: `task/2.20`.
 - Giờ: 6. Phụ thuộc: 2.19 FS; 2.16 FS.
 - AC: Mã nguồn có thể cài và chạy lại theo README; không ghi mật khẩu thật trong repo.
 - Đầu ra: Lệnh build/test; seed; môi trường demo; E2E nền.
@@ -353,6 +396,7 @@ Reviewer: Trần Quang Trung.
 - Kiểm tra/bàn giao: Một bạn clone mới, tạo DB thử sạch và chạy được theo README. Không cần tệp bí mật ngoài cấu hình hướng dẫn; không push .env hoặc node_modules.
 
 #### 2.21 — Tài liệu, review chéo và sự kiện sprint
+- Nhánh cố định: `task/2.21`.
 - Giờ: 8. Phụ thuộc: 2.19 FF; 2.20 FF; 2.1 FF; 2.2 FF.
 - AC: Tài liệu 2 giờ; phối hợp/review 4 giờ; sự kiện 2 giờ. Có bằng chứng.
 - Đầu ra: Tài liệu cập nhật; review; kiểm tra tích hợp; demo/retro
@@ -364,6 +408,7 @@ Reviewer: Trần Quang Trung.
 Reviewer: Phan Trung Trực.
 
 #### 3.1 — Kiểm thử toàn bộ vòng đời phiên
+- Nhánh cố định: `task/3.1`.
 - Giờ: 6. Phụ thuộc: 2.2 FS.
 - AC: Phiên mới có dãy số riêng; không tạo hai phiên chưa đóng.
 - Đầu ra: Bộ kiểm thử vòng đời phiên và mở phiên mới.
@@ -372,6 +417,7 @@ Reviewer: Phan Trung Trực.
 - Kiểm tra/bàn giao: Chỉ một phiên chưa đóng; còn phiếu hoạt động không đóng được; phiên mới có dãy số riêng. Tạo Issue lỗi, gắn 3.1 để sửa ở 3.2.
 
 #### 3.2 — Sửa lỗi mô đun phiên và chốt bàn giao
+- Nhánh cố định: `task/3.2`.
 - Giờ: 6. Phụ thuộc: 3.1 FS.
 - AC: Mô đun phiên đạt tiêu chí hoàn thành, có bằng chứng và không còn lỗi chặn.
 - Đầu ra: Mô đun phiên đã sửa lỗi; tài liệu; bằng chứng hồi quy.
@@ -380,6 +426,7 @@ Reviewer: Phan Trung Trực.
 - Kiểm tra/bàn giao: Bàn giao main đã sửa và bằng chứng trước hết thứ tư tuần 15. Không còn lỗi chặn mô đun phiên; Trực dùng đúng commit đó cho 3.20.
 
 #### 3.3 — Điều phối, nghiệm thu và chốt bản cuối
+- Nhánh cố định: `task/3.3`.
 - Giờ: 8. Phụ thuộc: 3.2 FF; 3.5 FF; 3.8 FF; 3.11 FF; 3.14 FF; 3.17 FF; 3.20 FF.
 - AC: Thứ 5-6 tuần 15, An duyệt sau sửa lỗi, test toàn luồng và cài sạch. Tài liệu 2 h; điều phối/nghiệm thu 4 h; sự kiện 2 h.
 - Đầu ra: Checklist nghiệm thu; báo cáo test cuối; bản demo được duyệt; ghi nhận review/retro.
@@ -389,6 +436,7 @@ Reviewer: Phan Trung Trực.
 Reviewer: Lại Quốc Bình An.
 
 #### 3.4 — Ma trận kiểm thử truy cập trái quyền
+- Nhánh cố định: `task/3.4`.
 - Giờ: 6. Phụ thuộc: 2.5 FS.
 - AC: Truy cập trái phép bị từ chối; không làm thay đổi dữ liệu.
 - Đầu ra: Ma trận và kết quả kiểm thử truy cập trái quyền.
@@ -397,6 +445,7 @@ Reviewer: Lại Quốc Bình An.
 - Kiểm tra/bàn giao: Trái quyền bị từ chối và không đổi dữ liệu. Gửi lỗi về đúng chủ API, ghi ca tái hiện và mức ảnh hưởng; phần quyền chung sửa ở 3.5.
 
 #### 3.5 — Sửa lỗi quyền và tài khoản phục vụ demo
+- Nhánh cố định: `task/3.5`.
 - Giờ: 6. Phụ thuộc: 3.4 FS.
 - AC: Tất cả vai trò đăng nhập được; quyền đúng trên bản demo cuối.
 - Đầu ra: Mô đun quyền đã sửa lỗi; tài khoản demo; hướng dẫn vai trò.
@@ -405,6 +454,7 @@ Reviewer: Lại Quốc Bình An.
 - Kiểm tra/bàn giao: Bàn giao trước hết thứ tư tuần 15; mọi vai trò hoạt động đúng, hai đại diện dùng hồ sơ chung hợp lệ. Trực nhận seed và hướng dẫn quyền cho 3.20.
 
 #### 3.6 — Tài liệu, review chéo và sự kiện sprint
+- Nhánh cố định: `task/3.6`.
 - Giờ: 8. Phụ thuộc: 3.4 FF; 3.5 FF; 3.7 FF; 3.8 FF.
 - AC: Tài liệu 2 giờ; phối hợp/review 4 giờ; sự kiện 2 giờ. Có bằng chứng.
 - Đầu ra: Tài liệu cập nhật; review; kiểm tra tích hợp; demo/retro
@@ -414,6 +464,7 @@ Reviewer: Lại Quốc Bình An.
 Reviewer: Lê Gia Hưng.
 
 #### 3.7 — Kiểm thử 20 yêu cầu và nhiều người đại diện
+- Nhánh cố định: `task/3.7`.
 - Giờ: 6. Phụ thuộc: 2.8 FS.
 - AC: Số trong phiên không trùng; cùng hồ sơ chỉ có một phiếu hoạt động.
 - Đầu ra: Kịch bản 20 yêu cầu, hai đại diện, gửi lại và báo cáo kết quả.
@@ -422,6 +473,7 @@ Reviewer: Lê Gia Hưng.
 - Kiểm tra/bàn giao: Số không trùng và tối đa một phiếu hoạt động mỗi hồ sơ/phiên. Báo lỗi thật cho 3.8; xung đột nghiệp vụ hợp lệ không bị tính nhầm thành lỗi server.
 
 #### 3.8 — Sửa lỗi cấp số và lưu bền dữ liệu
+- Nhánh cố định: `task/3.8`.
 - Giờ: 6. Phụ thuộc: 3.7 FS.
 - AC: Không mất phiếu, không dùng lại số; giao dịch lỗi không để lại dữ liệu dở dang.
 - Đầu ra: Mô đun cấp số đã sửa lỗi; kiểm thử lưu bền và rollback.
@@ -430,6 +482,7 @@ Reviewer: Lê Gia Hưng.
 - Kiểm tra/bàn giao: Phiếu/lịch sử còn sau restart, số đã cấp không dùng lại, rollback không để dữ liệu dở dang. Bàn giao trước hết thứ tư tuần 15 cho Trực chạy 3.20.
 
 #### 3.9 — Tài liệu, review chéo và sự kiện sprint
+- Nhánh cố định: `task/3.9`.
 - Giờ: 8. Phụ thuộc: 3.7 FF; 3.8 FF; 3.10 FF; 3.11 FF.
 - AC: Tài liệu 2 giờ; phối hợp/review 4 giờ; sự kiện 2 giờ. Có bằng chứng.
 - Đầu ra: Tài liệu cập nhật; review; kiểm tra tích hợp; demo/retro
@@ -439,6 +492,7 @@ Reviewer: Lê Gia Hưng.
 Reviewer: Lê Đức Anh.
 
 #### 3.10 — Kiểm thử gọi đồng thời và ngoại lệ
+- Nhánh cố định: `task/3.10`.
 - Giờ: 6. Phụ thuộc: 2.11 FS.
 - AC: Chỉ một lượt chiếm quầy; mọi kết quả giữ đúng trạng thái và lịch sử.
 - Đầu ra: Bộ ca gọi đồng thời, hàng rỗng và ngoại lệ.
@@ -447,6 +501,7 @@ Reviewer: Lê Đức Anh.
 - Kiểm tra/bàn giao: Một lượt chiếm quầy; FIFO và T đúng; trạng thái cuối không chuyển ngược. Ghi Issue có bước tái hiện cho 3.11, không tạo bộ quy tắc test tách rời API.
 
 #### 3.11 — Sửa lỗi quy tắc và kiểm thử hồi quy
+- Nhánh cố định: `task/3.11`.
 - Giờ: 6. Phụ thuộc: 3.10 FS.
 - AC: Không còn lỗi chặn luồng tiếp nhận; TV5 dùng API ổn định trên bản demo.
 - Đầu ra: Mô đun tiếp nhận đã sửa lỗi; bằng chứng hồi quy.
@@ -455,6 +510,7 @@ Reviewer: Lê Đức Anh.
 - Kiểm tra/bàn giao: Không còn lỗi chặn tiếp nhận; bằng chứng đúng bản main. Hoàn thành trước hết thứ tư tuần 15, gửi Trực các ca hồi quy quan trọng.
 
 #### 3.12 — Tài liệu, review chéo và sự kiện sprint
+- Nhánh cố định: `task/3.12`.
 - Giờ: 8. Phụ thuộc: 3.10 FF; 3.11 FF; 3.13 FF; 3.14 FF.
 - AC: Tài liệu 2 giờ; phối hợp/review 4 giờ; sự kiện 2 giờ. Có bằng chứng.
 - Đầu ra: Tài liệu cập nhật; review; kiểm tra tích hợp; demo/retro
@@ -464,6 +520,7 @@ Reviewer: Lê Đức Anh.
 Reviewer: Hồ Sỹ Hoàng Anh.
 
 #### 3.13 — Kiểm thử người dùng trên trình duyệt
+- Nhánh cố định: `task/3.13`.
 - Giờ: 6. Phụ thuộc: 2.14 FS.
 - AC: Không thao tác nhầm hồ sơ; nút và thông báo đúng trạng thái từ API.
 - Đầu ra: Kết quả E2E người dùng, màn hình nhỏ, gửi lại, hủy và mất mạng.
@@ -472,6 +529,7 @@ Reviewer: Hồ Sỹ Hoàng Anh.
 - Kiểm tra/bàn giao: Không thao tác nhầm hồ sơ/phiếu; nút và thông báo khớp API. Lỗi cấp/quyền gửi Đức Anh/Hưng, lỗi patient UI/API hủy đưa sang 3.14.
 
 #### 3.14 — Sửa lỗi và hướng dẫn người dùng
+- Nhánh cố định: `task/3.14`.
 - Giờ: 6. Phụ thuộc: 3.13 FS.
 - AC: Luồng người bệnh hoàn chỉnh, có bằng chứng E2E và hướng dẫn ngắn.
 - Đầu ra: Giao diện/API hủy đã sửa lỗi; hướng dẫn người dùng; bằng chứng.
@@ -480,6 +538,7 @@ Reviewer: Hồ Sỹ Hoàng Anh.
 - Kiểm tra/bàn giao: Luồng người bệnh đạt AC trên main, hướng dẫn khớp sản phẩm. Bàn giao trước hết thứ tư tuần 15; Trực nhận E2E và tài liệu cho 3.20.
 
 #### 3.15 — Tài liệu, review chéo và sự kiện sprint
+- Nhánh cố định: `task/3.15`.
 - Giờ: 8. Phụ thuộc: 3.13 FF; 3.14 FF; 3.16 FF; 3.17 FF.
 - AC: Tài liệu 2 giờ; phối hợp/review 4 giờ; sự kiện 2 giờ. Có bằng chứng.
 - Đầu ra: Tài liệu cập nhật; review; kiểm tra tích hợp; demo/retro
@@ -489,6 +548,7 @@ Reviewer: Hồ Sỹ Hoàng Anh.
 Reviewer: Đặng Thành Đạt.
 
 #### 3.16 — Kiểm thử toàn luồng nhân viên
+- Nhánh cố định: `task/3.16`.
 - Giờ: 6. Phụ thuộc: 2.17 FS.
 - AC: Luồng trên giao diện khớp API; lỗi có thông báo rõ và có thể tiếp tục thao tác.
 - Đầu ra: Kết quả E2E nhân viên trên hai trình duyệt.
@@ -497,6 +557,7 @@ Reviewer: Đặng Thành Đạt.
 - Kiểm tra/bàn giao: UI khớp trạng thái thật, báo lỗi rõ và tiếp tục được sau tải lại. Ghi lỗi UI cho 3.17; lỗi phiên/queue gửi đúng chủ API.
 
 #### 3.17 — Sửa lỗi giao diện quầy và tài liệu
+- Nhánh cố định: `task/3.17`.
 - Giờ: 6. Phụ thuộc: 3.16 FS.
 - AC: Nhân viên thao tác hết vòng đời từ một màn hình; bằng chứng chạy được lưu đầy đủ.
 - Đầu ra: Giao diện nhân viên đã sửa lỗi; hướng dẫn thao tác và bằng chứng.
@@ -505,6 +566,7 @@ Reviewer: Đặng Thành Đạt.
 - Kiểm tra/bàn giao: Một màn hình vận hành được hết vòng đời, không báo thành công giả. Bàn giao trước hết thứ tư tuần 15 để Trực kiểm thử/đóng gói.
 
 #### 3.18 — Tài liệu, review chéo và sự kiện sprint
+- Nhánh cố định: `task/3.18`.
 - Giờ: 8. Phụ thuộc: 3.16 FF; 3.17 FF; 3.19 FF; 3.20 FF.
 - AC: Tài liệu 2 giờ; phối hợp/review 4 giờ; sự kiện 2 giờ. Có bằng chứng.
 - Đầu ra: Tài liệu cập nhật; review; kiểm tra tích hợp; demo/retro
@@ -514,6 +576,7 @@ Reviewer: Đặng Thành Đạt.
 Reviewer: Trần Quang Trung.
 
 #### 3.19 — Thử tải và đo tốc độ cập nhật
+- Nhánh cố định: `task/3.19`.
 - Giờ: 6. Phụ thuộc: 2.20 FS.
 - AC: Có số đo, điều kiện thử và lỗi. Mục tiêu 95% yêu cầu trong 2 giây, cập nhật trong 5 giây.
 - Đầu ra: Báo cáo thử tải 50 phiên/5 phút và tốc độ cập nhật.
@@ -522,6 +585,7 @@ Reviewer: Trần Quang Trung.
 - Kiểm tra/bàn giao: So số thực với mục tiêu p95 API ≤2 giây và cập nhật ≤5 giây. Kết quả chưa đạt phải ghi rõ; gửi điểm nghẽn cho chủ mô đun sửa và chạy lại.
 
 #### 3.20 — Kiểm thử tích hợp và đóng gói demo
+- Nhánh cố định: `task/3.20`.
 - Giờ: 6. Phụ thuộc: 3.19 FS; 3.2 FS; 3.5 FS; 3.8 FS; 3.11 FS; 3.14 FS; 3.17 FS.
 - AC: Xong sửa lỗi 6 mô đun; test hồi quy/E2E và cài sạch đạt; không còn lỗi chặn/lộ dữ liệu; đủ bằng chứng để An nghiệm thu.
 - Đầu ra: Gói demo có phiên bản; mã nguồn, seed, README; báo cáo test cuối; kịch bản demo.
@@ -530,6 +594,7 @@ Reviewer: Trần Quang Trung.
 - Kiểm tra/bàn giao: Đủ kết quả để An nghiệm thu ở 3.3; Trung review. Chỉ chốt nhãn phiên bản sau An duyệt; lỗi chặn hoặc lộ dữ liệu còn mở phải được báo và xử lý.
 
 #### 3.21 — Tài liệu, review chéo và sự kiện sprint
+- Nhánh cố định: `task/3.21`.
 - Giờ: 8. Phụ thuộc: 3.19 FF; 3.20 FF; 3.1 FF; 3.2 FF.
 - AC: Tài liệu 2 giờ; phối hợp/review 4 giờ; sự kiện 2 giờ. Có bằng chứng.
 - Đầu ra: Tài liệu cập nhật; review; kiểm tra tích hợp; demo/retro

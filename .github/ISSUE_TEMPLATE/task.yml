@@ -10,6 +10,13 @@ body:
     validations:
       required: true
   - type: input
+    id: branch
+    attributes:
+      label: Nhánh cố định
+      description: Dùng task/<WBS>, ví dụ task/1.13. Task chỉ họp/review ghi Không cần nhánh; không tạo PR rỗng.
+    validations:
+      required: true
+  - type: input
     id: owner
     attributes:
       label: Người phụ trách và reviewer
