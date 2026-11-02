@@ -1,0 +1,22 @@
+[
+  {
+    "path": "client/src/features/staff/StaffPage.jsx",
+    "sha256": "1450a804153ac6eb3e7aefc44122414d52bdb4233744e3e11dba6f2bbc1fda37"
+  },
+  {
+    "path": "client/src/features/staff/components/CurrentTicket.jsx",
+    "sha256": "1e94cbcc13c9e2c7069e7a666d0137acb6b69c33d818328b70157166f8329ef3"
+  },
+  {
+    "path": "client/src/features/staff/components/WaitingList.jsx",
+    "sha256": "8b1d4f34a72d29c5fb21e479410e0051b858e1188178a6c5ed4b60c6f129907c"
+  },
+  {
+    "path": "client/src/features/staff/mocks/staff.mock.js",
+    "sha256": "5db43fba73b3ed2e338f75469e2ab1abb585fa1b5dcaa242ad30e8721f61ed1d"
+  },
+  {
+    "path": "client/src/features/staff/staff.css",
+    "sha256": "fd8031cb45a6e6fea85624ae8d9b3d7a9917f9900d5415b83ad4cc2e94c5a73a"
+  }
+]
