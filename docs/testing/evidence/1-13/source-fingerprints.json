@@ -1,0 +1,18 @@
+[
+  {
+    "path": "client/src/features/patient/PatientPage.jsx",
+    "sha256": "fbcd711d6f293acf64d3f39b6422778ec27254921dbeeab61e5f3b70b5498b64"
+  },
+  {
+    "path": "client/src/features/patient/components/TicketCard.jsx",
+    "sha256": "82f9f79ba0cd8818d0b5af741a8da6f2ba65c85d86f843a455d93688dbf7a581"
+  },
+  {
+    "path": "client/src/features/patient/mocks/patient.mock.js",
+    "sha256": "3a0fd73d71769eb9e184f8a0e61d6f95e59f6d88a377b2571c9591e0859b0926"
+  },
+  {
+    "path": "client/src/features/patient/patient.css",
+    "sha256": "9bc01b1fb8efa55b6bd1b7c6c20031d013fcc2abef3cd680fe30fc72d00eec2a"
+  }
+]
