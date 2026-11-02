@@ -16,6 +16,7 @@ Không chạy các lệnh cài/chạy theo phỏng đoán. Sau 1.19, dùng đún
 2. Tra task, giờ, phụ thuộc và vị trí làm tại [bảng WBS](docs/planning/task-map.md). Dùng WBS làm mã task; không thêm Work ID riêng.
 3. Đọc [hướng dẫn tổ chức thư mục và tích hợp](docs/team-guides/MediQueue_Quy_chuan_thu_muc_va_tich_hop_theo_tung_task.docx), nhất là trang 2–6.
 4. Đọc file hướng dẫn cá nhân và GitHub tại [docs/team-guides](docs/team-guides/).
+5. Dùng đúng tên nhánh tại [danh sách nhánh theo 63 task](docs/planning/branch-names.md); quy định này thay các ví dụ tên nhánh trong tài liệu cũ.
 
 Đường dẫn trong hướng dẫn tổ chức thư mục là quy ước chính về nơi đặt tệp; các hướng dẫn cá nhân bổ sung cách thực hiện. Chỉ tạo tệp JS/JSX/SQL khi có nội dung thật, không tạo chức năng giả chỉ để đủ tên.
 

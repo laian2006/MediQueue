@@ -3,11 +3,11 @@
 ## Nhận task và gửi thay đổi
 
 1. An tạo hoặc giao Issue theo WBS trong Excel. Giữ AC, giờ, phụ thuộc và đầu ra; mỗi Issue có một người chịu trách nhiệm chính.
-2. Cập nhật main khi thư mục làm việc không còn thay đổi chưa xử lý. Tạo branch riêng, ví dụ `feat/1-13-patient-ui`; dùng `fix/` cho sửa lỗi, `docs/` cho tài liệu.
+2. Cập nhật main khi thư mục làm việc không còn thay đổi chưa xử lý. Dùng đúng nhánh `task/<WBS>`, ví dụ `task/1.13`; tra [danh sách 63 nhánh](docs/planning/branch-names.md). Code/tài liệu/test cùng task dùng cùng tên, không thêm tên cá nhân.
 3. Thực hiện đúng feature/module của mình; tự chạy các ca liên quan theo README sau khi khung chạy được bàn giao.
 4. Commit và push phần liên quan; tạo PR về main theo mẫu. Dùng `Refs #N` để tham chiếu Issue thực; chỉ `Closes #N` khi hoàn thành trọn Issue.
 5. Yêu cầu reviewer đúng phân công. Sửa phản hồi trên cùng branch, push và yêu cầu xem lại. An merge sau review; phần An được Trực review.
-6. Chạy lại phần tích hợp trên main rồi mới đóng Issue/Done. Sau merge nếu phát hiện lỗi, tạo branch/PR sửa mới và liên kết Issue.
+6. Chạy lại phần tích hợp trên main rồi mới đóng Issue/Done. Sau merge không push tiếp nhánh cũ; task cần PR tiếp do An giao task/<WBS>-r2; lỗi mới do An giao bug/<số Issue thực>. Chi tiết và lượt tiếp theo theo bảng tên nhánh.
 
 Chỉ An merge là quy ước nhóm, không phải bảo vệ kỹ thuật đã được tự động cấu hình. Không dùng force push/reset/discard khi chưa hiểu; báo An để giữ công việc. Không tạo PR rỗng cho việc họp hoặc review, ghi bằng chứng trên Issue.
 

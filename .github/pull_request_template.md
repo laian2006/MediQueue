@@ -1,6 +1,7 @@
 ## Task
 
 - WBS:
+- Nhánh: task/<WBS>; nếu PR tiếp hoặc lỗi sau merge, dùng tên An đã giao theo docs/planning/branch-names.md.
 - Issue: Refs #
 - Reviewer:
 
