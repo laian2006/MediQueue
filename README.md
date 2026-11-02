@@ -6,7 +6,7 @@ Mô phỏng một quầy đăng ký ngoại trú và một hàng chờ thông th
 
 ## Trạng thái ban đầu
 
-Repo hiện có cấu trúc thư mục, quy ước phối hợp và tài liệu theo kế hoạch; phần ứng dụng chưa được triển khai. Hai package.json mới khai báo tên project, chưa có thư viện hoặc lệnh chạy. Trực hoàn thiện khung chạy, công cụ/phiên bản, scripts, kết nối DB và hướng dẫn ở **1.19**; An chốt yêu cầu/kiến trúc/API ở **1.3**. Cổng trong .env.example là giá trị phát triển dự kiến, được Trực chốt lại cùng README.
+Repo có cấu trúc thư mục, quy ước và thiết kế chung. Mô đun phiên task **1.1** đã có migration, API mở/đọc và kiểm thử độc lập; xem [hướng dẫn ghép mô đun](docs/modules/sessions.md) và [kết quả thử](docs/testing/cases/1-1.md). Chưa ghép xác thực thật và app chung; chưa đánh dấu task Done. Hai package.json mới khai báo tên project, chưa có thư viện hoặc lệnh chạy. Trực hoàn thiện khung chạy, công cụ/phiên bản, scripts, kết nối DB và hướng dẫn ở **1.19**; An chốt yêu cầu/kiến trúc/API ở **1.3**. Cổng trong .env.example là giá trị phát triển dự kiến, được Trực chốt lại cùng README.
 
 Không chạy các lệnh cài/chạy theo phỏng đoán. Sau 1.19, dùng đúng hướng dẫn được cập nhật tại đây. Tệp .gitkeep giữ các thư mục chưa có nội dung trên GitHub; có thể bỏ khi thư mục đã có tệp thật.
 
