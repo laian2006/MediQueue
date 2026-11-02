@@ -1,0 +1,86 @@
+{
+  "browserVersion": "156.0.8078.76",
+  "errors": [],
+  "results": [
+    {
+      "id": "UI-01",
+      "name": "Loading state",
+      "result": "PASS"
+    },
+    {
+      "id": "UI-02",
+      "name": "Explicit profile selection",
+      "result": "PASS"
+    },
+    {
+      "id": "UI-03",
+      "name": "WAITING TicketView and correct profile",
+      "result": "PASS"
+    },
+    {
+      "id": "UI-04",
+      "name": "CALLED replaces previous ticket",
+      "result": "PASS"
+    },
+    {
+      "id": "UI-05",
+      "name": "Issue fixture only after confirmation and block repeated clicks",
+      "result": "PASS"
+    },
+    {
+      "id": "UI-06",
+      "name": "Empty authorized profiles",
+      "result": "PASS"
+    },
+    {
+      "id": "UI-07",
+      "name": "No session prevents new issue",
+      "result": "PASS"
+    },
+    {
+      "id": "UI-08",
+      "name": "STOPPED shows existing ticket but prevents new issue",
+      "result": "PASS"
+    },
+    {
+      "id": "UI-09",
+      "name": "Initial load failure does not report success",
+      "result": "PASS"
+    },
+    {
+      "id": "UI-10",
+      "name": "Ticket load failure blocks blind issue",
+      "result": "PASS"
+    },
+    {
+      "id": "UI-11",
+      "name": "Failed issue retry keeps the entire request body",
+      "result": "PASS"
+    },
+    {
+      "id": "UI-12",
+      "name": "Late previous-profile response cannot overwrite current profile",
+      "result": "PASS"
+    },
+    {
+      "id": "UI-13",
+      "name": "Zero waitingAhead remains visible without claiming called",
+      "result": "PASS"
+    },
+    {
+      "id": "UI-14",
+      "name": "360 px mobile layout with WAITING and CALLED",
+      "result": "PASS"
+    },
+    {
+      "id": "UI-15",
+      "name": "Long profile name wraps at 360 px",
+      "result": "PASS"
+    },
+    {
+      "id": "UI-16",
+      "name": "Profile select works with keyboard",
+      "result": "PASS"
+    }
+  ]
+}
