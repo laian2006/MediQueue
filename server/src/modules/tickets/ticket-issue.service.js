@@ -4,7 +4,7 @@ import { TicketError } from './ticket.errors.js';
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const INPUT_FIELDS = ['patientId', 'requestId', 'sessionId'];
 
-// v1.0 gives 409 for a session that is not OPEN but no code yet; awaiting An (tickets.md, câu hỏi 1).
+// Issuing in a STOPPED/CLOSED session: 409 INVALID_STATE, as decided by An on 04/11/2026.
 export const SESSION_NOT_OPEN_CODE = 'INVALID_STATE';
 
 function requireRepresentative(actor) {
