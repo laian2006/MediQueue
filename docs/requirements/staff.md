@@ -86,7 +86,12 @@ cả khi mở URL trực tiếp.
 - Mọi API quầy chỉ cho STAFF; máy chủ là nơi quyết định, ẩn nút không thay được
   kiểm tra quyền.
 - `401` hoặc `403` không hiển thị dữ liệu quầy; cách điều hướng thống nhất với
-  Hưng để các trang xử lý giống nhau.
+  Hưng để các trang xử lý giống nhau. Theo 1.4 (`docs/modules/auth.md`, đã
+  merge): `requireStaff` đặt sau `authenticate`; chưa đăng nhập hoặc hết hạn
+  tuyệt đối 8 giờ trả 401 `UNAUTHENTICATED`, REPRESENTATIVE trả 403
+  `FORBIDDEN`, envelope `{error: {code, message}}`. Tài khoản thử: `staff_01`,
+  `rep_a`. UI 1.16 đã có thông báo riêng cho hai mã này (UI-24 đến UI-26, mock);
+  chuyển sang LoginPage chờ 1.5 và route 1.19.
 - Mock ở 1.16 không chứng minh được quyền; ca này chỉ nghiệm thu ở 1.17.
 
 ## Ca từ chối cần kiểm thử
@@ -99,7 +104,8 @@ cả khi mở URL trực tiếp.
 | Cửa sổ khác vừa gọi | UI thấy quầy rảnh, API trả COUNTER_BUSY | Báo từ chối, tải lại thấy lượt thật | 1.16 mock; 1.17 thật |
 | Phiếu cuối vừa bị hủy | UI thấy còn phiếu, API trả QUEUE_EMPTY | Báo từ chối, tải lại thấy hàng rỗng | 1.16 mock; 1.17 thật |
 | Bấm hai lần nhanh | Quầy rảnh, còn phiếu | Một yêu cầu, một thông báo thành công | 1.16 mock; 1.17 thật |
-| Tài khoản thường | REPRESENTATIVE mở `/staff` | Không vận hành được quầy | 1.17 |
+| Tài khoản thường | REPRESENTATIVE (`rep_a`) mở `/staff` | 403 `FORBIDDEN`, không thấy hàng chờ, không vận hành được quầy | 1.16 mock; 1.17 thật |
+| Hết phiên đăng nhập | Cookie hết hạn khi bấm gọi | 401 `UNAUTHENTICATED`, không báo "chưa có xác nhận", bỏ dữ liệu quầy | 1.16 mock; 1.17 thật |
 
 ## Ranh giới và bàn giao
 
