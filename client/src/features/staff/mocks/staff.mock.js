@@ -44,6 +44,11 @@ function apiError(code, message, status = 409) {
 export function createStaffMockApi({ scenario = 'default', delay = 250 } = {}) {
   const state = (fixtures[scenario] ?? fixtures.default)();
   let failReads = scenario === 'load-error';
+  // Lỗi quyền theo hợp đồng 1.4: 'forbidden' là tài khoản REPRESENTATIVE.
+  let accessError = {
+    unauthenticated: apiError('UNAUTHENTICATED', 'Bạn cần đăng nhập.', 401),
+    forbidden: apiError('FORBIDDEN', 'Chỉ nhân viên được thực hiện thao tác này.', 403),
+  }[scenario] ?? null;
 
   function response(read, error = null) {
     return new Promise((resolve, reject) => {
@@ -54,7 +59,7 @@ export function createStaffMockApi({ scenario = 'default', delay = 250 } = {}) {
     });
   }
 
-  const readError = () => (failReads ? new Error('Không tải được dữ liệu mô phỏng.') : null);
+  const readError = () => accessError ?? (failReads ? new Error('Không tải được dữ liệu mô phỏng.') : null);
 
   return {
     getCurrentSession: () => response(() => {
@@ -72,6 +77,12 @@ export function createStaffMockApi({ scenario = 'default', delay = 250 } = {}) {
       serverTime,
     }), readError()),
     callNext: () => {
+      if (accessError) return response(null, accessError);
+      if (scenario === 'session-expired') {
+        // Phiên đăng nhập hết hạn giữa chừng: từ đây mọi yêu cầu đều 401.
+        accessError = apiError('UNAUTHENTICATED', 'Phiên đăng nhập đã hết hạn.', 401);
+        return response(null, accessError);
+      }
       if (scenario === 'call-error') {
         return response(null, new Error('Mất kết nối mô phỏng.'));
       }

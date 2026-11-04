@@ -1,7 +1,7 @@
 [
   {
     "path": "client/src/features/staff/StaffPage.jsx",
-    "sha256": "1450a804153ac6eb3e7aefc44122414d52bdb4233744e3e11dba6f2bbc1fda37"
+    "sha256": "0bc5d941ebcba6e10f41d21e633b54e12cfcbde698791d0e92b8715ecdf064c6"
   },
   {
     "path": "client/src/features/staff/components/CurrentTicket.jsx",
@@ -13,10 +13,10 @@
   },
   {
     "path": "client/src/features/staff/mocks/staff.mock.js",
-    "sha256": "5db43fba73b3ed2e338f75469e2ab1abb585fa1b5dcaa242ad30e8721f61ed1d"
+    "sha256": "359b1c41c80869ec166340dc815874062ce04d62240e93cf4e2cab59bd414952"
   },
   {
     "path": "client/src/features/staff/staff.css",
-    "sha256": "fd8031cb45a6e6fea85624ae8d9b3d7a9917f9900d5415b83ad4cc2e94c5a73a"
+    "sha256": "9d630720a675d0febd013d0fbfc4912daae91a72ab0b5128faca0b6cb4211aa2"
   }
 ]

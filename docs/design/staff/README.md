@@ -31,6 +31,8 @@ tại và hàng chờ → gọi số tiếp theo khi quầy rảnh → đọc l�
 | Tải lần đầu lỗi | Báo lỗi và Thử tải lại, không có số | | Chưa hiện |
 | Tải lại lỗi | Giữ dữ liệu cũ, cảnh báo kèm thời điểm | Giữ dữ liệu cũ | Khóa đến khi tải lại được |
 | Đang gửi | Giữ nguyên, không tự đổi số | Giữ nguyên | Khóa, ghi Đang gọi… |
+| 401 `UNAUTHENTICATED` | Báo cần đăng nhập tài khoản nhân viên, bỏ dữ liệu đang hiện | | Chưa hiện |
+| 403 `FORBIDDEN` | Báo tài khoản không có quyền vận hành quầy, bỏ dữ liệu đang hiện | | Chưa hiện |
 
 Kết quả thao tác hiển thị phía trên hai panel:
 
@@ -99,7 +101,9 @@ const previewApi = createStaffMockApi({ scenario: 'called', delay: 250 });
 
 Các scenario: `default`, `called`, `registering`, `empty-queue`, `no-session`,
 `stopped-session`, `load-error`, `counter-busy`, `queue-empty`, `invalid-state`,
-`call-error`, `call-error-then-offline`. Tạo adapter ngoài component để tránh
+`call-error`, `call-error-then-offline`, `unauthenticated`, `forbidden`,
+`session-expired`. Ba scenario cuối dùng mã lỗi và envelope
+`{error: {code, message}}` của 1.4 (`docs/modules/auth.md`). Tạo adapter ngoài component để tránh
 khởi tạo lại sau mỗi render. Không coi mock là kiểm tra quyền ở server.
 
 ## Bằng chứng và phần chờ

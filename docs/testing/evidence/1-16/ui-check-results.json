@@ -108,6 +108,21 @@
       "result": "PASS"
     },
     {
+      "id": "UI-24",
+      "name": "UNAUTHENTICATED shows login message and no counter data",
+      "result": "PASS"
+    },
+    {
+      "id": "UI-25",
+      "name": "FORBIDDEN (REPRESENTATIVE) cannot see or operate the counter",
+      "result": "PASS"
+    },
+    {
+      "id": "UI-26",
+      "name": "Login expires on call: rejected, not unconfirmed, data removed",
+      "result": "PASS"
+    },
+    {
       "id": "UI-22",
       "name": "360 px layout for free and CALLED states",
       "result": "PASS"

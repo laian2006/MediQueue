@@ -9,7 +9,12 @@ const callErrors = {
   QUEUE_EMPTY: 'Máy chủ từ chối: hàng chờ đã hết khi gửi yêu cầu. Màn hình được tải lại theo dữ liệu máy chủ.',
   INVALID_STATE: 'Máy chủ từ chối: trạng thái phiên hoặc phiếu đã thay đổi. Màn hình được tải lại theo dữ liệu máy chủ.',
 };
-const unconfirmedCall = 'Chưa nhận được xác nhận gọi số, số có thể đã hoặc chưa được gọi. Hãy kiểm tra lượt hiện tại trước khi thao tác tiếp.';
+// Mã lỗi theo hợp đồng 1.4 (authenticate, requireStaff); không hiện dữ liệu quầy khi gặp hai mã này.
+const accessErrors = {
+  UNAUTHENTICATED: 'Bạn cần đăng nhập bằng tài khoản nhân viên để vận hành quầy.',
+  FORBIDDEN: 'Tài khoản này không có quyền vận hành quầy. Chỉ nhân viên được dùng màn hình này.',
+};
+const unconfirmedCall ='Chưa nhận được xác nhận gọi số, số có thể đã hoặc chưa được gọi. Hãy kiểm tra lượt hiện tại trước khi thao tác tiếp.';
 
 const sessionLabels = {
   OPEN: 'Đang nhận số',
@@ -29,6 +34,7 @@ export default function StaffPage({ api = staffMockApi, sessionPanel = null }) {
   const [snapshot, setSnapshot] = useState(null);
   const [refreshing, setRefreshing] = useState(true);
   const [loadError, setLoadError] = useState('');
+  const [accessError, setAccessError] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState(null);
   const submittingRef = useRef(false);
@@ -54,8 +60,17 @@ export default function StaffPage({ api = staffMockApi, sessionPanel = null }) {
       if (seq !== loadSeq.current) return;
       setSnapshot({ session, waiting, current, receivedAt: new Date().toISOString() });
       setLoadError('');
-    } catch {
-      if (seq === loadSeq.current) setLoadError('Không tải được trạng thái quầy.');
+      setAccessError('');
+    } catch (error) {
+      if (seq !== loadSeq.current) return;
+      if (accessErrors[error?.code]) {
+        // 401/403: bỏ dữ liệu quầy đã có, không giữ lại như dữ liệu cũ.
+        setSnapshot(null);
+        setResult(null);
+        setAccessError(accessErrors[error.code]);
+      } else {
+        setLoadError('Không tải được trạng thái quầy.');
+      }
     } finally {
       if (seq === loadSeq.current) setRefreshing(false);
     }
@@ -65,6 +80,7 @@ export default function StaffPage({ api = staffMockApi, sessionPanel = null }) {
     setSnapshot(null);
     setResult(null);
     setLoadError('');
+    setAccessError('');
     refresh();
     return () => { loadSeq.current += 1; };
   }, [refresh]);
@@ -82,7 +98,13 @@ export default function StaffPage({ api = staffMockApi, sessionPanel = null }) {
       const { data: ticket } = await api.callNext({ sessionId: snapshot.session.sessionId });
       setResult({ type: 'success', text: `Máy chủ đã xác nhận gọi số ${ticket.number}.` });
     } catch (error) {
-      setResult({ type: 'error', text: callErrors[error.code] ?? unconfirmedCall });
+      if (accessErrors[error.code]) {
+        // Máy chủ đã từ chối dứt khoát, không báo "chưa có xác nhận".
+        setSnapshot(null);
+        setAccessError(accessErrors[error.code]);
+      } else {
+        setResult({ type: 'error', text: callErrors[error.code] ?? unconfirmedCall });
+      }
     } finally {
       submittingRef.current = false;
       setSubmitting(false);
@@ -107,7 +129,13 @@ export default function StaffPage({ api = staffMockApi, sessionPanel = null }) {
         <h1>Vận hành quầy</h1>
 
         {!snapshot && refreshing && <p className="staff-notice" role="status">Đang tải trạng thái quầy…</p>}
-        {!snapshot && !refreshing && (
+        {!snapshot && !refreshing && accessError && (
+          <div className="staff-notice staff-notice--error" role="alert">
+            <p>{accessError} Không hiển thị dữ liệu quầy.</p>
+            <button className="staff-button staff-button--secondary" onClick={reload}>Thử tải lại</button>
+          </div>
+        )}
+        {!snapshot && !refreshing && !accessError && (
           <div className="staff-notice staff-notice--error" role="alert">
             <p>{loadError} Chưa có dữ liệu để hiển thị.</p>
             <button className="staff-button staff-button--secondary" onClick={reload}>Thử tải lại</button>
