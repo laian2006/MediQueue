@@ -54,7 +54,7 @@ docs/                    Yêu cầu, thiết kế, API, test và demo
 
 Mỗi người 20 giờ/sprint; tuần 9 chuẩn bị 2 giờ và tuần 16 demo 2 giờ tính riêng. Ngày bắt đầu tuần 10 trong Excel đang dự kiến 02/11/2026, An xác nhận theo lịch lớp.
 
-Kế hoạch gốc: [Sprint Plan VI](docs/planning/MediQueue_Group11_Sprint_Plan_VI.xlsx). Cập nhật kế hoạch có thống nhất khi thay đổi phạm vi/lịch; không âm thầm đổi giao việc.
+Kế hoạch hiện hành: [Sprint Plan EN](docs/planning/MediQueue_Group11_Sprint_Plan.xlsx). Cả nhóm sử dụng bản Excel trong repo để tra cứu phân công, lịch và tiến độ. Mọi thay đổi phạm vi, lịch hoặc phân công cần thống nhất với An; khi cập nhật kế hoạch, thay tệp Excel này và commit cùng các thay đổi liên quan.
 
 ## Phạm vi
 
