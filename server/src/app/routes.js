@@ -7,9 +7,15 @@ import { requireStaff } from '../shared/middleware/require-staff.js';
 import { createSessionRepository } from '../modules/sessions/session.repository.js';
 import { createSessionService } from '../modules/sessions/session.service.js';
 import { createSessionRouter } from '../modules/sessions/session.routes.js';
+import { createPublicBoardRepository } from '../modules/public-board/public-board.repository.js';
+import { createPublicBoardService } from '../modules/public-board/public-board.service.js';
+import { createPublicBoardRouter } from '../modules/public-board/public-board.routes.js';
 
 export function createRoutes({ pool }) {
   const router = Router();
+  router.use('/public', createPublicBoardRouter({
+    boardService: createPublicBoardService({ repository: createPublicBoardRepository(pool) }),
+  }));
   router.get('/health', async (_req, res) => {
     try {
       await pool.query('SELECT 1');

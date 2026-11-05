@@ -6,7 +6,7 @@ Mô phỏng một quầy đăng ký ngoại trú và một hàng chờ thông th
 
 ## Cài và chạy — task 1.19
 
-Khung chung đã ghép React → Express → PostgreSQL, xác thực thật của Hưng (1.4) và phiên của An (1.1). Trang chủ kiểm tra kết nối DB thật; `/patient-demo` dùng UI mock của Đạt (1.13), không cấp phiếu thật. Các màn hình/API chưa được chủ mô đun triển khai không được giả lập thành API thật. Chờ review và kiểm tra trên main trước khi đánh dấu Done.
+Khung chung đã ghép React → Express → PostgreSQL, xác thực thật của Hưng (1.4) và phiên của An (1.1). Trang chủ kiểm tra kết nối DB thật; `/patient-demo` dùng UI mock của Đạt (1.13), không cấp phiếu thật. `/board` là bảng công khai 1.20 đọc PostgreSQL qua API riêng; cần migration Ticket 003 từ 1.7 được ghép trước khi dùng. Các màn hình/API chưa được chủ mô đun triển khai không được giả lập thành API thật. Chờ review và kiểm tra trên main trước khi đánh dấu Done.
 
 Yêu cầu: **Node.js 22.12+ (khuyến nghị 24 LTS), npm 10+, PostgreSQL 18**. Dùng npm, giữ một `package-lock.json` trong mỗi package. Các phiên bản thư viện được khóa chính xác; máy mới dùng `npm ci`, không tạo lockfile của yarn/pnpm.
 
@@ -66,6 +66,14 @@ TEST_DATABASE_URL='postgresql://USER:PASSWORD@localhost:5432/mediqueue_test' npm
 ```
 
 Không có `TEST_DATABASE_URL` thì test tích hợp ghi SKIP. Các test tạo/xóa schema tạm riêng, không reset schema public. Kết quả khung: [ca 1.19](docs/testing/cases/1-19.md). Helper và DDL bàn giao ở [thiết kế TicketEvent](docs/architecture/ticket-event.md); 004 chỉ được ghép sau Ticket 003 trong task 1.7.
+
+### Bảng gọi số công khai — task 1.20
+
+Mở http://localhost:5173/board, không cần đăng nhập. `GET /api/v1/public/board` trả đúng `{data:{currentTicket:{number,status}|null,waitingNumbers:[...],updatedAt}}`. Chỉ đọc phiên OPEN/STOPPED; số chờ tăng dần; không có phiên trả null và danh sách rỗng. Không trả tên, mã hồ sơ, ticketId/sessionId/patientId hoặc dữ liệu sức khỏe. Phản hồi không cache.
+
+UI tải ngay khi mở rồi đọc lại sau mỗi 3 giây kể từ khi yêu cầu trước kết thúc; không gửi chồng yêu cầu. Mất kết nối có cảnh báo và giữ nhãn dữ liệu có thể đã cũ; không tự tạo số hoặc báo thành công giả. Chuyển trang hủy yêu cầu đang chờ.
+
+Nhánh 1.20 dùng khung 1.19 đang chờ merge. Nền main hiện chưa có 003 và API 1.8/1.11: test bảng dùng PostgreSQL thật với fixture schema Ticket sao từ nhánh 1.7, không áp dụng fixture đó vào DB phát triển/integrated bằng runner. Chưa nghiệm thu luồng cấp/gọi số từ API thật; cần chủ các task ghép và chạy lại. Xem [kết quả 1.20](docs/testing/cases/1-20.md).
 
 ## Đọc trước khi làm
 
