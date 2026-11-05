@@ -18,6 +18,8 @@ Một quầy đăng ký ngoại trú, một hàng thông thường, dữ liệu 
 
 ## Mục tiêu chất lượng và nghiệm thu
 
+Yêu cầu chi tiết phần Trực: [khung, nhật ký và bảng công khai](platform.md). Bản bổ sung 1.21 đang chờ An duyệt, không thay thế trạng thái nghiệm thu/tích hợp.
+
 50 client trong 5 phút, polling 3 giây; mục tiêu p95 API ≤2 giây, UI cập nhật ≤5 giây trong điều kiện thử bình thường. Chưa có kết quả đo. Lưu bền sau API restart, rollback nguyên tử, quyền không lẫn tài khoản/hồ sơ, cài sạch được theo README.
 
 Giữ lịch sprint 1 tuần 10–11, sprint 2 tuần 12–13, sprint 3 tuần 14–15; tuần 16 demo. Các phần sửa chức năng xong trước hết thứ tư tuần 15; Trực 3.20 thứ năm–sáu rồi An 3.3 nghiệm thu. Mỗi người 20 giờ/sprint; chuẩn bị tuần 9/demo tuần 16 tính riêng theo Excel.
