@@ -1,0 +1,136 @@
+{
+  "browserVersion": "155.0.8059.85",
+  "errors": [],
+  "results": [
+    {
+      "id": "UI-01",
+      "name": "Loading state has no number or call button",
+      "result": "PASS"
+    },
+    {
+      "id": "UI-02",
+      "name": "Free counter with waiting tickets can call next",
+      "result": "PASS"
+    },
+    {
+      "id": "UI-03",
+      "name": "CALLED is separate from queue and locks call next",
+      "result": "PASS"
+    },
+    {
+      "id": "UI-04",
+      "name": "REGISTERING has its own label and locks call next",
+      "result": "PASS"
+    },
+    {
+      "id": "UI-05",
+      "name": "Empty queue shows message and no fake number",
+      "result": "PASS"
+    },
+    {
+      "id": "UI-06",
+      "name": "No session does not read queue and locks call next",
+      "result": "PASS"
+    },
+    {
+      "id": "UI-07",
+      "name": "STOPPED session can still call old tickets",
+      "result": "PASS"
+    },
+    {
+      "id": "UI-08",
+      "name": "Success only after confirmation, then re-read from server",
+      "result": "PASS"
+    },
+    {
+      "id": "UI-09",
+      "name": "Repeated clicks in the same tick send one request",
+      "result": "PASS"
+    },
+    {
+      "id": "UI-10",
+      "name": "COUNTER_BUSY is reported and reload shows the real ticket",
+      "result": "PASS"
+    },
+    {
+      "id": "UI-11",
+      "name": "QUEUE_EMPTY is reported and reload shows empty queue",
+      "result": "PASS"
+    },
+    {
+      "id": "UI-12",
+      "name": "INVALID_STATE message stays after reload",
+      "result": "PASS"
+    },
+    {
+      "id": "UI-13",
+      "name": "Lost response does not claim success or failure",
+      "result": "PASS"
+    },
+    {
+      "id": "UI-14",
+      "name": "First load failure has no number and retry recovers",
+      "result": "PASS"
+    },
+    {
+      "id": "UI-15",
+      "name": "Failed refresh keeps old data with warning and locks call next",
+      "result": "PASS"
+    },
+    {
+      "id": "UI-16",
+      "name": "Call fails and network drops: unconfirmed message plus stale warning",
+      "result": "PASS"
+    },
+    {
+      "id": "UI-17",
+      "name": "Late response from older read cannot overwrite newer read",
+      "result": "PASS"
+    },
+    {
+      "id": "UI-18",
+      "name": "SessionPanel slot replaces the read-only placeholder",
+      "result": "PASS"
+    },
+    {
+      "id": "UI-19",
+      "name": "Placeholder has no fake session controls",
+      "result": "PASS"
+    },
+    {
+      "id": "UI-20",
+      "name": "No internal IDs are shown on screen",
+      "result": "PASS"
+    },
+    {
+      "id": "UI-21",
+      "name": "Call next works with the keyboard",
+      "result": "PASS"
+    },
+    {
+      "id": "UI-24",
+      "name": "UNAUTHENTICATED shows login message and no counter data",
+      "result": "PASS"
+    },
+    {
+      "id": "UI-25",
+      "name": "FORBIDDEN (REPRESENTATIVE) cannot see or operate the counter",
+      "result": "PASS"
+    },
+    {
+      "id": "UI-26",
+      "name": "Login expires on call: rejected, not unconfirmed, data removed",
+      "result": "PASS"
+    },
+    {
+      "id": "UI-22",
+      "name": "360 px layout for free and CALLED states",
+      "result": "PASS"
+    },
+    {
+      "id": "UI-23",
+      "name": "Long queue and large number do not overflow at 360 px",
+      "result": "PASS"
+    }
+  ]
+}
