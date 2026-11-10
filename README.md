@@ -4,11 +4,68 @@
 
 Mô phỏng một quầy đăng ký ngoại trú và một hàng chờ thông thường, sử dụng dữ liệu giả lập. Kiến trúc đã chọn: React → Express → PostgreSQL.
 
-## Trạng thái ban đầu
+## Cài và chạy — task 1.19
 
-Repo có cấu trúc thư mục, quy ước và thiết kế chung. Mô đun phiên task **1.1** đã có migration, API mở/đọc và kiểm thử độc lập; xem [hướng dẫn ghép mô đun](docs/modules/sessions.md) và [kết quả thử](docs/testing/cases/1-1.md). Chưa ghép xác thực thật và app chung; chưa đánh dấu task Done. Hai package.json mới khai báo tên project, chưa có thư viện hoặc lệnh chạy. Trực hoàn thiện khung chạy, công cụ/phiên bản, scripts, kết nối DB và hướng dẫn ở **1.19**; An chốt yêu cầu/kiến trúc/API ở **1.3**. Cổng trong .env.example là giá trị phát triển dự kiến, được Trực chốt lại cùng README.
+Khung chung đã ghép React → Express → PostgreSQL, xác thực thật của Hưng (1.4) và phiên của An (1.1). Trang chủ kiểm tra kết nối DB thật; `/patient-demo` dùng UI mock của Đạt (1.13), không cấp phiếu thật. Các màn hình/API chưa được chủ mô đun triển khai không được giả lập thành API thật. Chờ review và kiểm tra trên main trước khi đánh dấu Done.
 
-Không chạy các lệnh cài/chạy theo phỏng đoán. Sau 1.19, dùng đúng hướng dẫn được cập nhật tại đây. Tệp .gitkeep giữ các thư mục chưa có nội dung trên GitHub; có thể bỏ khi thư mục đã có tệp thật.
+Yêu cầu: **Node.js 22.12+ (khuyến nghị 24 LTS), npm 10+, PostgreSQL 18**. Dùng npm, giữ một `package-lock.json` trong mỗi package. Các phiên bản thư viện được khóa chính xác; máy mới dùng `npm ci`, không tạo lockfile của yarn/pnpm.
+
+1. Clone repo, chuyển vào thư mục repo. Tạo **DB phát triển riêng** và tài khoản có quyền tạo bảng/schema trong DB đó bằng pgAdmin hoặc `createdb`. Không dùng DB tích hợp/dữ liệu người khác. PostgreSQL cần chạy trước các bước dưới.
+2. Sao chép `server/.env.example` thành `server/.env`, điền `DATABASE_URL` của DB riêng. Tạo khóa bằng lệnh sau rồi đặt kết quả vào `SESSION_SECRET` (không commit):
+
+   ```bash
+   node -e "console.log(require('node:crypto').randomBytes(32).toString('hex'))"
+   ```
+
+   Giữ `PORT=3000`, `CLIENT_ORIGIN=http://localhost:5173`, `COOKIE_SECURE=false` trên máy HTTP; T ghi vắng = 60 giây theo thiết kế. `.env.example` không chứa khóa thật. URL DB có ký tự đặc biệt trong mật khẩu phải URL-encode.
+3. Cài server, áp dụng migration theo thứ tự và seed dữ liệu giả lập:
+
+   ```bash
+   cd server
+   npm ci
+   npm run db:migrate
+   npm run db:seed
+   npm run dev
+   ```
+
+   API ở `http://localhost:3000/api/v1`. `npm start` chạy không theo dõi thay đổi tệp. Migration có lịch sử/checksum và transaction; chạy lại không tạo bảng trùng. Không có lệnh reset. Nếu DB cũ đã chạy SQL thủ công mà chưa có lịch sử, dùng DB phát triển mới hoặc thống nhất cách chuyển đổi; không xóa DB để xử lý tự động.
+4. Mở terminal thứ hai từ gốc repo:
+
+   ```bash
+   cd client
+   npm ci
+   npm run dev
+   ```
+
+   Mở **http://localhost:5173**. Trang chủ phải báo cơ sở dữ liệu đã kết nối. Client không cần `.env` với cấu hình mặc định; nếu đổi cổng API, sao chép `client/.env.example` thành `.env` rồi đổi `API_PROXY_TARGET` và các cổng/origin tương ứng. Vite chuyển `/api` đến Express và giữ Origin của trình duyệt. `localhost` và `127.0.0.1` là hai origin khác nhau, dùng nhất quán `localhost` khi mở UI.
+
+Tài khoản seed: `staff_01`, `rep_a`, `rep_b`, mật khẩu thử `Demo@12345`; xem [hợp đồng xác thực](docs/modules/auth.md). Chưa có LoginPage ở task này; API đăng nhập có thể thử bằng công cụ gọi API. Cookie HttpOnly và store `auth_sessions` PostgreSQL được tạo bởi thư viện khi dùng phiên lần đầu; đăng nhập vẫn còn sau restart API. Origin khác cấu hình bị từ chối, lớp `http.js` gửi cookie và JSON. Khung này dành cho phát triển/demo; triển khai sau reverse proxy HTTPS cần chốt cấu hình proxy tin cậy trước khi bật cookie Secure, không tự tin cậy mọi proxy.
+
+### Kiểm tra
+
+```bash
+cd server
+npm test
+cd ../client
+npm test
+npm run build
+npm run preview
+```
+
+`npm run preview` dùng cổng 5173; dừng Vite dev trước khi chạy preview và giữ API đang chạy. Express không phục vụ thư mục build. Kiểm tra tích hợp cần **DB test riêng**, tài khoản có quyền tạo schema, đặt `TEST_DATABASE_URL` trước `npm test`:
+
+```powershell
+# PowerShell, từ server; thay URL mẫu bằng DB test riêng của bạn
+$env:TEST_DATABASE_URL = 'postgresql://USER:PASSWORD@localhost:5432/mediqueue_test'
+npm test
+```
+
+```bash
+# Git Bash, từ server
+TEST_DATABASE_URL='postgresql://USER:PASSWORD@localhost:5432/mediqueue_test' npm test
+```
+
+Không có `TEST_DATABASE_URL` thì test tích hợp ghi SKIP. Các test tạo/xóa schema tạm riêng, không reset schema public. Kết quả khung: [ca 1.19](docs/testing/cases/1-19.md). Helper và DDL bàn giao ở [thiết kế TicketEvent](docs/architecture/ticket-event.md); 004 chỉ được ghép sau Ticket 003 trong task 1.7.
 
 ## Đọc trước khi làm
 
@@ -54,7 +111,7 @@ docs/                    Yêu cầu, thiết kế, API, test và demo
 
 Mỗi người 20 giờ/sprint; tuần 9 chuẩn bị 2 giờ và tuần 16 demo 2 giờ tính riêng. Ngày bắt đầu tuần 10 trong Excel đang dự kiến 02/11/2026, An xác nhận theo lịch lớp.
 
-Kế hoạch gốc: [Sprint Plan VI](docs/planning/MediQueue_Group11_Sprint_Plan_VI.xlsx). Cập nhật kế hoạch có thống nhất khi thay đổi phạm vi/lịch; không âm thầm đổi giao việc.
+Kế hoạch hiện hành: [Sprint Plan EN](docs/planning/MediQueue_Group11_Sprint_Plan.xlsx). Cả nhóm sử dụng bản Excel trong repo để tra cứu phân công, lịch và tiến độ. Mọi thay đổi phạm vi, lịch hoặc phân công cần thống nhất với An; khi cập nhật kế hoạch, thay tệp Excel này và commit cùng các thay đổi liên quan.
 
 ## Phạm vi
 

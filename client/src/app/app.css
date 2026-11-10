@@ -1,0 +1,11 @@
+:root { font-family: Arial, sans-serif; color: #173042; background: #f5f8fa; }
+body { margin: 0; }
+.app-header { display: flex; justify-content: space-between; gap: 1rem; padding: 1.25rem max(1rem, calc((100% - 900px) / 2)); background: white; border-bottom: 1px solid #dce5eb; }
+.app-header a { color: #185c65; font-weight: 700; text-decoration: none; }
+.app-home { max-width: 760px; margin: 3rem auto; padding: 0 1.25rem; line-height: 1.6; }
+.app-home section { background: white; padding: 1rem 1.5rem; border: 1px solid #dce5eb; border-radius: 12px; margin: 2rem 0; }
+.app-home h2 { font-size: 1.15rem; }
+.app-home button { padding: .6rem 1rem; cursor: pointer; }
+.app-home a { color: #185c65; }
+.app-note { color: #526779; }
+.app-demo-note { margin: 0; padding: 1rem; background: #fff1cf; color: #573d00; text-align: center; }

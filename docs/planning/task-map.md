@@ -1,6 +1,6 @@
 # Tra cứu task WBS
 
-Nguồn: [Sprint Plan VI](MediQueue_Group11_Sprint_Plan_VI.xlsx). Giữ WBS làm mã trao đổi. FS: xong trước khi bắt đầu; FF: xong trước khi nghiệm thu. Task 8 giờ gồm tài liệu 2 giờ, review/phối hợp 4 giờ, sự kiện 2 giờ.
+Nguồn: [Sprint Plan EN](MediQueue_Group11_Sprint_Plan.xlsx). Giữ WBS làm mã trao đổi. FS: xong trước khi bắt đầu; FF: xong trước khi nghiệm thu. Task 8 giờ gồm tài liệu 2 giờ, review/phối hợp 4 giờ, sự kiện 2 giờ.
 
 Tên nhánh theo [quy định nhánh chung](branch-names.md). Task họp/review thuần không tạo nhánh/PR rỗng.
 
