@@ -13,6 +13,8 @@ import { withTransaction } from '../../src/shared/db/transaction.js';
 
 const migrations = fileURLToPath(new URL('../../../database/migrations/', import.meta.url));
 const seeds = fileURLToPath(new URL('../../../database/seeds/', import.meta.url));
+// Every migration on main, in order. Add new files here when a later task adds a migration.
+const MIGRATIONS = ['001_identity.sql', '002_sessions.sql', '003_tickets.sql', '004_ticket_events.sql'];
 
 test('WBS 1.19: common app, migration history, PostgreSQL sessions and rollback', {
   skip: !process.env.TEST_DATABASE_URL,
@@ -37,15 +39,14 @@ test('WBS 1.19: common app, migration history, PostgreSQL sessions and rollback'
   await admin.query(`CREATE SCHEMA "${schema}"`);
   pool = new pg.Pool({ connectionString: process.env.TEST_DATABASE_URL, options: `-c search_path=${schema},public` });
   await t.test('fresh migrations apply once; seed can run twice', async () => {
-    assert.deepEqual(await migrate(pool, migrations), ['001_identity.sql', '002_sessions.sql']);
+    assert.deepEqual(await migrate(pool, migrations), MIGRATIONS);
     assert.deepEqual(await migrate(pool, migrations), []);
     await seed(pool, seeds);
     await seed(pool, seeds);
     assert.equal(Number((await pool.query('SELECT count(*) FROM users')).rows[0].count), 3);
   });
   await t.test('changed applied migration and out-of-order migration are refused', async () => {
-    await copyFile(join(migrations, '001_identity.sql'), join(temporary, '001_identity.sql'));
-    await copyFile(join(migrations, '002_sessions.sql'), join(temporary, '002_sessions.sql'));
+    for (const name of MIGRATIONS) await copyFile(join(migrations, name), join(temporary, name));
     await writeFile(join(temporary, '001_identity.sql'), '-- changed');
     await assert.rejects(migrate(pool, temporary), /missing or changed/);
     await copyFile(join(migrations, '001_identity.sql'), join(temporary, '001_identity.sql'));
@@ -54,10 +55,10 @@ test('WBS 1.19: common app, migration history, PostgreSQL sessions and rollback'
     await rm(join(temporary, '000_old.sql'));
   });
   await t.test('failed migration rolls back DDL and does not record completion', async () => {
-    await writeFile(join(temporary, '003_broken.sql'), 'CREATE TABLE rollback_probe (id int); SELECT * FROM no_such_table;');
+    await writeFile(join(temporary, '999_broken.sql'), 'CREATE TABLE rollback_probe (id int); SELECT * FROM no_such_table;');
     await assert.rejects(migrate(pool, temporary));
     assert.equal((await pool.query("SELECT to_regclass('rollback_probe') AS name")).rows[0].name, null);
-    assert.equal(Number((await pool.query('SELECT count(*) FROM schema_migrations')).rows[0].count), 2);
+    assert.equal(Number((await pool.query('SELECT count(*) FROM schema_migrations')).rows[0].count), MIGRATIONS.length);
   });
   async function start() {
     const app = createApp({ pool, config });
