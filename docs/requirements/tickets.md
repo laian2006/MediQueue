@@ -10,7 +10,7 @@ Tài liệu không thay thế review chéo, kiểm tra tích hợp hoặc sự k
 
 - `docs/architecture/shared-design-v1.0.md`, `docs/api/openapi.yaml`,
   `docs/architecture/erd.md`, `docs/architecture/ticket-state-machine.md`.
-- Sprint Plan VI, task 1.7, 1.8, 1.9, 2.7, 2.8, 3.7, 3.8 và hướng dẫn TV2.
+- [Sprint Plan EN](../planning/MediQueue_Group11_Sprint_Plan.xlsx), task 1.7, 1.8, 1.9, 2.7, 2.8, 3.7, 3.8 và hướng dẫn TV2.
 - Đức Anh làm Ticket, cấp số, đọc phiếu riêng, `waitingAhead` và `requestId`.
 - Ngoài phạm vi: hủy phiếu (Đạt, 2.13), gọi/tiếp nhận/ghi vắng (Hoàng Anh),
   vòng đời phiên (An), xác thực và PatientAccess (Hưng), helper TicketEvent (Trực).

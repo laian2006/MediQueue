@@ -9,7 +9,7 @@ thay thế review chéo, kiểm tra tích hợp hoặc sự kiện sprint.
 ## Căn cứ và phạm vi
 
 - `docs/architecture/shared-design-v1.0.md` và `docs/api/openapi.yaml`.
-- Sprint Plan VI, task 1.13, 1.14, 1.15 và hướng dẫn TV4.
+- [Sprint Plan EN](../planning/MediQueue_Group11_Sprint_Plan.xlsx), task 1.13, 1.14, 1.15 và hướng dẫn TV4.
 - Một quầy, một hàng thông thường, tài khoản và hồ sơ giả lập.
 - Đạt làm màn hình sau đăng nhập; Hưng làm LoginPage và quyền hồ sơ.
 - Task 1.13 dùng mock; task 1.14 nối API thật và PostgreSQL.
