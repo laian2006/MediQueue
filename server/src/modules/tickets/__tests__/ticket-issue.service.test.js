@@ -36,8 +36,8 @@ function setup({ session = { session_id: input.sessionId, status: 'OPEN', last_i
     },
   });
   let committed = false;
-  const withTransaction = async (fn) => {
-    calls.push(['begin']);
+  const withTransaction = async (db, fn) => {
+    calls.push(['begin', db === pool]);
     const result = await fn(client); // a throw here means rollback; commit only on success
     committed = true;
     return result;
@@ -69,6 +69,7 @@ test('OPEN session: lock, check, allocate, insert and ISSUED event share one tra
   assert.equal(result.number, 5);
   assert.ok(isCommitted());
   assert.deepEqual(calls.map(([step]) => step), ['access', 'begin', 'lock', 'active', 'allocate', 'insert', 'event']);
+  assert.deepEqual(calls.find(([step]) => step === 'begin'), ['begin', true], 'transaction must use the shared pool');
   assert.ok(calls.filter(([step]) => ['lock', 'active', 'allocate', 'insert', 'event'].includes(step))
     .every(([, onClient]) => onClient === true), 'every write step must use the transaction client');
   const [, , values] = calls.find(([step]) => step === 'insert');

@@ -37,9 +37,9 @@ const isUniqueViolation = (error, constraint) => error?.code === '23505' && erro
 
 /**
  * Cấp số nền (WBS 1.7).
- * - db: shared pool (reads outside the transaction).
- * - withTransaction(fn): Trực's shared transaction helper; runs fn(client), commits or rolls back.
- * - appendTicketEvent(client, event): Trực's TicketEvent helper; must not commit on its own.
+ * - db: shared pool from server/src/shared/db/pool.js.
+ * - withTransaction(pool, fn): server/src/shared/db/transaction.js (Trực, 1.19).
+ * - appendTicketEvent(client, event): server/src/modules/audit/append-ticket-event.js (Trực, 1.19).
  * - patientAccess: Hưng's createPatientAccessService(...).
  * Gửi lại cùng requestId trả phiếu cũ thuộc WBS 2.7; ở 1.7 khóa trùng chỉ được báo 409.
  */
@@ -75,7 +75,7 @@ export function createTicketIssueService({
       }
 
       try {
-        const row = await withTransaction(async (client) => {
+        const row = await withTransaction(db, async (client) => {
           const repository = createRepository(client);
           const session = await repository.lockSession(sessionId);
           if (!session) throw new TicketError(404, 'NOT_FOUND', 'Không tìm thấy phiên.');

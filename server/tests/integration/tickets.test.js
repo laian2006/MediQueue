@@ -1,13 +1,17 @@
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
 import { randomUUID } from 'node:crypto';
 import test from 'node:test';
 import { createPatientAccessRepository } from '../../src/modules/patients/patient-access.repository.js';
 import { createPatientAccessService } from '../../src/modules/patients/patient-access.service.js';
 import { createTicketRepository } from '../../src/modules/tickets/ticket.repository.js';
 import { createTicketIssueService, SESSION_NOT_OPEN_CODE } from '../../src/modules/tickets/ticket-issue.service.js';
+import { appendTicketEvent as realAppendTicketEvent } from '../../src/modules/audit/append-ticket-event.js';
+import { migrate, seed } from '../../src/shared/db/migrations.js';
+import { withTransaction } from '../../src/shared/db/transaction.js';
 
-const read = (path) => readFile(new URL(path, import.meta.url), 'utf8');
+const migrationsDir = fileURLToPath(new URL('../../../database/migrations/', import.meta.url));
+const seedsDir = fileURLToPath(new URL('../../../database/seeds/', import.meta.url));
 const IDS = {
   staff: '00000000-0000-4000-8000-000000000001',
   repA: '00000000-0000-4000-8000-000000000002',
@@ -42,35 +46,18 @@ test('WBS 1.7: ticket schema and transactional number allocation on PostgreSQL',
   schemaCreated = true;
   pool = new pg.Pool({ connectionString: process.env.TEST_DATABASE_URL, options: `-c search_path=${schema},public`, max: 20 });
 
-  // Real order: 001 → seed → 002 → 003. 004_ticket_events waits for Trực's design (1.19).
-  for (const file of ['migrations/001_identity.sql', 'seeds/001_identity.sql', 'migrations/002_sessions.sql', 'migrations/003_tickets.sql']) {
-    await pool.query(await read(`../../../database/${file}`));
-  }
-  // TEST DOUBLE ONLY: stands in for TicketEvent until 004 and append-ticket-event.js exist.
-  await pool.query(`CREATE TABLE test_ticket_events (
-    ticket_id UUID NOT NULL REFERENCES tickets(ticket_id), actor_user_id UUID NOT NULL,
-    action TEXT NOT NULL, from_status TEXT, to_status TEXT NOT NULL)`);
+  // Real shared runner (1.19): 001 → 002 → 003 → 004 with history/checksum, then seed 001.
+  assert.deepEqual(await migrate(pool, migrationsDir),
+    ['001_identity.sql', '002_sessions.sql', '003_tickets.sql', '004_ticket_events.sql']);
+  await seed(pool, seedsDir);
 
-  // TEST DOUBLE ONLY: stands in for Trực's shared transaction.js.
-  async function withTransaction(fn) {
-    const client = await pool.connect();
-    try {
-      await client.query('BEGIN');
-      const result = await fn(client);
-      await client.query('COMMIT');
-      return result;
-    } catch (error) {
-      await client.query('ROLLBACK');
-      throw error;
-    } finally {
-      client.release();
-    }
-  }
+  // Real helper. The wrapper only adds an optional failure AFTER the real INSERT has run,
+  // to prove that the ticket, the counter and the event roll back together.
   let failNextEvent = false;
-  async function appendTicketEvent(client, e) {
-    await client.query(`INSERT INTO test_ticket_events VALUES ($1, $2, $3, $4, $5)`,
-      [e.ticketId, e.actorUserId, e.action, e.fromStatus, e.toStatus]);
+  async function appendTicketEvent(client, event) {
+    const row = await realAppendTicketEvent(client, event);
     if (failNextEvent) { failNextEvent = false; throw new Error('simulated failure after event insert'); }
+    return row;
   }
 
   const patientAccess = createPatientAccessService({ repository: createPatientAccessRepository(pool) });
@@ -81,7 +68,7 @@ test('WBS 1.7: ticket schema and transactional number allocation on PostgreSQL',
   const one = async (sql, params) => (await pool.query(sql, params)).rows[0];
   const counts = async (sessionId) => one(`SELECT
       (SELECT count(*)::int FROM tickets) AS tickets,
-      (SELECT count(*)::int FROM test_ticket_events) AS events,
+      (SELECT count(*)::int FROM ticket_events) AS events,
       (SELECT last_issued_number FROM queue_sessions WHERE session_id = $1) AS counter`, [sessionId]);
   const openSession = async () => (await one(
     'INSERT INTO queue_sessions (opened_by) VALUES ($1) RETURNING session_id', [IDS.staff])).session_id;
@@ -103,7 +90,7 @@ test('WBS 1.7: ticket schema and transactional number allocation on PostgreSQL',
     assert.equal(new Date(ticket.createdAt).toISOString(), ticket.createdAt);
     const row = await one('SELECT issued_by_user_id FROM tickets WHERE ticket_id = $1', [ticket.ticketId]);
     assert.equal(row.issued_by_user_id, IDS.repA);
-    assert.deepEqual(await one('SELECT action, from_status, to_status, actor_user_id FROM test_ticket_events WHERE ticket_id = $1',
+    assert.deepEqual(await one('SELECT action, from_status, to_status, actor_user_id FROM ticket_events WHERE ticket_id = $1',
       [ticket.ticketId]), { action: 'ISSUED', from_status: null, to_status: 'WAITING', actor_user_id: IDS.repA });
     assert.deepEqual(await counts(sessionId), { tickets: 1, events: 1, counter: 1 });
   });
@@ -194,6 +181,26 @@ test('WBS 1.7: ticket schema and transactional number allocation on PostgreSQL',
     assert.ok(db.rows.every((r) => r.n === 1));
     const session = await one('SELECT last_issued_number FROM queue_sessions WHERE session_id = $1', [current]);
     assert.equal(session.last_issued_number, 4); // #1 earlier + three parallel successes, no gaps
+  });
+
+  await t.test('TicketEvent: one ISSUED row per ticket, DB-generated id/time, FK and no cascade', async () => {
+    const mismatch = await one(`SELECT
+      (SELECT count(*)::int FROM tickets t WHERE NOT EXISTS (SELECT 1 FROM ticket_events e
+         WHERE e.ticket_id = t.ticket_id AND e.action = 'ISSUED' AND e.from_status IS NULL AND e.to_status = 'WAITING'
+           AND e.actor_user_id = t.issued_by_user_id)) AS tickets_without_issued,
+      (SELECT count(*)::int FROM ticket_events WHERE action = 'ISSUED') AS issued,
+      (SELECT count(*)::int FROM tickets) AS tickets,
+      (SELECT count(*)::int FROM ticket_events WHERE event_id IS NULL OR occurred_at IS NULL) AS missing_generated`);
+    assert.deepEqual(mismatch, { tickets_without_issued: 0, issued: mismatch.tickets, tickets: mismatch.tickets, missing_generated: 0 });
+    const any = await one('SELECT ticket_id FROM tickets LIMIT 1');
+    const fk = (error) => error.code === '23503';
+    await assert.rejects(pool.query(`INSERT INTO ticket_events (ticket_id, actor_user_id, action, from_status, to_status)
+      VALUES ($1, $2, 'ISSUED', NULL, 'WAITING')`, [randomUUID(), IDS.repA]), fk);
+    await assert.rejects(pool.query(`INSERT INTO ticket_events (ticket_id, actor_user_id, action, from_status, to_status)
+      VALUES ($1, $2, 'ISSUED', NULL, 'WAITING')`, [any.ticket_id, randomUUID()]), fk);
+    await assert.rejects(pool.query(`INSERT INTO ticket_events (ticket_id, actor_user_id, action, from_status, to_status)
+      VALUES ($1, $2, 'CALLED', NULL, 'CALLED')`, [any.ticket_id, IDS.staff]), (error) => error.code === '23514');
+    await assert.rejects(pool.query('DELETE FROM tickets WHERE ticket_id = $1', [any.ticket_id]), fk); // history is not cascaded away
   });
 
   await t.test('DB constraints hold even when the service is bypassed', async () => {
