@@ -15,10 +15,10 @@
   sessionId, patientId, number, status, lastCalledAt, createdAt, updatedAt.
   Thời gian là UTC ISO 8601. `waitingAhead` là số phiếu WAITING cùng phiên có
   number nhỏ hơn; null khi phiếu không WAITING. Đây không phải thời gian chờ.
-- **Chưa có:**
-  - Trả lại phiếu cũ khi gửi lại cùng `requestId` (2.7). Ở Sprint 1, trùng
-    (người gửi, requestId) trả 409 `IDEMPOTENCY_CONFLICT`.
-  - 004 và helper TicketEvent thật, chờ 1.19.
+- **Chưa có:** trả lại phiếu cũ khi gửi lại cùng `requestId` (2.7). Ở Sprint 1,
+  trùng (người gửi, requestId) trả 409 `IDEMPOTENCY_CONFLICT`.
+- Migration `004_ticket_events.sql` đúng DDL Trực bàn giao trong
+  `docs/architecture/ticket-event.md`.
 
 ## Mã lỗi
 
@@ -46,37 +46,35 @@ Body lỗi luôn là `{error: {code, message, details?}}`. Mọi phản hồi c�
   cùng một câu SQL.
 - `ticket.dto.js`, `ticket.errors.js`: DTO, TicketView và lỗi nghiệp vụ.
 
-## Ghép vào app chung (Trực)
+## Ghép vào app chung
 
-`db`, `withTransaction`, `appendTicketEvent` là đầu ra của 1.19.
-`authenticate`, `patientAccess` là đầu ra của Hưng.
+Router đã được gắn trong `server/src/app/routes.js` tại `/api/v1/tickets`, cùng
+PR 1.8. Cần Trực rà lại phần này.
 
 ```js
-import { createTicketRepository } from '../modules/tickets/ticket.repository.js';
-import { createTicketIssueService } from '../modules/tickets/ticket-issue.service.js';
-import { createTicketQueryService } from '../modules/tickets/ticket-query.service.js';
-import { createTicketRouter } from '../modules/tickets/ticket.routes.js';
-
-const issueService = createTicketIssueService({
-  db, withTransaction, createRepository: createTicketRepository, patientAccess, appendTicketEvent,
-});
-const queryService = createTicketQueryService({
-  db, createRepository: createTicketRepository, patientAccess,
-});
-app.use('/api/v1/tickets', createTicketRouter({ issueService, queryService, authenticate }));
+const patientAccess = createPatientAccessService({ repository: createPatientAccessRepository(pool) });
+router.use('/tickets', createTicketRouter({
+  issueService: createTicketIssueService({
+    db: pool, withTransaction, createRepository: createTicketRepository, patientAccess, appendTicketEvent,
+  }),
+  queryService: createTicketQueryService({ db: pool, createRepository: createTicketRepository, patientAccess }),
+  authenticate,
+}));
 ```
 
-- Đăng ký `express.json()` trước router và error handler chung sau router.
+- `withTransaction(pool, fn)` và `appendTicketEvent(client, event)` là helper
+  thật của Trực (1.19). Mọi bước cấp số dùng cùng client của giao dịch.
+- `no-store`, kiểm tra Origin, parser JSON và error handler 500 do app chung lo.
+  Router của mô đun cũng tự đặt `no-store`.
 - Thiếu `authenticate` hoặc một service thì router báo lỗi ngay khi khởi tạo.
   Không có chế độ bỏ qua xác thực.
-- **Giao kèo đang chờ Trực xác nhận:**
-  - `withTransaction(fn)` chạy `fn(client)` trong một giao dịch: thành công thì
-    COMMIT, `fn` ném lỗi thì ROLLBACK rồi ném lại lỗi đó.
-  - `appendTicketEvent(client, {ticketId, actorUserId, action, fromStatus, toStatus})`
-    ghi trên chính `client` đó và không tự commit.
-  - Nếu tên hoặc tham số khác, mình sẽ sửa ở `task/1.7-r2`.
-- Error handler chung nên trả 400 `VALIDATION_ERROR` kèm `no-store` cho lỗi
-  parse JSON. Xem `docs/testing/cases/1-8.md`.
+
+### Migration
+
+Chạy `npm run db:migrate` trong `server/`. Runner áp dụng 001 → 002 → 003 →
+004 theo thứ tự và ghi lịch sử. Không sửa 003 và 004 sau khi đã áp dụng trên
+main; thay đổi sau này dùng số mới. `scaffold.test.js` giữ danh sách
+`MIGRATIONS`; task nào thêm migration thì bổ sung tên tệp vào danh sách này.
 
 ## Dùng cho giao diện người bệnh (Đạt, 1.14)
 
@@ -105,28 +103,24 @@ app.use('/api/v1/tickets', createTicketRouter({ issueService, queryService, auth
 
 ## Kiểm thử và chạy lại
 
-Trong `server/`, cần Express, pg và DB test riêng có quyền tạo schema. Các test
-tự tạo schema `mq_tickets_test_<UUID>` / `mq_tickets_api_<UUID>` và xóa sau khi
-chạy. Thiếu `TEST_DATABASE_URL` thì test tích hợp ghi SKIP, không được tính là
-đạt.
+Trong `server/`, sau `npm ci`, cần DB test riêng có quyền tạo schema:
 
 ```bash
-node --test src/modules/tickets/__tests__/*.test.js
-TEST_DATABASE_URL='postgresql://USER:PASSWORD@localhost:5432/mediqueue_test' \
-node --test tests/integration/tickets.test.js tests/integration/tickets.api.test.js
+TEST_DATABASE_URL='postgresql://USER:PASSWORD@localhost:5432/mediqueue_test' npm test
 ```
 
-Header `x-test-actor`, `withTransaction` và `test_ticket_events` trong test chỉ
-là bản thay thế. Không dùng chúng trong app thật.
+Test tự tạo schema `mq_tickets_test_<UUID>` / `mq_tickets_api_<UUID>` và xóa
+sau khi chạy. Thiếu `TEST_DATABASE_URL` thì test tích hợp ghi SKIP, không được
+tính là đạt. Test API chạy trên `createApp` thật, đăng nhập bằng tài khoản
+seed. Chuyển trạng thái phiếu và phiên trong test là SQL fixture.
 
 Kết quả: `docs/testing/cases/1-7.md`, `docs/testing/cases/1-8.md`.
 
 ## Điều kiện bàn giao và nghiệm thu
 
 Trước khi đóng 1.7 và 1.8:
-- Ghép 004 và helper thật (1.19), chạy lại DB-01, DB-06, DB-11.
-- Ghép router vào app chung với cookie thật của Hưng.
-- Hưng review; An merge; kiểm tra lại trên main.
+- Hưng review cả hai PR; Trực rà `routes.js` và `scaffold.test.js`.
+- An merge 1.7 trước rồi tới 1.8; chạy lại `npm test` trên main.
 - Đạt xác nhận đã gọi được API ở 1.14.
 
-Không đóng task chỉ vì test với bản thay thế đã đạt.
+Không đóng task chỉ vì test tự chạy đã đạt; cần review và kiểm tra lại trên main.
