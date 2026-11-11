@@ -7,8 +7,10 @@ import { requireStaff } from '../shared/middleware/require-staff.js';
 import { createSessionRepository } from '../modules/sessions/session.repository.js';
 import { createSessionService } from '../modules/sessions/session.service.js';
 import { createSessionRouter } from '../modules/sessions/session.routes.js';
+import { createQueueService } from '../modules/queue/queue.service.js';
+import { createQueueRouter } from '../modules/queue/queue.routes.js';
 
-export function createRoutes({ pool }) {
+export function createRoutes({ pool, noShowTimeoutSeconds }) {
   const router = Router();
   router.get('/health', async (_req, res) => {
     try {
@@ -23,6 +25,17 @@ export function createRoutes({ pool }) {
   router.use('/auth', createAuthRouter({ authService: createAuthService({ repository }), authenticate }));
   router.use('/sessions', createSessionRouter({
     sessionService: createSessionService({ repository: createSessionRepository(pool) }),
+    authenticate,
+    requireStaff,
+  }));
+    // Tái sử dụng pool, cấu hình và quyền từ hạ tầng chung.
+  const queueService = createQueueService({
+    pool,
+    noShowTimeoutSeconds,
+  });
+
+  router.use('/queue', createQueueRouter({
+    queueService,
     authenticate,
     requireStaff,
   }));

@@ -19,7 +19,10 @@ export function createApp({ pool, config }) {
   });
   app.locals.sessionStore = sessionMiddleware.store;
   app.use(sessionMiddleware);
-  app.use('/api/v1', createRoutes({ pool }));
+  app.use('/api/v1', createRoutes({
+    pool,
+    noShowTimeoutSeconds: config.noShowTimeoutSeconds,
+  }));
   app.use((_req, res) => res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Không tìm thấy API.' } }));
   app.use(errorHandler);
   return app;
