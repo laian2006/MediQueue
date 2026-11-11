@@ -7,6 +7,9 @@ import { requireStaff } from '../shared/middleware/require-staff.js';
 import { createSessionRepository } from '../modules/sessions/session.repository.js';
 import { createSessionService } from '../modules/sessions/session.service.js';
 import { createSessionRouter } from '../modules/sessions/session.routes.js';
+import { createPatientAccessRepository } from '../modules/patients/patient-access.repository.js';
+import { createPatientAccessService } from '../modules/patients/patient-access.service.js';
+import { createPatientRouter } from '../modules/patients/patient.routes.js';
 
 export function createRoutes({ pool }) {
   const router = Router();
@@ -21,6 +24,10 @@ export function createRoutes({ pool }) {
   const repository = createAuthRepository(pool);
   const authenticate = createAuthenticate({ userRepository: repository });
   router.use('/auth', createAuthRouter({ authService: createAuthService({ repository }), authenticate }));
+  router.use('/patients', createPatientRouter({
+    patientAccessService: createPatientAccessService({ repository: createPatientAccessRepository(pool) }),
+    authenticate,
+  }));
   router.use('/sessions', createSessionRouter({
     sessionService: createSessionService({ repository: createSessionRepository(pool) }),
     authenticate,
