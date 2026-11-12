@@ -4,6 +4,7 @@ import { http } from '../shared/api/http.js';
 import PatientPage from '../features/patient/PatientPage.jsx';
 import StaffPage from '../features/staff/StaffPage.jsx';
 import LoginPage from '../features/auth/LoginPage.jsx';
+import SessionPanel from '../features/sessions/SessionPanel.jsx';
 
 function HomePage() {
   const [status, setStatus] = useState('loading');
@@ -36,15 +37,12 @@ export default function AppRoutes() {
   return <Routes>
     <Route path="/" element={<HomePage />} />
     <Route path="/login" element={<LoginPage />} />
-    {/* Đích sau đăng nhập. Hai màn hình này vẫn dùng mock mặc định đến khi Đạt (1.14) và Trung (1.17) nối API thật. */}
+    {/* Đạt nối luồng người bệnh ở 1.14 và Trung nối luồng gọi số ở 1.17. */}
     <Route path="/patient" element={<>
       <p className="app-demo-note">Dữ liệu mô phỏng, chưa nối API thật (task 1.14).</p>
       <PatientPage />
     </>} />
-    <Route path="/staff" element={<>
-      <p className="app-demo-note">Dữ liệu mô phỏng, chưa nối API thật (task 1.17).</p>
-      <StaffPage />
-    </>} />
+    <Route path="/staff" element={<StaffPage sessionPanel={<SessionPanel />} />} />
     <Route path="/patient-demo" element={<>
       <p className="app-demo-note">Bản xem thử · Dữ liệu mô phỏng, không lưu vào hệ thống.</p>
       <PatientPage />
