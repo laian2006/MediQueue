@@ -78,6 +78,8 @@ main; thay đổi sau này dùng số mới. `scaffold.test.js` giữ danh sách
 
 ## Dùng cho giao diện người bệnh (Đạt, 1.14)
 
+- **Chọn hồ sơ:** lấy danh sách từ `GET /api/v1/patients` (Hưng, 1.5). Chỉ gửi
+  `patientId` có trong danh sách này; hồ sơ khác sẽ nhận 403.
 - **Lấy số:** sinh `requestId` (UUID v4) **một lần** cho mỗi lượt bấm, rồi gửi
   `{patientId, sessionId, requestId}`. Không gửi người tạo, số phiếu hay trạng
   thái. Khi thử lại cùng một lượt thì giữ nguyên `requestId`. Ở Sprint 1 việc

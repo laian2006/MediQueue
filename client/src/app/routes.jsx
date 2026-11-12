@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { Link, Route, Routes } from 'react-router-dom';
 import { http } from '../shared/api/http.js';
 import PatientPage from '../features/patient/PatientPage.jsx';
+import StaffPage from '../features/staff/StaffPage.jsx';
+import LoginPage from '../features/auth/LoginPage.jsx';
 
 function HomePage() {
   const [status, setStatus] = useState('loading');
@@ -24,6 +26,7 @@ function HomePage() {
           : 'Chưa kết nối được hệ thống. Vui lòng thử lại.'}</p>
       {status === 'error' && <button onClick={() => setAttempt((n) => n + 1)}>Thử lại</button>}
     </section>
+    <p><Link to="/login">Đăng nhập</Link></p>
     <p><Link to="/patient-demo">Xem thử giao diện người bệnh</Link></p>
     <p className="app-note">Bản xem thử dùng dữ liệu mô phỏng, không tạo phiếu đăng ký thật.</p>
   </main>;
@@ -32,6 +35,16 @@ function HomePage() {
 export default function AppRoutes() {
   return <Routes>
     <Route path="/" element={<HomePage />} />
+    <Route path="/login" element={<LoginPage />} />
+    {/* Đích sau đăng nhập. Hai màn hình này vẫn dùng mock mặc định đến khi Đạt (1.14) và Trung (1.17) nối API thật. */}
+    <Route path="/patient" element={<>
+      <p className="app-demo-note">Dữ liệu mô phỏng, chưa nối API thật (task 1.14).</p>
+      <PatientPage />
+    </>} />
+    <Route path="/staff" element={<>
+      <p className="app-demo-note">Dữ liệu mô phỏng, chưa nối API thật (task 1.17).</p>
+      <StaffPage />
+    </>} />
     <Route path="/patient-demo" element={<>
       <p className="app-demo-note">Bản xem thử · Dữ liệu mô phỏng, không lưu vào hệ thống.</p>
       <PatientPage />

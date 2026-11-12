@@ -1,0 +1,10 @@
+.login-page { max-width: 420px; margin: 3rem auto; padding: 0 1.25rem; line-height: 1.6; }
+.login-page h1 { margin-bottom: .25rem; }
+.login-hint { color: #526779; margin-top: 0; }
+.login-form { display: flex; flex-direction: column; gap: .5rem; background: #fff; padding: 1.25rem 1.5rem; border: 1px solid #dce5eb; border-radius: 12px; }
+.login-form label { font-weight: 700; }
+.login-form input { padding: .65rem .75rem; font-size: 1rem; border: 1px solid #9fb1bf; border-radius: 8px; }
+.login-form input:focus-visible, .login-form button:focus-visible { outline: 3px solid #185c65; outline-offset: 2px; }
+.login-form button { margin-top: .75rem; padding: .7rem 1rem; font-size: 1rem; font-weight: 700; color: #fff; background: #185c65; border: 0; border-radius: 8px; cursor: pointer; }
+.login-form button:disabled { background: #6b8a90; cursor: not-allowed; }
+.login-error { margin: .25rem 0 0; padding: .6rem .75rem; color: #7a1d1d; background: #fdecec; border: 1px solid #e6b3b3; border-radius: 8px; }

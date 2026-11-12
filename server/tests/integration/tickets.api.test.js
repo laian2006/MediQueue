@@ -244,6 +244,32 @@ test('WBS 1.8: ticket API on the shared app with real login and PostgreSQL', {
     assert.deepEqual(await counts(), before);
   });
 
+  await t.test('API-15 sprint 1 flow: choose an allowed patient from /patients, issue, reload finds the same ticket', async () => {
+    const fresh = await call('POST', '/sessions', 'staff_01', { json: {} }); // previous session is STOPPED
+    assert.equal(fresh.status, 409); // only one active session at a time (An, 1.1)
+    await pool.query(`UPDATE queue_sessions SET status = 'CLOSED', closed_by = opened_by, closed_at = CURRENT_TIMESTAMP,
+      updated_at = CURRENT_TIMESTAMP WHERE session_id = $1`, [sessionId]); // test data; real close is WBS 2.1
+    await pool.query(`UPDATE tickets SET status = 'COMPLETED', updated_at = CURRENT_TIMESTAMP
+      WHERE session_id = $1 AND status IN ('WAITING','CALLED','REGISTERING')`, [sessionId]);
+    const reopened = await call('POST', '/sessions', 'staff_01', { json: {} });
+    assert.equal(reopened.status, 201);
+    const newSession = reopened.body.data.sessionId;
+
+    const patients = await call('GET', '/patients', 'rep_b'); // Hưng's real API (1.5)
+    assert.equal(patients.status, 200);
+    const allowed = patients.body.data.map((p) => p.patientId).sort();
+    assert.deepEqual(allowed, [IDS.p1, IDS.p3].sort());
+    const chosen = patients.body.data.find((p) => p.patientId === IDS.p3);
+    const requestId = randomUUID();
+    const created = await call('POST', '/tickets', 'rep_b', { json: { patientId: chosen.patientId, sessionId: newSession, requestId } });
+    assert.equal(created.status, 201);
+    assert.equal(created.body.data.ticket.number, 1);
+    const reloaded = await call('GET', `/tickets/active?patientId=${chosen.patientId}&sessionId=${newSession}`, 'rep_b');
+    assert.deepEqual(reloaded.body.data, created.body.data);
+    const byId = await call('GET', `/tickets/${created.body.data.ticket.ticketId}`, 'rep_b');
+    assert.deepEqual(byId.body.data, created.body.data);
+  });
+
   await t.test('API-14 unexpected DB errors give the shared generic 500 without SQL detail', async () => {
     await pool.query('ALTER TABLE tickets RENAME TO tickets_hidden_for_test');
     try {
