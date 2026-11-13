@@ -13,3 +13,11 @@ export function toTicketDto(row) {
     updatedAt: iso(row.updated_at),
   };
 }
+
+// TicketView of contract v1.0: { ticket, waitingAhead }. waitingAhead is null unless WAITING.
+export function toTicketView(row) {
+  return {
+    ticket: toTicketDto(row),
+    waitingAhead: row.status === 'WAITING' ? row.waiting_ahead : null,
+  };
+}
