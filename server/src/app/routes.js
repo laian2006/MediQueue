@@ -10,6 +10,12 @@ import { createSessionRouter } from '../modules/sessions/session.routes.js';
 import { createPatientAccessRepository } from '../modules/patients/patient-access.repository.js';
 import { createPatientAccessService } from '../modules/patients/patient-access.service.js';
 import { createPatientRouter } from '../modules/patients/patient.routes.js';
+import { createTicketRepository } from '../modules/tickets/ticket.repository.js';
+import { createTicketIssueService } from '../modules/tickets/ticket-issue.service.js';
+import { createTicketQueryService } from '../modules/tickets/ticket-query.service.js';
+import { createTicketRouter } from '../modules/tickets/ticket.routes.js';
+import { withTransaction } from '../shared/db/transaction.js';
+import { appendTicketEvent } from '../modules/audit/append-ticket-event.js';
 
 export function createRoutes({ pool }) {
   const router = Router();
@@ -32,6 +38,18 @@ export function createRoutes({ pool }) {
     sessionService: createSessionService({ repository: createSessionRepository(pool) }),
     authenticate,
     requireStaff,
+  }));
+  // WBS 1.8 (Đức Anh): ticket issue/read. Access is checked per patientId via Hưng's service.
+  const ticketPatientAccess = createPatientAccessService({ repository: createPatientAccessRepository(pool) });
+  router.use('/tickets', createTicketRouter({
+    issueService: createTicketIssueService({
+      db: pool, withTransaction, createRepository: createTicketRepository,
+      patientAccess: ticketPatientAccess, appendTicketEvent,
+    }),
+    queryService: createTicketQueryService({
+      db: pool, createRepository: createTicketRepository, patientAccess: ticketPatientAccess,
+    }),
+    authenticate,
   }));
   return router;
 }
