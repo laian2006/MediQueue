@@ -4,6 +4,7 @@ import { http } from '../shared/api/http.js';
 import PatientPage from '../features/patient/PatientPage.jsx';
 import { patientMockApi } from '../features/patient/mocks/patient.mock.js';
 import StaffPage from '../features/staff/StaffPage.jsx';
+import SessionPanel from "../features/sessions/SessionPanel.jsx";
 import LoginPage from '../features/auth/LoginPage.jsx';
 
 function HomePage() {
@@ -38,10 +39,7 @@ export default function AppRoutes() {
     <Route path="/" element={<HomePage />} />
     <Route path="/login" element={<LoginPage />} />
     <Route path="/patient" element={<PatientPage key="patient" />} />
-    <Route path="/staff" element={<>
-      <p className="app-demo-note">Dữ liệu mô phỏng, chưa nối API thật (task 1.17).</p>
-      <StaffPage />
-    </>} />
+    <Route path="/staff" element={<StaffPage sessionPanel={<SessionPanel />} />} />
     <Route path="/patient-demo" element={<PatientPage key="patient-demo" api={patientMockApi} demo />} />
     <Route path="*" element={<main className="app-home"><h1>Không tìm thấy trang</h1><Link to="/">Về trang chủ</Link></main>} />
   </Routes>;

@@ -1,4 +1,4 @@
-# Mô đun phiên — task 1.1 của An
+# Mô đun phiên — task 1.1 và 1.2 của An
 
 ## Phạm vi đã triển khai
 
@@ -6,7 +6,14 @@
 - `GET /api/v1/sessions/current`: tài khoản đã xác thực đọc phiên OPEN/STOPPED, không có trả `200 {"data":null}`.
 - `POST /api/v1/sessions`: chỉ STAFF mở một phiên OPEN, bộ đếm 0; trả 201. Còn OPEN hoặc STOPPED trả `409 SESSION_ALREADY_ACTIVE`.
 - Hai API dùng DTO sáu trường: sessionId, status, lastIssuedNumber, openedAt, stoppedAt, closedAt. Thời gian UTC ISO 8601; thời gian chưa có là null.
-- Chưa có giao diện (1.2) hoặc API ngừng/đóng (2.1). Chuyển trạng thái trong kiểm thử chỉ là dữ liệu thử.
+- Task 1.2 ghép `SessionPanel` vào `/staff` qua prop `sessionPanel` của `StaffPage`. Thao tác ngừng và đóng phiên thuộc task 2.1/2.2.
+
+## Giao diện quản lý phiên (1.2)
+
+- `client/src/features/sessions/session.api.js` xác minh vai trò bằng `/auth/me` và dùng `http.js` để đọc `/sessions/current` hoặc mở bằng `POST /sessions`. PostgreSQL và middleware phía server quyết định kết quả.
+- Nhân viên mở được phiên khi máy chủ trả `data: null`. Panel đọc lại phiên khi bấm **Tải lại phiên** hoặc quay lại cửa sổ. Khi bị 409 hoặc mất phản hồi mở phiên, panel đọc lại trạng thái và chỉ báo mở thành công sau khi nhận phản hồi POST thành công.
+- Khi ghép 1.17, đặt `<SessionPanel onSessionChange={refresh} />` trong `StaffPage` và bỏ panel tĩnh khỏi route `/staff`. `refresh` là hàm đọc lại phiên và hàng đợi của quầy. Panel gọi callback sau khi máy chủ xác nhận mở phiên. Giao diện hàng đợi tại thời điểm bàn giao 1.2 vẫn là mock 1.16.
+- Xem [ca thử 1.2](../testing/cases/1-2.md) để chạy lại bằng tài khoản giả lập và PostgreSQL riêng.
 
 ## Vì sao không thể mở trùng
 
