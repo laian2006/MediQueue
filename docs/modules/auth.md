@@ -1,4 +1,4 @@
-# Mô đun xác thực và quyền hồ sơ — task 1.4 của Hưng
+# Mô đun xác thực và quyền hồ sơ — task 1.4 và 1.5 của Hưng
 
 ## Phạm vi đã triển khai
 
@@ -6,7 +6,8 @@
 - Seed giả lập `database/seeds/001_identity.sql`: 1 STAFF, 2 REPRESENTATIVE, 1 hồ sơ dùng chung, mỗi đại diện thêm 1 hồ sơ riêng.
 - `POST /api/v1/auth/login` và `GET /api/v1/auth/me` (server session, cookie `mediqueue.sid`).
 - Middleware dùng chung `authenticate.js`, `require-staff.js` và hàm quyền `patients/patient-access.service.js`.
-- Chưa làm: `POST /auth/logout` (task 2.5), `GET /patients` + `LoginPage` (task 1.5), kiểm tra Origin và cấu hình app chung (Trực, 1.19). Chưa đánh dấu task Done.
+- Task 1.5: `GET /api/v1/patients` (`patient.routes.js`) và `LoginPage` ở `client/src/features/auth`. Điều hướng sau đăng nhập: REPRESENTATIVE → `/patient`, STAFF → `/staff`; hai màn hình này vẫn dùng mock đến khi Đạt (1.14) và Trung (1.17) nối API thật.
+- Chưa làm: `POST /auth/logout` (task 2.5). Kiểm tra Origin và cấu hình app chung do Trực làm ở 1.19. Chưa đánh dấu task Done.
 
 ## Tài khoản thử (chỉ dùng cho DB thử/demo)
 
@@ -32,6 +33,7 @@ node -e "import('./src/modules/auth/password.js').then(async m => console.log(aw
 |---|---|---|---|
 | POST | `/api/v1/auth/login` | công khai | 200 `{data:{user, expiresAt}}` + cookie |
 | GET | `/api/v1/auth/me` | đã đăng nhập | 200 `{data:{userId, displayName, role}}` |
+| GET | `/api/v1/patients` | REPRESENTATIVE | 200 `{data:[{patientId, code, displayName}]}`; chưa có hồ sơ thì `data: []` |
 
 Đầu vào login: JSON `{username, password}`, không nhận trường khác. Lỗi: 400 `VALIDATION_ERROR` (sai dạng); 401 `INVALID_CREDENTIALS` (sai tên hoặc mật khẩu, cùng một thông báo cho cả hai trường hợp); 401 `UNAUTHENTICATED` (chưa đăng nhập, hết hạn, user không còn tồn tại). Phản hồi `Cache-Control: no-store`.
 
@@ -101,3 +103,30 @@ Thiếu `TEST_DATABASE_URL` thì test ghi SKIP, không được báo là đã pa
 ## Điều kiện để Done
 
 Chạy lại test trên PostgreSQL thật và khung chung sau khi Trực bàn giao 1.19; An review; gửi hợp đồng xác thực/quyền cho An, Đức Anh, Hoàng Anh, Đạt; kiểm tra với cookie thật qua store PostgreSQL và trình duyệt.
+
+## Danh sách hồ sơ và đăng nhập trên giao diện — task 1.5
+
+`GET /api/v1/patients`: `userId` lấy từ phiên server (`req.user`), không đọc từ query/body/header. Chỉ trả `patientId`, `code`, `displayName`, sắp theo `code`. Lỗi: 401 `UNAUTHENTICATED` (chưa đăng nhập hoặc hết hạn), 403 `FORBIDDEN` (STAFF không có quyền đại diện). Phản hồi `Cache-Control: no-store`. Hai đại diện chung P001 cùng thấy một `patientId`.
+
+Hồ sơ ngoài quyền: hợp đồng v1.0 không có API đọc một hồ sơ riêng lẻ, nên việc từ chối được kiểm tra bằng hàm dùng chung `assertCanAccessPatient` (403 cho hồ sơ ngoài quyền hoặc không tồn tại, 400 cho patientId sai dạng), có test ở `tests/integration/patients.test.js`.
+
+Giao diện (`client/src/features/auth`):
+
+- `auth.api.js`: `authApi.login/me` và `patientsApi.list()`, đều qua `http.js` (cookie `credentials: 'include'`).
+- `LoginPage.jsx`: nhãn rõ, báo lỗi bằng chữ (sai mật khẩu → "Tên đăng nhập hoặc mật khẩu không đúng."), khóa nút khi đang gửi, xóa ô mật khẩu khi lỗi.
+- `auth.logic.js`: `homeFor(role)`, `validateLoginForm`, `loginErrorMessage`, `isUnauthenticated` (test bằng `node --test`).
+
+Bàn giao cho Đạt (chọn hồ sơ trong `PatientPage`):
+
+- Gọi `patientsApi.list()` thay cho `api.getPatients()` mock; dữ liệu nằm trong `response.data`.
+- Danh sách rỗng là `200` với `[]`: giải thích rõ và không cho lấy số.
+- Phản hồi 401 (hết phiên 8 giờ hoặc chưa đăng nhập): dùng `isUnauthenticated(error)` và đưa người dùng về `/login`, không hiển thị dữ liệu cũ.
+
+Chạy test 1.5 từ thư mục `server`:
+
+```bash
+node --test src/modules/patients/__tests__/patient.routes.test.js
+TEST_DATABASE_URL='postgresql://USER:PASSWORD@localhost:5432/mediqueue_test' node --test tests/integration/patients.test.js
+```
+
+và từ `client`: `npm test`. Kết quả ghi ở `docs/testing/cases/1-5.md`.

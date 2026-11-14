@@ -2,6 +2,18 @@ const TICKET_COLUMNS = `
   ticket_id, session_id, patient_id, number, status, last_called_at, created_at, updated_at
 `;
 
+// waiting_ahead: WAITING tickets of the same session with a smaller number; null unless WAITING.
+// CANCELLED/NO_SHOW/COMPLETED and CALLED/REGISTERING are never counted.
+const VIEW_SELECT = `
+  SELECT t.ticket_id, t.session_id, t.patient_id, t.number, t.status,
+         t.last_called_at, t.created_at, t.updated_at,
+         CASE WHEN t.status = 'WAITING' THEN (
+           SELECT count(*)::int FROM tickets w
+           WHERE w.session_id = t.session_id AND w.status = 'WAITING' AND w.number < t.number
+         ) END AS waiting_ahead
+  FROM tickets t
+`;
+
 /**
  * `db` is either the shared pool or the client of an open transaction.
  * Issue steps must all run on the SAME transaction client (lock, counter, insert, event).
@@ -42,6 +54,19 @@ export function createTicketRepository(db) {
         RETURNING last_issued_number
       `, [sessionId]);
       return result.rows[0]?.last_issued_number ?? null;
+    },
+
+    // Reads (WBS 1.8): ticket and waitingAhead come from ONE statement, so they share a snapshot.
+    async findViewById(ticketId) {
+      const result = await db.query(`${VIEW_SELECT} WHERE t.ticket_id = $1`, [ticketId]);
+      return result.rows[0] ?? null;
+    },
+
+    async findActiveView(sessionId, patientId) {
+      const result = await db.query(`${VIEW_SELECT}
+        WHERE t.session_id = $1 AND t.patient_id = $2
+          AND t.status IN ('WAITING', 'CALLED', 'REGISTERING')`, [sessionId, patientId]);
+      return result.rows[0] ?? null;
     },
 
     async insertWaiting({ sessionId, patientId, issuedByUserId, requestId, number }) {
