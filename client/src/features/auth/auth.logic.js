@@ -20,7 +20,7 @@ export function loginErrorMessage(error) {
   return 'Không đăng nhập được. Vui lòng kiểm tra kết nối và thử lại.';
 }
 
-// Phiên hết hạn hoặc chưa đăng nhập: màn hình khác dùng hàm này để đưa người dùng về /login.
+// Phiên hết hạn hoặc chưa đăng nhập: màn hình khác dùng hàm này để báo cần đăng nhập kèm đường dẫn về /login (Sprint 1).
 export function isUnauthenticated(error) {
   return error?.status === 401;
 }
