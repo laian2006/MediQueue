@@ -96,16 +96,19 @@ cả khi mở URL trực tiếp.
 
 ## Ca từ chối cần kiểm thử
 
+Các ca "1.17 thật" đã chạy bằng `tests/e2e/staff-flow.spec.js` trên Express và
+PostgreSQL; số ca E2E ở cột cuối theo `docs/testing/cases/1-17.md`.
+
 | Tình huống | Dữ liệu đầu | Kết quả mong đợi | Task |
 | --- | --- | --- | --- |
 | Quầy bận, thử gọi tiếp | Có CALLED hoặc REGISTERING | Nút khóa, ghi rõ lý do | 1.16 |
 | Hàng rỗng | Quầy rảnh, không có WAITING | Nút khóa, không có số giả | 1.16 |
 | Chưa có phiên | `data=null` | Không gọi API hàng chờ, nút khóa | 1.16 |
-| Cửa sổ khác vừa gọi | UI thấy quầy rảnh, API trả COUNTER_BUSY | Báo từ chối, tải lại thấy lượt thật | 1.16 mock; 1.17 thật |
-| Phiếu cuối vừa bị hủy | UI thấy còn phiếu, API trả QUEUE_EMPTY | Báo từ chối, tải lại thấy hàng rỗng | 1.16 mock; 1.17 thật |
-| Bấm hai lần nhanh | Quầy rảnh, còn phiếu | Một yêu cầu, một thông báo thành công | 1.16 mock; 1.17 thật |
-| Tài khoản thường | REPRESENTATIVE (`rep_a`) mở `/staff` | 403 `FORBIDDEN`, không thấy hàng chờ, không vận hành được quầy | 1.16 mock; 1.17 thật |
-| Hết phiên đăng nhập | Cookie hết hạn khi bấm gọi | 401 `UNAUTHENTICATED`, không báo "chưa có xác nhận", bỏ dữ liệu quầy | 1.16 mock; 1.17 thật |
+| Cửa sổ khác vừa gọi | UI thấy quầy rảnh, API trả COUNTER_BUSY | Báo từ chối, tải lại thấy lượt thật | 1.16 mock; 1.17 thật (E2E-8) |
+| Phiếu cuối vừa bị hủy | UI thấy còn phiếu, API trả QUEUE_EMPTY | Báo từ chối, tải lại thấy hàng rỗng | 1.16 mock; 1.17 thật (E2E-5) |
+| Bấm hai lần nhanh | Quầy rảnh, còn phiếu | Một yêu cầu, một thông báo thành công | 1.16 mock; 1.17 thật (E2E-7) |
+| Tài khoản thường | REPRESENTATIVE (`rep_a`) mở `/staff` | 403 `FORBIDDEN`, không thấy hàng chờ, không vận hành được quầy | 1.16 mock; 1.17 thật (E2E-9) |
+| Hết phiên đăng nhập | Cookie hết hạn khi bấm gọi | 401 `UNAUTHENTICATED`, không báo "chưa có xác nhận", bỏ dữ liệu quầy | 1.16 mock; 1.17 thật (E2E-4) |
 
 ## Ranh giới và bàn giao
 
@@ -118,6 +121,12 @@ cả khi mở URL trực tiếp.
 - Không sửa auth, FIFO, API phiên, routes chung hoặc khung app thay chủ mô đun.
 
 ## Câu hỏi cần chốt
+
+Đã chốt: An trả lời cả bốn câu ở `docs/design/staff/design-decisions.md`
+(mục 1–4). Màn hình quầy chỉ hiện số theo `TicketView` v1.0; SessionPanel gọi
+`onSessionChange()`; polling 3 giây, bỏ lượt khi lần trước chưa xong; lỗi đọc từ
+`ApiError` của `http.js`. Task 1.17 đã triển khai theo các quyết định này
+(`docs/testing/cases/1-17.md`). Nội dung gốc giữ lại bên dưới để đối chiếu.
 
 Theo mẫu Tên — WBS — vấn đề — ảnh hưởng — phương án xử lý.
 
@@ -138,7 +147,7 @@ Theo mẫu Tên — WBS — vấn đề — ảnh hưởng — phương án xử
 
 ## Phần còn lại của task 1.18
 
-- An duyệt user stories/AC và trả lời các câu hỏi trên.
+- An duyệt user stories/AC (bốn câu hỏi trên đã được trả lời).
 - Cập nhật tài liệu mô đun theo phần đã tích hợp.
 - Trung review task 1.19 và 1.20 của Trực; xử lý review phần mình.
 - Kiểm tra tích hợp, planning, review và retrospective có bằng chứng.
