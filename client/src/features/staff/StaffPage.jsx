@@ -1,13 +1,17 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { cloneElement, isValidElement, useCallback, useEffect, useRef, useState } from 'react';
 import CurrentTicket from './components/CurrentTicket.jsx';
 import WaitingList from './components/WaitingList.jsx';
-import { staffMockApi } from './mocks/staff.mock.js';
+import { staffApi } from './staff.api.js';
 import './staff.css';
+
+// Chốt thiết kế màn hình quầy, mục 3: đọc lại mỗi 3 giây khi đang mở.
+const POLL_INTERVAL_MS = 3000;
 
 const callErrors = {
   COUNTER_BUSY: 'Máy chủ từ chối: quầy đang có lượt khác, có thể do cửa sổ khác vừa gọi. Màn hình được tải lại theo dữ liệu máy chủ.',
   QUEUE_EMPTY: 'Máy chủ từ chối: hàng chờ đã hết khi gửi yêu cầu. Màn hình được tải lại theo dữ liệu máy chủ.',
   INVALID_STATE: 'Máy chủ từ chối: trạng thái phiên hoặc phiếu đã thay đổi. Màn hình được tải lại theo dữ liệu máy chủ.',
+  NOT_FOUND: 'Máy chủ từ chối: phiên đăng ký không còn tồn tại. Màn hình được tải lại theo dữ liệu máy chủ.',
 };
 // Mã lỗi theo hợp đồng 1.4 (authenticate, requireStaff); không hiện dữ liệu quầy khi gặp hai mã này.
 const accessErrors = {
@@ -30,7 +34,8 @@ function callBlockedReason({ session, current, waiting, stale }) {
 }
 
 // sessionPanel là chỗ ghép SessionPanel của An (1.2); phần phiên không viết lại tại đây.
-export default function StaffPage({ api = staffMockApi, sessionPanel = null }) {
+// demo: chỉ dùng khi truyền mock vào api, để ghi rõ dữ liệu mô phỏng trên màn hình.
+export default function StaffPage({ api = staffApi, sessionPanel = null, demo = false }) {
   const [snapshot, setSnapshot] = useState(null);
   const [refreshing, setRefreshing] = useState(true);
   const [loadError, setLoadError] = useState('');
@@ -39,10 +44,13 @@ export default function StaffPage({ api = staffMockApi, sessionPanel = null }) {
   const [result, setResult] = useState(null);
   const submittingRef = useRef(false);
   const loadSeq = useRef(0);
+  const activeLoads = useRef(0);
 
-  const refresh = useCallback(async () => {
+  // silent: lượt polling, không bật trạng thái đang tải để màn hình không nhấp nháy.
+  const refresh = useCallback(async ({ silent = false } = {}) => {
     const seq = ++loadSeq.current;
-    setRefreshing(true);
+    activeLoads.current += 1;
+    if (!silent) setRefreshing(true);
     try {
       const { data: session } = await api.getCurrentSession();
       let waiting = [];
@@ -72,6 +80,7 @@ export default function StaffPage({ api = staffMockApi, sessionPanel = null }) {
         setLoadError('Không tải được trạng thái quầy.');
       }
     } finally {
+      activeLoads.current -= 1;
       if (seq === loadSeq.current) setRefreshing(false);
     }
   }, [api]);
@@ -84,6 +93,16 @@ export default function StaffPage({ api = staffMockApi, sessionPanel = null }) {
     refresh();
     return () => { loadSeq.current += 1; };
   }, [refresh]);
+
+  // Polling chỉ khi đã có dữ liệu; bỏ lượt nếu lần đọc trước hoặc thao tác gọi chưa xong; dừng khi rời màn hình.
+  const polling = Boolean(snapshot) && !accessError;
+  useEffect(() => {
+    if (!polling) return undefined;
+    const timer = setInterval(() => {
+      if (activeLoads.current === 0 && !submittingRef.current) refresh({ silent: true });
+    }, POLL_INTERVAL_MS);
+    return () => clearInterval(timer);
+  }, [polling, refresh]);
 
   const stale = Boolean(loadError);
   const blockedReason = snapshot ? callBlockedReason({ ...snapshot, stale }) : '';
@@ -118,11 +137,14 @@ export default function StaffPage({ api = staffMockApi, sessionPanel = null }) {
     refresh();
   }
 
+  // Chốt thiết kế, mục 2: SessionPanel gọi onSessionChange sau khi API xác nhận đổi phiên.
+  const panel = isValidElement(sessionPanel) ? cloneElement(sessionPanel, { onSessionChange: reload }) : sessionPanel;
+
   return (
     <main className="staff-page">
       <header className="staff-header">
         <a className="staff-brand" href="#staff-content" aria-label="MediQueue, đến nội dung chính">MediQueue<span>Vận hành quầy đăng ký</span></a>
-        <span className="staff-demo-label">Bản xem thử · Dữ liệu mô phỏng</span>
+        {demo && <span className="staff-demo-label">Bản xem thử · Dữ liệu mô phỏng</span>}
       </header>
 
       <div className="staff-content" id="staff-content">
@@ -132,6 +154,7 @@ export default function StaffPage({ api = staffMockApi, sessionPanel = null }) {
         {!snapshot && !refreshing && accessError && (
           <div className="staff-notice staff-notice--error" role="alert">
             <p>{accessError} Không hiển thị dữ liệu quầy.</p>
+            <a className="staff-link" href="/login">Đăng nhập</a>
             <button className="staff-button staff-button--secondary" onClick={reload}>Thử tải lại</button>
           </div>
         )}
@@ -144,7 +167,7 @@ export default function StaffPage({ api = staffMockApi, sessionPanel = null }) {
 
         {snapshot && (
           <>
-            {sessionPanel ?? (
+            {panel ?? (
               <section className="staff-session" aria-label="Phiên đăng ký">
                 <span className="staff-label">Phiên đăng ký</span>
                 <strong>{snapshot.session ? sessionLabels[snapshot.session.status] : 'Chưa có phiên'}</strong>
@@ -195,7 +218,7 @@ export default function StaffPage({ api = staffMockApi, sessionPanel = null }) {
           </>
         )}
 
-        <p className="staff-demo-note">Bản dựng task 1.16 dùng dữ liệu mô phỏng, chưa kết nối API và PostgreSQL. Thao tác không đổi phiếu thật.</p>
+        {demo && <p className="staff-demo-note">Bản xem thử dùng dữ liệu mô phỏng, không kết nối API và PostgreSQL. Thao tác không đổi phiếu thật.</p>}
       </div>
     </main>
   );

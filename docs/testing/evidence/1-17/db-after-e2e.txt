@@ -1,0 +1,8 @@
+ number | action | from_status | to_status | username 
+--------+--------+-------------+-----------+----------
+      1 | ISSUED |             | WAITING   | rep_a
+      2 | ISSUED |             | WAITING   | rep_a
+      3 | ISSUED |             | WAITING   | rep_b
+      1 | CALLED | WAITING     | CALLED    | staff_01
+(4 rows)
+

@@ -1,0 +1,59 @@
+
+> mediqueue-client@0.1.0 test
+> node --test --test-reporter=tap
+
+TAP version 13
+# Subtest: each role goes to its own area; unknown role goes home
+ok 1 - each role goes to its own area; unknown role goes home
+  ---
+  duration_ms: 0.9643
+  ...
+# Subtest: form validation asks for both fields; the password is not trimmed
+ok 2 - form validation asks for both fields; the password is not trimmed
+  ---
+  duration_ms: 0.2762
+  ...
+# Subtest: error messages: wrong credentials, bad input, forbidden origin, network
+ok 3 - error messages: wrong credentials, bad input, forbidden origin, network
+  ---
+  duration_ms: 0.2284
+  ...
+# Subtest: only 401 counts as unauthenticated
+ok 4 - only 401 counts as unauthenticated
+  ---
+  duration_ms: 0.6891
+  ...
+# Subtest: staff API uses the 1.11 endpoints through http.js with cookies
+ok 5 - staff API uses the 1.11 endpoints through http.js with cookies
+  ---
+  duration_ms: 17.9241
+  ...
+# Subtest: server rejections keep error.code for StaffPage
+ok 6 - server rejections keep error.code for StaffPage
+  ---
+  duration_ms: 6.0487
+  ...
+# Subtest: JSON, session credentials and AbortSignal are preserved
+ok 7 - JSON, session credentials and AbortSignal are preserved
+  ---
+  duration_ms: 49.3421
+  ...
+# Subtest: structured API failures and invalid JSON are errors, never success
+ok 8 - structured API failures and invalid JSON are errors, never success
+  ---
+  duration_ms: 1.9049
+  ...
+# Subtest: network errors propagate and 204 has no body
+ok 9 - network errors propagate and 204 has no body
+  ---
+  duration_ms: 0.4502
+  ...
+1..9
+# tests 9
+# suites 0
+# pass 9
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 213.4594
