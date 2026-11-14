@@ -69,6 +69,21 @@ export function createTicketRepository(db) {
       return result.rows[0] ?? null;
     },
 
+    async findTicketLocation(ticketId) {
+      const result = await db.query('SELECT session_id, patient_id FROM tickets WHERE ticket_id = $1', [ticketId]);
+      return result.rows[0] ?? null;
+    },
+
+    async cancelWaiting(ticketId, sessionId, patientId) {
+      const result = await db.query(`
+        UPDATE tickets
+        SET status = 'CANCELLED', updated_at = CURRENT_TIMESTAMP
+        WHERE ticket_id = $1 AND session_id = $2 AND patient_id = $3 AND status = 'WAITING'
+        RETURNING ${TICKET_COLUMNS}
+      `, [ticketId, sessionId, patientId]);
+      return result.rows[0] ?? null;
+    },
+
     async insertWaiting({ sessionId, patientId, issuedByUserId, requestId, number }) {
       const result = await db.query(`
         INSERT INTO tickets (session_id, patient_id, issued_by_user_id, request_id, number)

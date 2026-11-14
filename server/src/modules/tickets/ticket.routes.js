@@ -22,9 +22,10 @@ function handle(operation) {
  * - authenticate: Hưng's shared middleware; sets req.user = { userId, role, displayName }.
  * - issueService: createTicketIssueService(...) (WBS 1.7).
  * - queryService: createTicketQueryService(...).
+ * - cancelService: createTicketCancelService(...) (WBS 2.13).
  * express.json() must run before this router (shared app, WBS 1.19).
  */
-export function createTicketRouter({ issueService, queryService, authenticate }) {
+export function createTicketRouter({ issueService, queryService, cancelService, authenticate }) {
   // No fallback authentication: missing shared middleware must fail at startup.
   if (typeof authenticate !== 'function') {
     throw new TypeError('Shared authenticate middleware is required.');
@@ -33,6 +34,7 @@ export function createTicketRouter({ issueService, queryService, authenticate })
   if (typeof queryService?.getById !== 'function' || typeof queryService?.getActive !== 'function') {
     throw new TypeError('queryService is required.');
   }
+  if (typeof cancelService?.cancel !== 'function') throw new TypeError('cancelService is required.');
   const router = Router();
   router.use((_req, res, next) => {
     res.set('Cache-Control', 'no-store');
@@ -58,6 +60,14 @@ export function createTicketRouter({ issueService, queryService, authenticate })
   router.get('/:ticketId', authenticate, handle(async (req, res) => {
     const data = await queryService.getById(req.user, req.params.ticketId);
     res.status(200).json({ data });
+  }));
+
+  router.post('/:ticketId/cancel', authenticate, handle(async (req, res) => {
+    if (req.body !== undefined) {
+      throw new TicketError(400, 'VALIDATION_ERROR', 'Hủy phiếu không nhận dữ liệu gửi kèm.');
+    }
+    const data = await cancelService.cancel(req.user, req.params.ticketId);
+    res.json({ data });
   }));
 
   return router;
