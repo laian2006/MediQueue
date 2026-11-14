@@ -1,0 +1,128 @@
+# Mô đun phiếu — task 1.7 và 1.8 của Đức Anh
+
+## Phạm vi đã triển khai
+
+- Migration `database/migrations/003_tickets.sql` tạo bảng `tickets` theo ERD v1.0.
+- Cấp số trong một giao dịch (1.7): khóa `queue_sessions` → kiểm tra OPEN →
+  kiểm tra phiếu hoạt động → tăng `last_issued_number` → tạo WAITING → ghi
+  TicketEvent `ISSUED`.
+- `POST /api/v1/tickets`: chỉ REPRESENTATIVE có PatientAccess, body đúng
+  `{patientId, sessionId, requestId}`. Thành công trả 201 `{data: TicketView}`.
+- `GET /api/v1/tickets/{ticketId}`: đọc phiếu theo id, ở mọi trạng thái.
+- `GET /api/v1/tickets/active?patientId=&sessionId=`: phiếu WAITING, CALLED
+  hoặc REGISTERING của hồ sơ trong phiên. Không có thì trả `200 {data: null}`.
+- `TicketView = {ticket, waitingAhead}`. `ticket` có đúng 8 trường: ticketId,
+  sessionId, patientId, number, status, lastCalledAt, createdAt, updatedAt.
+  Thời gian là UTC ISO 8601. `waitingAhead` là số phiếu WAITING cùng phiên có
+  number nhỏ hơn; null khi phiếu không WAITING. Đây không phải thời gian chờ.
+- **Chưa có:** trả lại phiếu cũ khi gửi lại cùng `requestId` (2.7). Ở Sprint 1,
+  trùng (người gửi, requestId) trả 409 `IDEMPOTENCY_CONFLICT`.
+- Migration `004_ticket_events.sql` đúng DDL Trực bàn giao trong
+  `docs/architecture/ticket-event.md`.
+
+## Mã lỗi
+
+| HTTP | code | Khi nào |
+| --- | --- | --- |
+| 400 | VALIDATION_ERROR | Body/query/id sai, thiếu hoặc thừa trường; body không phải JSON |
+| 401 | UNAUTHENTICATED | Chưa đăng nhập |
+| 403 | FORBIDDEN | STAFF; hồ sơ ngoài PatientAccess (không trả trường nào của phiếu) |
+| 404 | NOT_FOUND | Không có phiên (`POST`) hoặc không có phiếu (`GET /{ticketId}`) |
+| 409 | INVALID_STATE | Phiên STOPPED/CLOSED (An chốt 04/11) |
+| 409 | ACTIVE_TICKET_EXISTS | Hồ sơ đã có phiếu hoạt động; `details.ticketId` là phiếu đó |
+| 409 | IDEMPOTENCY_CONFLICT | Sprint 1: cùng người gửi dùng lại requestId |
+
+Body lỗi luôn là `{error: {code, message, details?}}`. Mọi phản hồi của router
+đều có `Cache-Control: no-store`.
+
+## Phân lớp và vị trí tệp
+
+- `ticket.routes.js`: Router Express, kiểm tra JSON, mã HTTP và body.
+  `/active` được khai báo trước `/:ticketId`.
+- `ticket-issue.service.js`: luật cấp số và giao dịch (1.7).
+- `ticket-query.service.js`: đọc phiếu, quyền theo `patient_id` của phiếu.
+  Với `/active`, quyền được kiểm tra trước khi truy vấn.
+- `ticket.repository.js`: SQL tham số hóa. Phiếu và `waitingAhead` lấy trong
+  cùng một câu SQL.
+- `ticket.dto.js`, `ticket.errors.js`: DTO, TicketView và lỗi nghiệp vụ.
+
+## Ghép vào app chung
+
+Router đã được gắn trong `server/src/app/routes.js` tại `/api/v1/tickets`, cùng
+PR 1.8. Cần Trực rà lại phần này.
+
+```js
+const patientAccess = createPatientAccessService({ repository: createPatientAccessRepository(pool) });
+router.use('/tickets', createTicketRouter({
+  issueService: createTicketIssueService({
+    db: pool, withTransaction, createRepository: createTicketRepository, patientAccess, appendTicketEvent,
+  }),
+  queryService: createTicketQueryService({ db: pool, createRepository: createTicketRepository, patientAccess }),
+  authenticate,
+}));
+```
+
+- `withTransaction(pool, fn)` và `appendTicketEvent(client, event)` là helper
+  thật của Trực (1.19). Mọi bước cấp số dùng cùng client của giao dịch.
+- `no-store`, kiểm tra Origin, parser JSON và error handler 500 do app chung lo.
+  Router của mô đun cũng tự đặt `no-store`.
+- Thiếu `authenticate` hoặc một service thì router báo lỗi ngay khi khởi tạo.
+  Không có chế độ bỏ qua xác thực.
+
+### Migration
+
+Chạy `npm run db:migrate` trong `server/`. Runner áp dụng 001 → 002 → 003 →
+004 theo thứ tự và ghi lịch sử. Không sửa 003 và 004 sau khi đã áp dụng trên
+main; thay đổi sau này dùng số mới. `scaffold.test.js` giữ danh sách
+`MIGRATIONS`; task nào thêm migration thì bổ sung tên tệp vào danh sách này.
+
+## Dùng cho giao diện người bệnh (Đạt, 1.14)
+
+- **Chọn hồ sơ:** lấy danh sách từ `GET /api/v1/patients` (Hưng, 1.5). Chỉ gửi
+  `patientId` có trong danh sách này; hồ sơ khác sẽ nhận 403.
+- **Lấy số:** sinh `requestId` (UUID v4) **một lần** cho mỗi lượt bấm, rồi gửi
+  `{patientId, sessionId, requestId}`. Không gửi người tạo, số phiếu hay trạng
+  thái. Khi thử lại cùng một lượt thì giữ nguyên `requestId`. Ở Sprint 1 việc
+  thử lại vẫn nhận 409; từ 2.7 sẽ nhận lại phiếu cũ.
+- **409 `ACTIVE_TICKET_EXISTS`:** dùng `details.ticketId` để mở phiếu đang có,
+  không báo lỗi chung chung.
+- **Sau khi tải lại trang:** gọi `GET /active` cho hồ sơ đang chọn. `data: null`
+  nghĩa là chưa có phiếu hoạt động.
+- **Cập nhật định kỳ:** gọi `GET /{ticketId}`. Hiển thị `waitingAhead` khi phiếu
+  WAITING. Khi giá trị là null, hiển thị theo trạng thái (CALLED, REGISTERING,
+  COMPLETED, CANCELLED, NO_SHOW). Không tự tính vị trí ở trình duyệt.
+
+## Dùng cho FIFO và bảng công khai
+
+- **Hoàng Anh:**
+  - Index `ix_tickets_waiting (session_id, number) WHERE status = 'WAITING'`
+    phục vụ chọn số nhỏ nhất.
+  - `uq_tickets_counter_slot` chặn lượt thứ hai đang CALLED/REGISTERING trong
+    một phiên. Cần bạn xác nhận index này.
+  - Mọi chuyển trạng thái phải giữ `uq_tickets_active_patient`.
+- **Trực:** bảng công khai đọc truy vấn riêng, không tái dùng TicketView. Không
+  trả patientId hay người lấy số.
+
+## Kiểm thử và chạy lại
+
+Trong `server/`, sau `npm ci`, cần DB test riêng có quyền tạo schema:
+
+```bash
+TEST_DATABASE_URL='postgresql://USER:PASSWORD@localhost:5432/mediqueue_test' npm test
+```
+
+Test tự tạo schema `mq_tickets_test_<UUID>` / `mq_tickets_api_<UUID>` và xóa
+sau khi chạy. Thiếu `TEST_DATABASE_URL` thì test tích hợp ghi SKIP, không được
+tính là đạt. Test API chạy trên `createApp` thật, đăng nhập bằng tài khoản
+seed. Chuyển trạng thái phiếu và phiên trong test là SQL fixture.
+
+Kết quả: `docs/testing/cases/1-7.md`, `docs/testing/cases/1-8.md`.
+
+## Điều kiện bàn giao và nghiệm thu
+
+Trước khi đóng 1.7 và 1.8:
+- Hưng review cả hai PR; Trực rà `routes.js` và `scaffold.test.js`.
+- An merge 1.7 trước rồi tới 1.8; chạy lại `npm test` trên main.
+- Đạt xác nhận đã gọi được API ở 1.14.
+
+Không đóng task chỉ vì test tự chạy đã đạt; cần review và kiểm tra lại trên main.

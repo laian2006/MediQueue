@@ -25,18 +25,10 @@ test('WBS 1.20: public board on real PostgreSQL, anonymous access and privacy', 
     await admin.end();
   });
   await admin.query(`CREATE SCHEMA "${schema}"`);
-  pool = new pg.Pool({ connectionString: process.env.TEST_DATABASE_URL, options: `-c search_path=${schema},public` });
+  pool = new pg.Pool({ connectionString: process.env.TEST_DATABASE_URL, options: `-c search_path=${schema},pg_catalog` });
   await pool.query(await read('../../../database/migrations/001_identity.sql'));
   await pool.query(await read('../../../database/migrations/002_sessions.sql'));
-  // Until 1.7 merges, use an exact test-only copy of 003 from 3d570ca.
-  // This is NOT installed by db:migrate and does not claim real issue/call API integration.
-  let ticketSql;
-  try { ticketSql = await read('../../../database/migrations/003_tickets.sql'); }
-  catch (error) {
-    if (error.code !== 'ENOENT') throw error;
-    ticketSql = await read('../fixtures/public-board.tickets.sql');
-  }
-  await pool.query(ticketSql);
+  await pool.query(await read('../../../database/migrations/003_tickets.sql'));
   await pool.query(await read('../../../database/seeds/001_identity.sql'));
   app = createApp({ pool, config: {
     clientOrigin: 'http://localhost:5173', sessionSecret: 'test-only-secret-'.repeat(4),

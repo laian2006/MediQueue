@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import TicketCard from './components/TicketCard.jsx';
-import { patientMockApi } from './mocks/patient.mock.js';
+import { patientApi } from './patient.api.js';
 import './patient.css';
 
-export default function PatientPage({ api = patientMockApi }) {
+export default function PatientPage({ api = patientApi, demo = false }) {
   const [patients, setPatients] = useState([]);
   const [session, setSession] = useState(null);
   const [selectedId, setSelectedId] = useState('');
@@ -12,78 +13,121 @@ export default function PatientPage({ api = patientMockApi }) {
   const [ticketLoading, setTicketLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [pageError, setPageError] = useState('');
-  const [ticketError, setTicketError] = useState('');
+  const [accessError, setAccessError] = useState(null);
+  const [ticketError, setTicketError] = useState(null);
   const [reload, setReload] = useState(0);
+  const [ticketReload, setTicketReload] = useState(0);
   const pendingRequest = useRef(null);
   const submittingRef = useRef(false);
   const selectedPatient = patients.find((patient) => patient.patientId === selectedId);
+  const visibleTicket = ticketView?.ticket?.patientId === selectedId
+    && ticketView.ticket.sessionId === session?.sessionId ? ticketView : null;
 
   useEffect(() => {
-    let cancelled = false;
+    const controller = new AbortController();
+    const { signal } = controller;
     setLoading(true);
     setPageError('');
+    setAccessError(null);
+    setPatients([]);
+    setSession(null);
     setSelectedId('');
     setTicketView(null);
     pendingRequest.current = null;
 
-    Promise.all([api.getPatients(), api.getCurrentSession()])
+    Promise.all([api.getPatients({ signal }), api.getCurrentSession({ signal })])
       .then(([patientResponse, sessionResponse]) => {
-        if (cancelled) return;
+        if (signal.aborted) return;
         setPatients(patientResponse.data);
         setSession(sessionResponse.data);
       })
-      .catch(() => {
-        if (!cancelled) setPageError('Không tải được danh sách hồ sơ và phiên đăng ký. Vui lòng thử lại.');
+      .catch((error) => {
+        if (signal.aborted) return;
+        if (error.status === 401 || error.status === 403) setAccessError(error.status);
+        else setPageError('Không tải được danh sách hồ sơ và phiên đăng ký. Vui lòng thử lại.');
       })
-      .finally(() => { if (!cancelled) setLoading(false); });
+      .finally(() => { if (!signal.aborted) setLoading(false); });
 
-    return () => { cancelled = true; };
+    return () => controller.abort();
   }, [api, reload]);
 
   useEffect(() => {
-    let cancelled = false;
     setTicketView(null);
-    setTicketError('');
+    setTicketError(null);
     if (!selectedId || !session) {
       setTicketLoading(false);
       return;
     }
 
+    const controller = new AbortController();
+    const { signal } = controller;
     setTicketLoading(true);
-    api.getActiveTicket({ patientId: selectedId, sessionId: session.sessionId })
-      .then((response) => { if (!cancelled) setTicketView(response.data); })
-      .catch(() => { if (!cancelled) setTicketError('Không tải được phiếu của hồ sơ này. Vui lòng thử lại.'); })
-      .finally(() => { if (!cancelled) setTicketLoading(false); });
+    api.getActiveTicket({ patientId: selectedId, sessionId: session.sessionId }, { signal })
+      .then(({ data }) => { if (!signal.aborted) setTicketView(data); })
+      .catch((error) => {
+        if (signal.aborted) return;
+        if (error.status === 401 || error.status === 403) setAccessError(error.status);
+        else setTicketError({ message: 'Không tải được phiếu của hồ sơ này. Vui lòng thử lại.', retry: 'ticket' });
+      })
+      .finally(() => { if (!signal.aborted) setTicketLoading(false); });
 
-    return () => { cancelled = true; };
-  }, [api, selectedId, session, reload]);
+    return () => controller.abort();
+  }, [api, selectedId, session, ticketReload]);
 
   function selectPatient(event) {
     if (submittingRef.current) return;
     setSelectedId(event.target.value);
     setTicketView(null);
-    setTicketError('');
+    setTicketError(null);
     setTicketLoading(Boolean(event.target.value && session));
     pendingRequest.current = null;
   }
 
   async function issueTicket() {
-    if (submittingRef.current || ticketLoading || ticketView || !selectedPatient || session?.status !== 'OPEN') return;
+    if (submittingRef.current || !canIssue) return;
     submittingRef.current = true;
     setSubmitting(true);
-    setTicketError('');
-    // Một lần thử lại giữ nguyên body; nối http.js/API thật thuộc task 1.14.
-    pendingRequest.current ??= {
-      patientId: selectedId,
-      sessionId: session.sessionId,
-      requestId: crypto.randomUUID(),
-    };
+    setTicketError(null);
     try {
-      const response = await api.issueTicket(pendingRequest.current);
+      pendingRequest.current ??= {
+        patientId: selectedId,
+        sessionId: session.sessionId,
+        requestId: crypto.randomUUID(),
+      };
+      let response;
+      try {
+        response = await api.issueTicket(pendingRequest.current);
+      } catch (error) {
+        if (error.code !== 'ACTIVE_TICKET_EXISTS') throw error;
+
+        pendingRequest.current = null;
+        const scope = { patientId: selectedId, sessionId: session.sessionId };
+        response = error.details?.ticketId
+          ? await api.getTicket(error.details.ticketId)
+          : await api.getActiveTicket(scope);
+        const ticket = response.data?.ticket;
+        if (ticket && (ticket.patientId !== scope.patientId || ticket.sessionId !== scope.sessionId)) {
+          setTicketError({ message: 'Không xác nhận được phiếu của hồ sơ này. Vui lòng tải lại phiếu.', retry: 'ticket' });
+          return;
+        }
+      }
       setTicketView(response.data);
       pendingRequest.current = null;
-    } catch {
-      setTicketError('Chưa nhận được xác nhận lấy số. Vui lòng thử lại cùng thao tác.');
+    } catch (error) {
+      if (error.status === 401 || error.status === 403) {
+        pendingRequest.current = null;
+        setAccessError(error.status);
+      } else if (error.code === 'INVALID_STATE' || error.status === 404) {
+        pendingRequest.current = null;
+        setTicketError({ message: 'Thông tin phiên hoặc phiếu đã thay đổi. Vui lòng tải lại.', retry: 'page' });
+      } else if (error.status >= 400 && error.status < 500) {
+        pendingRequest.current = null;
+        setTicketError({ message: 'Máy chủ từ chối yêu cầu lấy số. Vui lòng tải lại phiếu.', retry: 'ticket' });
+      } else if (pendingRequest.current) {
+        setTicketError({ message: 'Chưa nhận được xác nhận lấy số. Vui lòng thử lại cùng thao tác.', retry: 'issue' });
+      } else {
+        setTicketError({ message: 'Chưa đọc được phiếu của hồ sơ này. Vui lòng tải lại phiếu.', retry: 'ticket' });
+      }
     } finally {
       submittingRef.current = false;
       setSubmitting(false);
@@ -91,13 +135,19 @@ export default function PatientPage({ api = patientMockApi }) {
   }
 
   const canIssue = selectedPatient && session?.status === 'OPEN'
-    && !loading && !ticketLoading && !submitting && !ticketView && !pageError && !ticketError;
+    && !loading && !ticketLoading && !submitting && !visibleTicket && !pageError && !accessError
+    && (!ticketError || ticketError.retry === 'issue');
+
+  function retryTicketLoad() {
+    if (ticketError.retry === 'page') setReload((value) => value + 1);
+    else setTicketReload((value) => value + 1);
+  }
 
   return (
     <main className="patient-page">
       <header className="patient-header">
         <a className="patient-brand" href="#patient-content" aria-label="MediQueue, đến nội dung chính">MediQueue<span>Đăng ký ngoại trú</span></a>
-        <span className="patient-demo-label">Bản xem thử · Dữ liệu mô phỏng</span>
+        {demo && <span className="patient-demo-label">Bản xem thử · Dữ liệu mô phỏng</span>}
       </header>
 
       <div className="patient-content" id="patient-content">
@@ -107,10 +157,16 @@ export default function PatientPage({ api = patientMockApi }) {
           <p>Chọn đúng hồ sơ để xem số thứ tự và trạng thái tại quầy.</p>
         </div>
 
-        {loading ? <p className="patient-notice" role="status">Đang tải hồ sơ và phiên đăng ký…</p> : pageError ? (
+        {loading ? <p className="patient-notice" role="status">Đang tải hồ sơ và phiên đăng ký…</p> : accessError ? (
+          <div className="patient-notice patient-notice--error" role="alert">
+            <p>{accessError === 401 ? 'Bạn cần đăng nhập để xem hồ sơ và phiếu đăng ký.' : 'Tài khoản không có quyền truy cập hồ sơ hoặc phiếu này.'}</p>
+            {accessError === 401 ? <Link to="/login">Đăng nhập</Link>
+              : <button className="patient-button patient-button--secondary" onClick={() => setReload((value) => value + 1)}>Tải lại hồ sơ</button>}
+          </div>
+        ) : pageError ? (
           <div className="patient-notice patient-notice--error" role="alert">
             <p>{pageError}</p>
-            <button className="patient-button patient-button--secondary" onClick={() => setReload(reload + 1)}>Thử tải lại</button>
+            <button className="patient-button patient-button--secondary" onClick={() => setReload((value) => value + 1)}>Thử tải lại</button>
           </div>
         ) : (
           <div className="patient-layout">
@@ -142,12 +198,12 @@ export default function PatientPage({ api = patientMockApi }) {
               <h2 id="patient-ticket-heading">Phiếu đăng ký</h2>
               {!selectedPatient ? <p className="patient-empty">Chọn hồ sơ ở bước 1 để xem phiếu hoặc lấy số.</p>
                 : ticketLoading ? <p className="patient-empty" role="status">Đang tải phiếu của {selectedPatient.code}…</p>
-                  : ticketView ? <TicketCard patient={selectedPatient} ticketView={ticketView} />
+                  : visibleTicket ? <TicketCard patient={selectedPatient} ticketView={visibleTicket} />
                     : !ticketError && <p className="patient-empty">{session ? 'Hồ sơ này chưa có phiếu hoạt động trong phiên.' : 'Chưa có phiên đăng ký để lấy hoặc xem phiếu hoạt động.'}</p>}
-              {ticketError && <p className="patient-notice patient-notice--error" role="alert">{ticketError}</p>}
-              {ticketError && !pendingRequest.current && <button className="patient-button patient-button--secondary" onClick={() => setReload(reload + 1)}>Thử tải lại</button>}
-              {selectedPatient && !ticketView && (
-                <button className="patient-button" onClick={issueTicket} disabled={!canIssue && !(pendingRequest.current && !submitting && !ticketLoading)}>
+              {ticketError && <p className="patient-notice patient-notice--error" role="alert">{ticketError.message}</p>}
+              {ticketError && ticketError.retry !== 'issue' && <button className="patient-button patient-button--secondary" onClick={retryTicketLoad}>Thử tải lại</button>}
+              {selectedPatient && !visibleTicket && (
+                <button className="patient-button" onClick={issueTicket} disabled={!canIssue}>
                   {submitting ? 'Đang lấy số…' : pendingRequest.current ? 'Thử lại lấy số' : 'Lấy số đăng ký'}
                 </button>
               )}
@@ -155,7 +211,7 @@ export default function PatientPage({ api = patientMockApi }) {
           </div>
         )}
 
-        <p className="patient-demo-note">Bản dựng task 1.13 dùng dữ liệu mô phỏng, chưa kết nối API và PostgreSQL. Thao tác không tạo phiếu thật.</p>
+        {demo && <p className="patient-demo-note">Dữ liệu xem thử không được lưu vào hệ thống.</p>}
       </div>
     </main>
   );

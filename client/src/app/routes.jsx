@@ -1,8 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Link, Route, Routes } from 'react-router-dom';
 import { http } from '../shared/api/http.js';
-import PatientPage from '../features/patient/PatientPage.jsx';
 import PublicBoardPage from '../features/public-board/PublicBoardPage.jsx';
+import PatientPage from '../features/patient/PatientPage.jsx';
+import { patientMockApi } from '../features/patient/mocks/patient.mock.js';
+import StaffPage from '../features/staff/StaffPage.jsx';
+import SessionPanel from "../features/sessions/SessionPanel.jsx";
+import LoginPage from '../features/auth/LoginPage.jsx';
 
 function HomePage() {
   const [status, setStatus] = useState('loading');
@@ -26,6 +30,7 @@ function HomePage() {
       {status === 'error' && <button onClick={() => setAttempt((n) => n + 1)}>Thử lại</button>}
     </section>
     <p><Link to="/board">Mở bảng gọi số công khai</Link></p>
+    <p><Link to="/login">Đăng nhập</Link></p>
     <p><Link to="/patient-demo">Xem thử giao diện người bệnh</Link></p>
     <p className="app-note">Bản xem thử dùng dữ liệu mô phỏng, không tạo phiếu đăng ký thật.</p>
   </main>;
@@ -35,10 +40,10 @@ export default function AppRoutes() {
   return <Routes>
     <Route path="/" element={<HomePage />} />
     <Route path="/board" element={<PublicBoardPage />} />
-    <Route path="/patient-demo" element={<>
-      <p className="app-demo-note">Bản xem thử · Dữ liệu mô phỏng, không lưu vào hệ thống.</p>
-      <PatientPage />
-    </>} />
+    <Route path="/login" element={<LoginPage />} />
+    <Route path="/patient" element={<PatientPage key="patient" />} />
+    <Route path="/staff" element={<StaffPage sessionPanel={<SessionPanel />} />} />
+    <Route path="/patient-demo" element={<PatientPage key="patient-demo" api={patientMockApi} demo />} />
     <Route path="*" element={<main className="app-home"><h1>Không tìm thấy trang</h1><Link to="/">Về trang chủ</Link></main>} />
   </Routes>;
 }
