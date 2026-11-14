@@ -7,7 +7,7 @@
 - `POST /api/v1/auth/login` và `GET /api/v1/auth/me` (server session, cookie `mediqueue.sid`).
 - Middleware dùng chung `authenticate.js`, `require-staff.js` và hàm quyền `patients/patient-access.service.js`.
 - Task 1.5: `GET /api/v1/patients` (`patient.routes.js`) và `LoginPage` ở `client/src/features/auth`. Điều hướng sau đăng nhập: REPRESENTATIVE → `/patient`, STAFF → `/staff`; hai màn hình này vẫn dùng mock đến khi Đạt (1.14) và Trung (1.17) nối API thật.
-- Chưa làm: `POST /auth/logout` và giới hạn số lần thử mật khẩu (task 2.5). Kiểm tra Origin và cấu hình app chung do Trực làm ở 1.19, đã có trên `main`.
+- Chưa làm: `POST /auth/logout` (task 2.5). Giới hạn số lần thử mật khẩu chưa được chốt ở task nào, ngoài phạm vi hiện tại. Kiểm tra Origin và cấu hình app chung do Trực làm ở 1.19, đã có trên `main`.
 
 ## Tài khoản thử (chỉ dùng cho DB thử/demo)
 
@@ -115,7 +115,7 @@ Còn lại:
 
 - Xác nhận của Đạt về cách dùng `patientsApi.list()` và `isUnauthenticated` trên `/patient`, chờ 1.14 vào `main`.
 - Chạy lại phần tích hợp trên `main` sau khi PR của task 1.6 được merge.
-- Đăng xuất và giới hạn số lần thử mật khẩu (2.5); cookie `Secure` qua HTTPS thật.
+- Đăng xuất (2.5); cookie `Secure` qua HTTPS thật. Giới hạn số lần thử mật khẩu chưa có task, ngoài phạm vi hiện tại.
 
 ## Danh sách hồ sơ và đăng nhập trên giao diện — task 1.5
 
@@ -133,7 +133,7 @@ Bàn giao cho Đạt (chọn hồ sơ trong `PatientPage`):
 
 - Gọi `patientsApi.list()` thay cho `api.getPatients()` mock; dữ liệu nằm trong `response.data`.
 - Danh sách rỗng là `200` với `[]`: giải thích rõ và không cho lấy số.
-- Phản hồi 401 (hết phiên 8 giờ hoặc chưa đăng nhập): dùng `isUnauthenticated(error)` và đưa người dùng về `/login`, không hiển thị dữ liệu cũ.
+- Phản hồi 401 (hết phiên 8 giờ hoặc chưa đăng nhập): dùng `isUnauthenticated(error)`, báo cần đăng nhập kèm đường dẫn về `/login` (như #14), không hiển thị dữ liệu cũ. Tự chuyển trang để Sprint 2 cùng luồng đăng xuất.
 
 Chạy test 1.5 từ thư mục `server`:
 

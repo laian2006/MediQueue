@@ -21,9 +21,11 @@ sự kiện sprint của 1.6.
 - Dữ liệu là tài khoản giả lập: `staff_01` (STAFF), `rep_a`, `rep_b`
   (REPRESENTATIVE). P001 là hồ sơ dùng chung của hai đại diện; P002 riêng của
   `rep_a`, P003 riêng của `rep_b`.
-- Ngoài phạm vi Sprint 1: đăng xuất, giới hạn số lần thử mật khẩu, quản lý
-  tài khoản (2.4–2.5), cookie `Secure` qua HTTPS thật, đưa người dùng về `/login`
-  khi phiên hết hạn trên các màn hình khác.
+- Ngoài phạm vi Sprint 1: đăng xuất (2.5), quản lý tài khoản, cookie `Secure` qua
+  HTTPS thật, tự chuyển người dùng về `/login` khi phiên hết hạn trên các màn hình
+  khác (để Sprint 2, thống nhất cùng luồng đăng xuất). Trong Sprint 1, màn hình nhận
+  401 báo cần đăng nhập và có đường dẫn về `/login`, như #14. Giới hạn số lần thử mật
+  khẩu chưa được chốt ở task nào nên ghi là ngoài phạm vi hiện tại.
 
 ## User stories và tiêu chí chấp nhận
 
@@ -33,9 +35,14 @@ Là nhân viên hoặc người đại diện, tôi muốn đăng nhập bằng 
 hệ thống biết tôi là ai trong các thao tác tiếp theo.
 
 - `POST /api/v1/auth/login` nhận JSON đúng hai trường `username` và `password`.
-  Thiếu trường, trường rỗng hoặc chỉ có khoảng trắng, sai kiểu, quá dài
-  (tên đăng nhập > 100, mật khẩu > 200 ký tự), có trường thừa, body là mảng, text
-  hoặc JSON hỏng đều trả 400 `VALIDATION_ERROR` và không tạo cookie.
+  Có trường thừa, body là mảng, text hoặc JSON hỏng trả 400 `VALIDATION_ERROR` và
+  không tạo cookie. Điều kiện của từng trường:
+  - `username`: thiếu, sai kiểu, rỗng sau khi trim hoặc dài hơn 100 ký tự → 400
+    `VALIDATION_ERROR`. Giá trị hợp lệ được trim trước khi tra cứu.
+  - `password`: thiếu, sai kiểu, rỗng hoặc dài hơn 200 ký tự → 400
+    `VALIDATION_ERROR`. Giữ nguyên khoảng trắng, không trim, nên mật khẩu chỉ gồm
+    khoảng trắng không bị 400 vì rỗng; nếu khác mật khẩu của tài khoản thử, API trả
+    401 `INVALID_CREDENTIALS`.
 - Sai tên đăng nhập và sai mật khẩu trả cùng một 401 `INVALID_CREDENTIALS` với cùng
   thông báo, để không lộ tên đăng nhập nào tồn tại. Không tạo cookie. Tên đăng nhập
   phân biệt hoa thường.
@@ -116,7 +123,7 @@ vực của mình và biết ngay khi nhập sai.
 - Lỗi 403 (sai nguồn yêu cầu) và lỗi mạng có thông báo riêng, không hiện chung với
   sai mật khẩu.
 - Hàm `isUnauthenticated(error)` chỉ coi 401 là hết phiên, để các màn hình khác dùng
-  đưa người dùng về `/login`.
+  báo cần đăng nhập kèm đường dẫn về `/login` (Sprint 1). Tự chuyển trang để Sprint 2.
 
 ## Bảng tình huống lỗi
 
@@ -124,6 +131,8 @@ vực của mình và biết ngay khi nhập sai.
 | --- | --- | --- |
 | Body login sai dạng, thiếu hoặc thừa trường | 400 `VALIDATION_ERROR`, không cookie | Unit + tích hợp 1.4 |
 | Sai tên hoặc sai mật khẩu | 401 `INVALID_CREDENTIALS`, cùng thông báo, không cookie | Unit + tích hợp 1.4, 1.5 |
+| Mật khẩu chỉ gồm khoảng trắng, khác mật khẩu tài khoản thử | 401 `INVALID_CREDENTIALS`, không cookie | Unit 1.4 |
+| `username` rỗng hoặc chỉ khoảng trắng | 400 `VALIDATION_ERROR`, không cookie | Unit 1.4 |
 | Không đăng nhập gọi API cần quyền | 401 `UNAUTHENTICATED` | Tích hợp 1.4, 1.5 |
 | Cookie giả hoặc quá 8 giờ | 401 `UNAUTHENTICATED` | Tích hợp 1.4 |
 | REPRESENTATIVE gọi API chỉ dành cho STAFF | 403 `FORBIDDEN` | Unit + tích hợp 1.4 |
@@ -137,14 +146,15 @@ vực của mình và biết ngay khi nhập sai.
 
 - Chọn hồ sơ bằng API thật trên `/patient` (1.14, Đạt) và màn hình quầy (1.17, Trung):
   trước đó chỉ dùng dữ liệu mô phỏng, không ghi là tích hợp thật.
-- Đưa người dùng về `/login` khi phiên hết hạn ở các màn hình khác.
-- Đăng xuất, giới hạn số lần thử mật khẩu (2.5), cookie `Secure` qua HTTPS.
-- Integration check của 1.6 trên `main` (login thật rồi lấy số, 1.8): ghi ở
-  `docs/testing/cases/1-6.md` khi chạy xong.
+- Tự chuyển về `/login` khi phiên hết hạn ở các màn hình khác: để Sprint 2 cùng
+  luồng đăng xuất (2.5). Sprint 1 chỉ báo cần đăng nhập kèm đường dẫn về `/login`.
+- Đăng xuất (2.5) và cookie `Secure` qua HTTPS thật.
+- Giới hạn số lần thử mật khẩu: chưa được chốt ở task nào, ngoài phạm vi hiện tại.
 
-## Câu hỏi cần An chốt
+## Kết quả kiểm tra tích hợp đã có
 
-1. Danh sách AUTH-01 đến AUTH-05 có đủ phạm vi cho phần yêu cầu của 1.6 không, hay
-   cần tách riêng story cho `/auth/me`?
-2. Phản hồi 401 trên các màn hình khác có cần chuyển về `/login` ngay trong Sprint 1,
-   hay để Sprint 2 cùng đăng xuất (2.5)?
+Luồng đăng nhập thật, chọn hồ sơ được phép từ `/patients`, lấy số, tải lại tìm thấy
+cùng phiếu (API-15, 1.8) đã đạt ở mức API trên `main` tại `fbbcf79`; xem
+[ca thử 1.6](../testing/cases/1-6.md). Những phần mô tả giao diện còn dùng dữ liệu
+mô phỏng (`/patient` thuộc 1.14, `/staff` thuộc 1.17) giữ mốc `fbbcf79` và chưa tính là
+tích hợp thật.
