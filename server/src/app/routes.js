@@ -12,6 +12,7 @@ import { createPatientAccessService } from '../modules/patients/patient-access.s
 import { createPatientRouter } from '../modules/patients/patient.routes.js';
 import { createTicketRepository } from '../modules/tickets/ticket.repository.js';
 import { createTicketIssueService } from '../modules/tickets/ticket-issue.service.js';
+import { createTicketCancelService } from '../modules/tickets/ticket-cancel.service.js';
 import { createTicketQueryService } from '../modules/tickets/ticket-query.service.js';
 import { createTicketRouter } from '../modules/tickets/ticket.routes.js';
 import { withTransaction } from '../shared/db/transaction.js';
@@ -48,6 +49,10 @@ export function createRoutes({ pool }) {
     }),
     queryService: createTicketQueryService({
       db: pool, createRepository: createTicketRepository, patientAccess: ticketPatientAccess,
+    }),
+    cancelService: createTicketCancelService({
+      db: pool, withTransaction, createRepository: createTicketRepository,
+      patientAccess: ticketPatientAccess, appendTicketEvent,
     }),
     authenticate,
   }));
