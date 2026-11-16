@@ -3,64 +3,69 @@ TAP version 13
     # Subtest: chưa đăng nhập: không hiện dữ liệu quầy
     ok 1 - chưa đăng nhập: không hiện dữ liệu quầy
       ---
-      duration_ms: 1068.1963
+      duration_ms: 973.8671
       ...
     # Subtest: mở phiên bằng SessionPanel, StaffPage đọc lại qua onSessionChange
     ok 2 - mở phiên bằng SessionPanel, StaffPage đọc lại qua onSessionChange
       ---
-      duration_ms: 288.0636
+      duration_ms: 361.1177
       ...
     # Subtest: phiếu thật lấy từ tài khoản đại diện tự hiện trên quầy nhờ polling
     ok 3 - phiếu thật lấy từ tài khoản đại diện tự hiện trên quầy nhờ polling
       ---
-      duration_ms: 2808.7061
+      duration_ms: 2780.1595
       ...
     # Subtest: hết phiên đăng nhập khi bấm gọi: 401, bỏ dữ liệu quầy, không đổi DB
     ok 4 - hết phiên đăng nhập khi bấm gọi: 401, bỏ dữ liệu quầy, không đổi DB
       ---
-      duration_ms: 662.8053
+      duration_ms: 499.2565
+      ...
+    # Subtest: polling: /queue/current 500 khi /queue/waiting còn treo không gửi lượt chồng
+    ok 5 - polling: /queue/current 500 khi /queue/waiting còn treo không gửi lượt chồng
+      ---
+      duration_ms: 12701.7243
       ...
     # Subtest: hàng chờ vừa hết ở máy chủ: 409 QUEUE_EMPTY, tải lại thấy hàng rỗng
-    ok 5 - hàng chờ vừa hết ở máy chủ: 409 QUEUE_EMPTY, tải lại thấy hàng rỗng
+    ok 6 - hàng chờ vừa hết ở máy chủ: 409 QUEUE_EMPTY, tải lại thấy hàng rỗng
       ---
-      duration_ms: 675.8052
+      duration_ms: 586.9739
       ...
     # Subtest: phiếu mới sau khi hủy hiện lại nhờ polling
-    ok 6 - phiếu mới sau khi hủy hiện lại nhờ polling
+    ok 7 - phiếu mới sau khi hủy hiện lại nhờ polling
       ---
-      duration_ms: 2147.1679
+      duration_ms: 1598.7537
       ...
     # Subtest: bấm hai lần nhanh: một yêu cầu, Ticket thành CALLED trong cơ sở dữ liệu
-    ok 7 - bấm hai lần nhanh: một yêu cầu, Ticket thành CALLED trong cơ sở dữ liệu
+    ok 8 - bấm hai lần nhanh: một yêu cầu, Ticket thành CALLED trong cơ sở dữ liệu
       ---
-      duration_ms: 140.6346
+      duration_ms: 118.5176
       ...
     # Subtest: hai cửa sổ: cửa sổ dữ liệu cũ bị từ chối COUNTER_BUSY và tải lại theo máy chủ
-    ok 8 - hai cửa sổ: cửa sổ dữ liệu cũ bị từ chối COUNTER_BUSY và tải lại theo máy chủ
+    ok 9 - hai cửa sổ: cửa sổ dữ liệu cũ bị từ chối COUNTER_BUSY và tải lại theo máy chủ
       ---
-      duration_ms: 92.6043
+      duration_ms: 79.8978
       ...
     # Subtest: tài khoản thường không vận hành được quầy
-    ok 9 - tài khoản thường không vận hành được quầy
+    ok 10 - tài khoản thường không vận hành được quầy
       ---
-      duration_ms: 383.3914
+      duration_ms: 375.2927
       ...
     # Subtest: 360 px không tràn ngang
-    ok 10 - 360 px không tràn ngang
+    ok 11 - 360 px không tràn ngang
       ---
-      duration_ms: 272.2222
+      duration_ms: 234.9048
       ...
-    1..10
+    1..11
 ok 1 - 1.17: gọi số từ màn hình quầy qua API 1.11 và PostgreSQL thật
   ---
-  duration_ms: 11810.368
+  duration_ms: 21729.3742
   ...
 1..1
-# tests 11
+# tests 12
 # suites 0
-# pass 11
+# pass 12
 # fail 0
 # cancelled 0
 # skipped 0
 # todo 0
-# duration_ms 12005.9082
+# duration_ms 21814.0021

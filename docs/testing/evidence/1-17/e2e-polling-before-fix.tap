@@ -1,0 +1,93 @@
+TAP version 13
+# Subtest: 1.17: gọi số từ màn hình quầy qua API 1.11 và PostgreSQL thật
+    # Subtest: chưa đăng nhập: không hiện dữ liệu quầy
+    ok 1 - chưa đăng nhập: không hiện dữ liệu quầy
+      ---
+      duration_ms: 643.9262
+      ...
+    # Subtest: mở phiên bằng SessionPanel, StaffPage đọc lại qua onSessionChange
+    ok 2 - mở phiên bằng SessionPanel, StaffPage đọc lại qua onSessionChange
+      ---
+      duration_ms: 370.6108
+      ...
+    # Subtest: phiếu thật lấy từ tài khoản đại diện tự hiện trên quầy nhờ polling
+    ok 3 - phiếu thật lấy từ tài khoản đại diện tự hiện trên quầy nhờ polling
+      ---
+      duration_ms: 2790.8593
+      ...
+    # Subtest: hết phiên đăng nhập khi bấm gọi: 401, bỏ dữ liệu quầy, không đổi DB
+    ok 4 - hết phiên đăng nhập khi bấm gọi: 401, bỏ dữ liệu quầy, không đổi DB
+      ---
+      duration_ms: 610.2154
+      ...
+    # Subtest: polling: /queue/current 500 khi /queue/waiting còn treo không gửi lượt chồng
+    not ok 5 - polling: /queue/current 500 khi /queue/waiting còn treo không gửi lượt chồng
+      ---
+      duration_ms: 10806.1455
+      location: 'C:\\Users\\trung\\Desktop\\A++\\2026.1 A++\\IT4082E Software Engineering\\MediQueue\\tests\\e2e\\staff-flow.spec.js:122:11'
+      failureType: 'testCodeFailure'
+      error: |-
+        request chồng: start,start,start
+        
+        true !== false
+        
+      code: 'ERR_ASSERTION'
+      name: 'AssertionError'
+      expected: false
+      actual: true
+      operator: 'strictEqual'
+      stack: |-
+        TestContext.<anonymous> (file:///C:/Users/trung/Desktop/A++/2026.1%20A++/IT4082E%20Software%20Engineering/MediQueue/tests/e2e/staff-flow.spec.js:141:12)
+        async Test.run (node:internal/test_runner/test:935:9)
+        async TestContext.<anonymous> (file:///C:/Users/trung/Desktop/A++/2026.1%20A++/IT4082E%20Software%20Engineering/MediQueue/tests/e2e/staff-flow.spec.js:122:3)
+        async Test.run (node:internal/test_runner/test:935:9)
+        async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
+      ...
+    # Subtest: hàng chờ vừa hết ở máy chủ: 409 QUEUE_EMPTY, tải lại thấy hàng rỗng
+    ok 6 - hàng chờ vừa hết ở máy chủ: 409 QUEUE_EMPTY, tải lại thấy hàng rỗng
+      ---
+      duration_ms: 630.1375
+      ...
+    # Subtest: phiếu mới sau khi hủy hiện lại nhờ polling
+    ok 7 - phiếu mới sau khi hủy hiện lại nhờ polling
+      ---
+      duration_ms: 3327.6461
+      ...
+    # Subtest: bấm hai lần nhanh: một yêu cầu, Ticket thành CALLED trong cơ sở dữ liệu
+    ok 8 - bấm hai lần nhanh: một yêu cầu, Ticket thành CALLED trong cơ sở dữ liệu
+      ---
+      duration_ms: 124.02
+      ...
+    # Subtest: hai cửa sổ: cửa sổ dữ liệu cũ bị từ chối COUNTER_BUSY và tải lại theo máy chủ
+    ok 9 - hai cửa sổ: cửa sổ dữ liệu cũ bị từ chối COUNTER_BUSY và tải lại theo máy chủ
+      ---
+      duration_ms: 92.7499
+      ...
+    # Subtest: tài khoản thường không vận hành được quầy
+    ok 10 - tài khoản thường không vận hành được quầy
+      ---
+      duration_ms: 353.9463
+      ...
+    # Subtest: 360 px không tràn ngang
+    ok 11 - 360 px không tràn ngang
+      ---
+      duration_ms: 18.5124
+      ...
+    1..11
+not ok 1 - 1.17: gọi số từ màn hình quầy qua API 1.11 và PostgreSQL thật
+  ---
+  duration_ms: 26373.4963
+  location: 'C:\\Users\\trung\\Desktop\\A++\\2026.1 A++\\IT4082E Software Engineering\\MediQueue\\tests\\e2e\\staff-flow.spec.js:15:1'
+  failureType: 'subtestsFailed'
+  error: '1 subtest failed'
+  code: 'ERR_TEST_FAILURE'
+  ...
+1..1
+# tests 12
+# suites 0
+# pass 10
+# fail 2
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 26472.474

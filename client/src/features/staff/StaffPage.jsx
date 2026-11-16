@@ -45,24 +45,46 @@ export default function StaffPage({ api = staffApi, sessionPanel = null, demo = 
   const submittingRef = useRef(false);
   const loadSeq = useRef(0);
   const activeLoads = useRef(0);
+  const loadControllers = useRef(new Set());
 
   // silent: lượt polling, không bật trạng thái đang tải để màn hình không nhấp nháy.
   const refresh = useCallback(async ({ silent = false } = {}) => {
     const seq = ++loadSeq.current;
     activeLoads.current += 1;
     if (!silent) setRefreshing(true);
+    const controller = new AbortController();
+    loadControllers.current.add(controller);
+    const options = { signal: controller.signal };
+    const fail = (error) => {
+      if (seq !== loadSeq.current) return;
+      if (accessErrors[error?.code]) {
+        // 401/403: bỏ dữ liệu quầy đã có ngay, không giữ lại như dữ liệu cũ.
+        setSnapshot(null);
+        setResult(null);
+        setAccessError(accessErrors[error.code]);
+      } else {
+        setLoadError('Không tải được trạng thái quầy.');
+      }
+    };
     try {
-      const { data: session } = await api.getCurrentSession();
+      const { data: session } = await api.getCurrentSession(options);
       let waiting = [];
       let current = null;
       if (session) {
         const query = { sessionId: session.sessionId };
-        const [waitingResponse, currentResponse] = await Promise.all([
-          api.getWaitingQueue(query),
-          api.getCurrentQueue(query),
-        ]);
-        waiting = waitingResponse.data.tickets;
-        current = currentResponse.data.ticket;
+        const requests = [api.getWaitingQueue(query, options), api.getCurrentQueue(query, options)];
+        try {
+          const [waitingResponse, currentResponse] = await Promise.all(requests);
+          waiting = waitingResponse.data.tickets;
+          current = currentResponse.data.ticket;
+        } catch (error) {
+          // Một request lỗi: báo ngay, hủy request còn treo và chờ nó kết thúc
+          // trước khi giảm activeLoads, để polling không gửi lượt chồng lên.
+          fail(error);
+          controller.abort();
+          await Promise.allSettled(requests);
+          return;
+        }
       }
       // Phản hồi của lần đọc cũ về trễ không được ghi đè lần đọc mới.
       if (seq !== loadSeq.current) return;
@@ -70,16 +92,9 @@ export default function StaffPage({ api = staffApi, sessionPanel = null, demo = 
       setLoadError('');
       setAccessError('');
     } catch (error) {
-      if (seq !== loadSeq.current) return;
-      if (accessErrors[error?.code]) {
-        // 401/403: bỏ dữ liệu quầy đã có, không giữ lại như dữ liệu cũ.
-        setSnapshot(null);
-        setResult(null);
-        setAccessError(accessErrors[error.code]);
-      } else {
-        setLoadError('Không tải được trạng thái quầy.');
-      }
+      fail(error);
     } finally {
+      loadControllers.current.delete(controller);
       activeLoads.current -= 1;
       if (seq === loadSeq.current) setRefreshing(false);
     }
@@ -91,7 +106,11 @@ export default function StaffPage({ api = staffApi, sessionPanel = null, demo = 
     setLoadError('');
     setAccessError('');
     refresh();
-    return () => { loadSeq.current += 1; };
+    return () => {
+      loadSeq.current += 1;
+      // Rời màn hình: hủy các request đọc còn treo.
+      loadControllers.current.forEach((controller) => controller.abort());
+    };
   }, [refresh]);
 
   // Polling chỉ khi đã có dữ liệu; bỏ lượt nếu lần đọc trước hoặc thao tác gọi chưa xong; dừng khi rời màn hình.

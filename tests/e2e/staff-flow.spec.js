@@ -119,6 +119,35 @@ test('1.17: gọi số từ màn hình quầy qua API 1.11 và PostgreSQL thật
     await context.close();
   });
 
+  await t.test('polling: /queue/current 500 khi /queue/waiting còn treo không gửi lượt chồng', async () => {
+    const context = await newContext();
+    await signIn(context, 'staff_01');
+    const page = await staffPage(context);
+    await page.goto('/staff');
+    await queueLength(page, 3);
+    // Mỗi request đọc hàng chờ phải kết thúc (xong hoặc bị hủy) trước khi request kế tiếp bắt đầu.
+    const log = [];
+    let open = 0;
+    let overlap = false;
+    const isWaiting = (request) => request.url().includes('/queue/waiting');
+    page.on('request', (request) => { if (isWaiting(request)) { if (open > 0) overlap = true; open += 1; log.push('start'); } });
+    const end = (kind) => (request) => { if (isWaiting(request)) { open -= 1; log.push(kind); } };
+    page.on('requestfinished', end('done'));
+    page.on('requestfailed', end('aborted'));
+    await page.route('**/api/v1/queue/waiting**', () => {}); // Giữ treo, không phản hồi.
+    await page.route('**/api/v1/queue/current**', (route) => route.fulfill({ status: 500, json: { error: { code: 'INTERNAL_ERROR', message: 'test' } } }));
+    await page.getByText('Dữ liệu bên dưới có thể đã cũ', { exact: false }).waitFor({ timeout: 7000 });
+    await page.waitForTimeout(7000); // Hơn hai chu kỳ polling.
+    assert.equal(overlap, false, `request chồng: ${log.join(',')}`);
+    assert.ok(log.filter((x) => x === 'aborted').length >= 2, `polling không tiếp tục sau khi hủy: ${log.join(',')}`);
+    assert.equal(await page.locator('.staff-ticket-number').count(), 0);
+    assert.deepEqual(await queue(page), ['1', '2', '3']); // Giữ dữ liệu cũ kèm cảnh báo.
+    await page.unrouteAll({ behavior: 'ignoreErrors' });
+    await page.getByText('Dữ liệu bên dưới có thể đã cũ', { exact: false }).waitFor({ state: 'detached', timeout: 7000 });
+    assert.equal(overlap, false, `request chồng: ${log.join(',')}`);
+    await context.close();
+  });
+
   await t.test('hàng chờ vừa hết ở máy chủ: 409 QUEUE_EMPTY, tải lại thấy hàng rỗng', async () => {
     const page = await frozenStaffPage(3);
     for (const { actor, ticket } of firstRound) {
