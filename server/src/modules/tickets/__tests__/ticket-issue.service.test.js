@@ -21,12 +21,14 @@ const matchesError = (statusCode, code) => (error) => error.statusCode === statu
 
 // Records every step so tests can check order, actor and that nothing ran after a rejection.
 function setup({ session = { session_id: input.sessionId, status: 'OPEN', last_issued_number: 4 },
-  active = null, insertError, eventError, access = async () => {} } = {}) {
+  active = null, insertError, eventError, access = async () => {}, byKey = () => null } = {}) {
+  let keyCalls = 0;
   const calls = [];
   const client = { query: async () => { throw new Error('repository double only'); } };
   const pool = { query: async () => { throw new Error('repository double only'); } };
   const createRepository = (db) => ({
     lockSession: async (id) => { calls.push(['lock', db === client, id]); return session; },
+    findByRequestKey: async (uid, rid) => { calls.push(['key', db === client, uid, rid]); return byKey(db === client, keyCalls++); },
     findActiveForPatient: async (sid, pid) => { calls.push(['active', db === client, sid, pid]); return active; },
     allocateNumber: async (id) => { calls.push(['allocate', db === client, id]); return session.last_issued_number + 1; },
     insertWaiting: async (values) => {
@@ -68,7 +70,9 @@ test('OPEN session: lock, check, allocate, insert and ISSUED event share one tra
   assert.equal(result.status, 'WAITING');
   assert.equal(result.number, 5);
   assert.ok(isCommitted());
-  assert.deepEqual(calls.map(([step]) => step), ['access', 'begin', 'lock', 'active', 'allocate', 'insert', 'event']);
+  assert.deepEqual(calls.map(([step]) => step), ['access', 'key', 'begin', 'lock', 'key', 'active', 'allocate', 'insert', 'event']);
+  assert.deepEqual(calls.filter(([step]) => step === 'key').map(([, onClient]) => onClient), [false, true],
+    'retry key is read before the transaction and re-read inside it after the session lock');
   assert.deepEqual(calls.find(([step]) => step === 'begin'), ['begin', true], 'transaction must use the shared pool');
   assert.ok(calls.filter(([step]) => ['lock', 'active', 'allocate', 'insert', 'event'].includes(step))
     .every(([, onClient]) => onClient === true), 'every write step must use the transaction client');
@@ -130,7 +134,7 @@ test('unknown session is 404; nothing is allocated or inserted', async () => {
   const { service, calls, isCommitted } = setup({ session: null });
   await assert.rejects(service.issue(rep, input), matchesError(404, 'NOT_FOUND'));
   assert.equal(isCommitted(), false);
-  assert.deepEqual(calls.map(([step]) => step), ['access', 'begin', 'lock']);
+  assert.deepEqual(calls.map(([step]) => step), ['access', 'key', 'begin', 'lock']);
 });
 
 test('STOPPED and CLOSED sessions are 409 and issue nothing', async () => {
@@ -156,10 +160,66 @@ test('event helper failure propagates so the whole transaction rolls back', asyn
   assert.equal(isCommitted(), false);
 });
 
-test('reused requestId of the same sender is 409 in Sprint 1 (replay arrives in 2.7)', async () => {
-  const { service } = setup({ insertError: Object.assign(new Error('dup'), {
-    code: '23505', constraint: 'uq_tickets_request' }) });
-  await assert.rejects(service.issue(rep, input), matchesError(409, 'IDEMPOTENCY_CONFLICT'));
+// ---------- WBS 2.7: retry with the same requestId ----------
+const storedRow = (fields = {}) => ({ ...ticketRow, status: 'CANCELLED', number: 3, ...fields });
+
+test('2.7 same key + same patient/session replays the stored ticket in its current state, no transaction', async () => {
+  const { service, calls, isCommitted } = setup({ byKey: (onClient) => (onClient ? null : storedRow()) });
+  const result = await service.issueWithStatus(rep, input);
+  assert.equal(result.replayed, true);
+  assert.equal(result.ticket.ticketId, ticketRow.ticket_id);
+  assert.equal(result.ticket.status, 'CANCELLED');
+  assert.equal(result.ticket.number, 3);
+  assert.deepEqual(calls.map(([step]) => step), ['access', 'key']);
+  assert.equal(isCommitted(), false);
+  const [, , uid, rid] = calls.find(([step]) => step === 'key');
+  assert.deepEqual([uid, rid], [rep.userId, input.requestId], 'key is (issued_by_user_id from login, requestId)');
+});
+
+test('2.7 issue() keeps returning the Ticket DTO for existing callers, new or replayed', async () => {
+  assert.equal((await setup().service.issue(rep, input)).status, 'WAITING');
+  assert.equal((await setup({ byKey: () => storedRow() }).service.issue(rep, input)).status, 'CANCELLED');
+  assert.equal((await setup().service.issueWithStatus(rep, input)).replayed, false);
+});
+
+test('2.7 same key with a different patient or session → 409 IDEMPOTENCY_CONFLICT, nothing written', async () => {
+  for (const other of [{ patient_id: '10000000-0000-4000-8000-000000000009' }, { session_id: '20000000-0000-4000-8000-000000000009' }]) {
+    const { service, calls } = setup({ byKey: () => storedRow(other) });
+    await assert.rejects(service.issueWithStatus(rep, input), matchesError(409, 'IDEMPOTENCY_CONFLICT'));
+    assert.equal(calls.some(([step]) => ['begin', 'insert', 'event'].includes(step)), false);
+  }
+});
+
+test('2.7 access is checked before the key lookup: a lost access is 403 and the stored ticket is never read', async () => {
+  const { service, calls } = setup({ byKey: () => storedRow(),
+    access: async () => { throw Object.assign(new Error('no'), { statusCode: 403, code: 'FORBIDDEN' }); } });
+  await assert.rejects(service.issueWithStatus(rep, input), matchesError(403, 'FORBIDDEN'));
+  assert.deepEqual(calls.map(([step]) => step), ['access']);
+});
+
+test('2.7 replay is answered before the OPEN check (closed session still replays)', async () => {
+  const { service, calls } = setup({ session: { session_id: input.sessionId, status: 'CLOSED', last_issued_number: 9 },
+    byKey: () => storedRow({ status: 'COMPLETED' }) });
+  assert.equal((await service.issueWithStatus(rep, input)).ticket.status, 'COMPLETED');
+  assert.equal(calls.some(([step]) => step === 'lock'), false);
+});
+
+test('2.7 concurrent retry that committed while we waited for the session lock is replayed, no second ticket', async () => {
+  const { service, calls } = setup({ byKey: (onClient) => (onClient ? storedRow({ status: 'WAITING' }) : null) });
+  const result = await service.issueWithStatus(rep, input);
+  assert.equal(result.replayed, true);
+  assert.equal(calls.some(([step]) => ['active', 'allocate', 'insert', 'event'].includes(step)), false);
+});
+
+test('2.7 unique violation on the retry key rolls back, re-reads the winner and replays (never 500)', async () => {
+  const dup = Object.assign(new Error('dup'), { code: '23505', constraint: 'uq_tickets_request' });
+  const { service, isCommitted } = setup({ insertError: dup, byKey: (onClient, n) => (n === 2 ? storedRow({ status: 'WAITING' }) : null) });
+  const result = await service.issueWithStatus(rep, input);
+  assert.equal(result.replayed, true);
+  assert.equal(isCommitted(), false);
+
+  const conflict = setup({ insertError: dup, byKey: (onClient, n) => (n === 2 ? storedRow({ patient_id: '10000000-0000-4000-8000-000000000009' }) : null) });
+  await assert.rejects(conflict.service.issueWithStatus(rep, input), matchesError(409, 'IDEMPOTENCY_CONFLICT'));
 });
 
 test('unrelated unique/FK/connection errors are not disguised as business conflicts', async () => {

@@ -272,6 +272,39 @@ test('WBS 1.8: ticket API on the shared app with real login and PostgreSQL', {
     assert.deepEqual(byId.body.data, created.body.data);
   });
 
+  await t.test('API-16 (2.7) retry with the same requestId: 201 then 200 same ticket; conflict 409; after cancel still 200 with CANCELLED', async () => {
+    const session = (await call('GET', '/sessions/current', 'staff_01')).body.data;
+    const body = { patientId: IDS.p2, sessionId: session.sessionId, requestId: randomUUID() };
+    const first = await call('POST', '/tickets', 'rep_a', { json: body });
+    assert.equal(first.status, 201);
+    const afterFirst = await counts();
+
+    const retry = await call('POST', '/tickets', 'rep_a', { json: body });
+    assert.equal(retry.status, 200);
+    assert.equal(retry.headers.get('cache-control'), 'no-store');
+    assert.deepEqual(retry.body, first.body);
+    assert.deepEqual(await counts(), afterFirst, 'a retry writes no ticket and no event');
+
+    const conflict = await call('POST', '/tickets', 'rep_a', { json: { ...body, patientId: IDS.p1 } });
+    assert.equal(conflict.status, 409);
+    assert.equal(conflict.body.error.code, 'IDEMPOTENCY_CONFLICT');
+    assert.equal('data' in conflict.body, false);
+    assert.deepEqual(await counts(), afterFirst);
+
+    const cancelled = await call('POST', `/tickets/${first.body.data.ticket.ticketId}/cancel`, 'rep_a'); // Đạt's API (2.13)
+    assert.equal(cancelled.status, 200);
+    const afterCancel = await counts();
+    const late = await call('POST', '/tickets', 'rep_a', { json: body });
+    assert.equal(late.status, 200);
+    assert.equal(late.body.data.ticket.ticketId, first.body.data.ticket.ticketId);
+    assert.equal(late.body.data.ticket.status, 'CANCELLED');
+    assert.equal(late.body.data.waitingAhead, null);
+    assert.deepEqual(await counts(), afterCancel, 'retry after cancel does not issue a new number');
+    const issued = await one(`SELECT count(*)::int AS n FROM ticket_events WHERE ticket_id = $1 AND action = 'ISSUED'`,
+      [first.body.data.ticket.ticketId]);
+    assert.equal(issued.n, 1);
+  });
+
   await t.test('API-14 unexpected DB errors give the shared generic 500 without SQL detail', async () => {
     await pool.query('ALTER TABLE tickets RENAME TO tickets_hidden_for_test');
     try {
