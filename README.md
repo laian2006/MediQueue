@@ -6,7 +6,7 @@ Mô phỏng một quầy đăng ký ngoại trú và một hàng chờ thông th
 
 ## Cài và chạy — task 1.19
 
-Khung chung đã ghép React → Express → PostgreSQL, xác thực thật của Hưng (1.4) và phiên của An (1.1). Trang chủ kiểm tra kết nối DB thật; `/patient-demo` dùng UI mock của Đạt (1.13), không cấp phiếu thật. Các màn hình/API chưa được chủ mô đun triển khai không được giả lập thành API thật. Chờ review và kiểm tra trên main trước khi đánh dấu Done.
+Ứng dụng đã ghép React → Express → PostgreSQL. `/login` đăng nhập thật; `/patient` chọn hồ sơ, lấy và xem phiếu thật; `/staff` mở/ngừng/đóng phiên và gọi số thật. `/patient-demo` dùng dữ liệu mô phỏng. API hủy WAITING và gửi lại cùng requestId đã có. Giao diện hủy, bảng công khai và quy trình tiếp nhận đầy đủ tiếp tục theo kế hoạch. [Tiến độ và bàn giao ngày 18/11](docs/sprints/sprint-2.md).
 
 Yêu cầu: **Node.js 22.12+ (khuyến nghị 24 LTS), npm 10+, PostgreSQL 18**. Dùng npm, giữ một `package-lock.json` trong mỗi package. Các phiên bản thư viện được khóa chính xác; máy mới dùng `npm ci`, không tạo lockfile của yarn/pnpm.
 
@@ -39,7 +39,7 @@ Yêu cầu: **Node.js 22.12+ (khuyến nghị 24 LTS), npm 10+, PostgreSQL 18**.
 
    Mở **http://localhost:5173**. Trang chủ phải báo cơ sở dữ liệu đã kết nối. Client không cần `.env` với cấu hình mặc định; nếu đổi cổng API, sao chép `client/.env.example` thành `.env` rồi đổi `API_PROXY_TARGET` và các cổng/origin tương ứng. Vite chuyển `/api` đến Express và giữ Origin của trình duyệt. `localhost` và `127.0.0.1` là hai origin khác nhau, dùng nhất quán `localhost` khi mở UI.
 
-Tài khoản seed: `staff_01`, `rep_a`, `rep_b`, mật khẩu thử `Demo@12345`; xem [hợp đồng xác thực](docs/modules/auth.md). Chưa có LoginPage ở task này; API đăng nhập có thể thử bằng công cụ gọi API. Cookie HttpOnly và store `auth_sessions` PostgreSQL được tạo bởi thư viện khi dùng phiên lần đầu; đăng nhập vẫn còn sau restart API. Origin khác cấu hình bị từ chối, lớp `http.js` gửi cookie và JSON. Khung này dành cho phát triển/demo; triển khai sau reverse proxy HTTPS cần chốt cấu hình proxy tin cậy trước khi bật cookie Secure, không tự tin cậy mọi proxy.
+Tài khoản seed: `staff_01`, `rep_a`, `rep_b`, mật khẩu thử `Demo@12345`; xem [hợp đồng xác thực](docs/modules/auth.md). Đăng nhập tại `/login`; dùng cửa sổ riêng tư để mở tài khoản đại diện song song với nhân viên. Cookie HttpOnly và store `auth_sessions` PostgreSQL được tạo bởi thư viện khi dùng phiên lần đầu; đăng nhập vẫn còn sau restart API. Origin khác cấu hình bị từ chối, lớp `http.js` gửi cookie và JSON. Khung này dành cho phát triển/demo; triển khai sau reverse proxy HTTPS cần chốt cấu hình proxy tin cậy trước khi bật cookie Secure, không tự tin cậy mọi proxy.
 
 ### Kiểm tra
 

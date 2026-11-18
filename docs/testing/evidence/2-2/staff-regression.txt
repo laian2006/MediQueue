@@ -1,0 +1,21 @@
+▶ 1.17: gọi số từ màn hình quầy qua API 1.11 và PostgreSQL thật
+  ✔ chưa đăng nhập: không hiện dữ liệu quầy (374.0208ms)
+  ✔ mở phiên bằng SessionPanel, StaffPage đọc lại qua onSessionChange (433.1957ms)
+  ✔ phiếu thật lấy từ tài khoản đại diện tự hiện trên quầy nhờ polling (2812.8982ms)
+  ✔ hết phiên đăng nhập khi bấm gọi: 401, bỏ dữ liệu quầy, không đổi DB (351.8079ms)
+  ✔ polling: /queue/current 500 khi /queue/waiting còn treo không gửi lượt chồng (12518.6899ms)
+  ✔ hàng chờ vừa hết ở máy chủ: 409 QUEUE_EMPTY, tải lại thấy hàng rỗng (410.31ms)
+  ✔ phiếu mới sau khi hủy hiện lại nhờ polling (1976.6022ms)
+  ✔ bấm hai lần nhanh: một yêu cầu, Ticket thành CALLED trong cơ sở dữ liệu (81.6305ms)
+  ✔ hai cửa sổ: cửa sổ dữ liệu cũ bị từ chối COUNTER_BUSY và tải lại theo máy chủ (78.5777ms)
+  ✔ tài khoản thường không vận hành được quầy (242.9826ms)
+  ✔ 360 px không tràn ngang (6.0061ms)
+✔ 1.17: gọi số từ màn hình quầy qua API 1.11 và PostgreSQL thật (21642.335ms)
+ℹ tests 12
+ℹ suites 0
+ℹ pass 12
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 21715.3694
