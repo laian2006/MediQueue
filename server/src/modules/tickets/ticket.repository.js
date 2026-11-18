@@ -35,6 +35,16 @@ export function createTicketRepository(db) {
       return result.rows[0] ?? null;
     },
 
+    // WBS 2.7: retry key over the whole ticket history (uq_tickets_request).
+    async findByRequestKey(issuedByUserId, requestId) {
+      const result = await db.query(`
+        SELECT ${TICKET_COLUMNS}
+        FROM tickets
+        WHERE issued_by_user_id = $1 AND request_id = $2
+      `, [issuedByUserId, requestId]);
+      return result.rows[0] ?? null;
+    },
+
     async findActiveForPatient(sessionId, patientId) {
       const result = await db.query(`
         SELECT ${TICKET_COLUMNS}

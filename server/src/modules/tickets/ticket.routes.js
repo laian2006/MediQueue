@@ -30,7 +30,7 @@ export function createTicketRouter({ issueService, queryService, cancelService, 
   if (typeof authenticate !== 'function') {
     throw new TypeError('Shared authenticate middleware is required.');
   }
-  if (typeof issueService?.issue !== 'function') throw new TypeError('issueService is required.');
+  if (typeof issueService?.issueWithStatus !== 'function') throw new TypeError('issueService is required.');
   if (typeof queryService?.getById !== 'function' || typeof queryService?.getActive !== 'function') {
     throw new TypeError('queryService is required.');
   }
@@ -45,10 +45,11 @@ export function createTicketRouter({ issueService, queryService, cancelService, 
     if (!req.is('application/json') || req.body === undefined) {
       throw new TicketError(400, 'VALIDATION_ERROR', 'Dữ liệu gửi kèm phải là JSON.');
     }
-    const ticket = await issueService.issue(req.user, req.body);
+    const { ticket, replayed } = await issueService.issueWithStatus(req.user, req.body);
     // Re-read through the query service: same access rules and a fresh waitingAhead.
     const data = await queryService.getById(req.user, ticket.ticketId);
-    res.status(201).json({ data });
+    // v1.0: first issue 201; a valid retry with the same requestId 200 with the stored ticket (2.7).
+    res.status(replayed ? 200 : 201).json({ data });
   }));
 
   // Registered before '/:ticketId' so "active" is never parsed as an id.

@@ -136,13 +136,62 @@ test('WBS 1.7: ticket schema and transactional number allocation on PostgreSQL',
     assert.deepEqual(numbers, [1, 2, 3]);
   });
 
-  await t.test('same sender reusing a requestId → 409 in Sprint 1, no second ticket', async () => {
+  // WBS 2.7: retry with the same requestId.
+  const replayStatus = (actor, sid, patientId, requestId) =>
+    service.issueWithStatus(actor, { patientId, sessionId: sid, requestId });
+  let replay; // { requestId, ticketId } reused after the session is closed
+
+  await t.test('2.7 same sender + same requestId + same payload → stored ticket (current state), no number, no event', async () => {
     const requestId = randomUUID();
-    await issue(repB, sessionId, IDS.p3, requestId);
+    const first = await replayStatus(repB, sessionId, IDS.p3, requestId);
+    assert.equal(first.replayed, false);
     const before = await counts(sessionId);
-    await pool.query(`UPDATE tickets SET status = 'CANCELLED', updated_at = CURRENT_TIMESTAMP WHERE request_id = $1`, [requestId]);
-    await rejectsWith(issue(repB, sessionId, IDS.p3, requestId), 409, 'IDEMPOTENCY_CONFLICT');
+    const again = await replayStatus(repB, sessionId, IDS.p3, requestId.toUpperCase()); // casing does not change the key
+    assert.equal(again.replayed, true);
+    assert.deepEqual(again.ticket, first.ticket);
     assert.deepEqual(await counts(sessionId), before);
+
+    await pool.query(`UPDATE tickets SET status = 'CANCELLED', updated_at = CURRENT_TIMESTAMP WHERE ticket_id = $1`,
+      [first.ticket.ticketId]); // test data; real cancellation is 2.13
+    const afterCancel = await replayStatus(repB, sessionId, IDS.p3, requestId);
+    assert.equal(afterCancel.replayed, true);
+    assert.equal(afterCancel.ticket.ticketId, first.ticket.ticketId);
+    assert.equal(afterCancel.ticket.status, 'CANCELLED', 'replay returns the CURRENT state, it never reopens the ticket');
+    assert.deepEqual(await counts(sessionId), before);
+    replay = { requestId, ticketId: first.ticket.ticketId };
+  });
+
+  await t.test('2.7 same requestId with a different patient or session → 409 IDEMPOTENCY_CONFLICT, stored request untouched', async () => {
+    const before = await counts(sessionId);
+    await rejectsWith(issue(repB, sessionId, IDS.p1, replay.requestId), 409, 'IDEMPOTENCY_CONFLICT');
+    const other = (await one('INSERT INTO queue_sessions (opened_by, status, stopped_by, stopped_at, closed_by, closed_at) '
+      + "VALUES ($1, 'CLOSED', $1, CURRENT_TIMESTAMP, $1, CURRENT_TIMESTAMP) RETURNING session_id", [IDS.staff])).session_id;
+    await rejectsWith(issue(repB, other, IDS.p3, replay.requestId), 409, 'IDEMPOTENCY_CONFLICT');
+    assert.deepEqual(await counts(sessionId), before);
+    const stored = await one('SELECT patient_id, session_id FROM tickets WHERE request_id = $1', [replay.requestId]);
+    assert.deepEqual(stored, { patient_id: IDS.p3, session_id: sessionId });
+  });
+
+  await t.test('2.7 the key is per sender: another account may use the same requestId value for its own ticket', async () => {
+    await pool.query(`UPDATE tickets SET status = 'CANCELLED', updated_at = CURRENT_TIMESTAMP
+      WHERE session_id = $1 AND patient_id IN ($2, $3) AND status = 'WAITING'`, [sessionId, IDS.p2, IDS.p3]); // test data: free both patients
+    const sharedValue = randomUUID();
+    const a = await replayStatus(repA, sessionId, IDS.p2, sharedValue);
+    const b = await replayStatus(repB, sessionId, IDS.p3, sharedValue);
+    assert.equal(a.replayed, false);
+    assert.equal(b.replayed, false);
+    assert.notEqual(a.ticket.ticketId, b.ticket.ticketId);
+    await pool.query(`UPDATE tickets SET status = 'CANCELLED', updated_at = CURRENT_TIMESTAMP WHERE request_id = $1`,
+      [sharedValue]); // free P2/P3 again for the following cases
+  });
+
+  await t.test('2.7 lost PatientAccess → 403 even for a valid retry; the stored ticket is not returned', async () => {
+    await pool.query('DELETE FROM patient_access WHERE user_id = $1 AND patient_id = $2', [IDS.repB, IDS.p3]);
+    try {
+      await rejectsWith(replayStatus(repB, sessionId, IDS.p3, replay.requestId), 403, 'FORBIDDEN');
+    } finally {
+      await pool.query('INSERT INTO patient_access (user_id, patient_id) VALUES ($1, $2)', [IDS.repB, IDS.p3]);
+    }
   });
 
   await t.test('STOPPED and CLOSED sessions issue nothing', async () => {
@@ -154,6 +203,10 @@ test('WBS 1.7: ticket schema and transactional number allocation on PostgreSQL',
     await pool.query(`UPDATE queue_sessions SET status = 'CLOSED', closed_by = $1, closed_at = CURRENT_TIMESTAMP,
       updated_at = CURRENT_TIMESTAMP WHERE session_id = $2`, [IDS.staff, sessionId]);
     await rejectsWith(issue(repA, sessionId, IDS.p2), 409, SESSION_NOT_OPEN_CODE);
+    // 2.7: a valid retry is still answered after the session closed, without writing anything.
+    const late = await replayStatus(repB, sessionId, IDS.p3, replay.requestId);
+    assert.equal(late.replayed, true);
+    assert.equal(late.ticket.ticketId, replay.ticketId);
     const after = await counts(sessionId);
     assert.deepEqual({ tickets: after.tickets, events: after.events, counter: after.counter }, before);
   });
@@ -181,6 +234,19 @@ test('WBS 1.7: ticket schema and transactional number allocation on PostgreSQL',
     assert.ok(db.rows.every((r) => r.n === 1));
     const session = await one('SELECT last_issued_number FROM queue_sessions WHERE session_id = $1', [current]);
     assert.equal(session.last_issued_number, 4); // #1 earlier + three parallel successes, no gaps
+  });
+
+  await t.test('2.7 five concurrent sends with the same requestId → exactly one ticket, one event; all get the same ticket', async () => {
+    const current = (await one(`SELECT session_id FROM queue_sessions WHERE status = 'OPEN'`)).session_id;
+    await pool.query(`UPDATE tickets SET status = 'CANCELLED', updated_at = CURRENT_TIMESTAMP
+      WHERE session_id = $1 AND status = 'WAITING' AND patient_id = $2`, [current, IDS.p2]);
+    const before = await counts(current);
+    const requestId = randomUUID();
+    const results = await Promise.all(Array.from({ length: 5 }, () => replayStatus(repA, current, IDS.p2, requestId)));
+    assert.equal(new Set(results.map((r) => r.ticket.ticketId)).size, 1);
+    assert.equal(results.filter((r) => !r.replayed).length, 1, 'exactly one request created the ticket');
+    const after = await counts(current);
+    assert.deepEqual(after, { tickets: before.tickets + 1, events: before.events + 1, counter: before.counter + 1 });
   });
 
   await t.test('TicketEvent: one ISSUED row per ticket, DB-generated id/time, FK and no cascade', async () => {
