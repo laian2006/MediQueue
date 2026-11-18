@@ -16,6 +16,20 @@ function handle(operation) {
   };
 }
 
+function requireEmptyBody(req) {
+  const hasBody = Number(req.get('content-length') ?? 0) > 0
+    || req.get('transfer-encoding') !== undefined;
+  if (hasBody && (!req.is('application/json') || req.body === undefined)) {
+    throw new SessionError(400, 'VALIDATION_ERROR', 'Dữ liệu gửi kèm phải là JSON rỗng.');
+  }
+  if (req.body !== undefined && (
+    req.body === null || typeof req.body !== 'object' || Array.isArray(req.body)
+    || Object.keys(req.body).length !== 0
+  )) {
+    throw new SessionError(400, 'VALIDATION_ERROR', 'Thao tác phiên không nhận trường dữ liệu.');
+  }
+}
+
 export function createSessionRouter({ sessionService, authenticate, requireStaff }) {
   // No fallback authentication: missing shared middleware must fail at startup.
   if (typeof authenticate !== 'function' || typeof requireStaff !== 'function') {
@@ -33,20 +47,21 @@ export function createSessionRouter({ sessionService, authenticate, requireStaff
   }));
 
   router.post('/', authenticate, requireStaff, handle(async (req, res) => {
-    const hasBody = Number(req.get('content-length') ?? 0) > 0
-      || req.get('transfer-encoding') !== undefined;
-    if (hasBody && (!req.is('application/json') || req.body === undefined)) {
-      throw new SessionError(400, 'VALIDATION_ERROR', 'Dữ liệu gửi kèm phải là JSON rỗng.');
-    }
-    // No input fields. An empty object is accepted for generic JSON clients.
-    if (req.body !== undefined && (
-      req.body === null || typeof req.body !== 'object' || Array.isArray(req.body)
-      || Object.keys(req.body).length !== 0
-    )) {
-      throw new SessionError(400, 'VALIDATION_ERROR', 'Mở phiên không nhận trường dữ liệu.');
-    }
+    requireEmptyBody(req);
     const data = await sessionService.open(req.user);
     res.status(201).json({ data });
+  }));
+
+  router.post('/:sessionId/stop', authenticate, requireStaff, handle(async (req, res) => {
+    requireEmptyBody(req);
+    const data = await sessionService.stop(req.user, req.params.sessionId);
+    res.status(200).json({ data });
+  }));
+
+  router.post('/:sessionId/close', authenticate, requireStaff, handle(async (req, res) => {
+    requireEmptyBody(req);
+    const data = await sessionService.close(req.user, req.params.sessionId);
+    res.status(200).json({ data });
   }));
 
   return router;

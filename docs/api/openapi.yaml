@@ -425,7 +425,7 @@ paths:
             "application/json":
               schema:
                 "$ref": "#/components/schemas/Error"
-      description: "Thiết kế phiên bản 1.0 ban hành ngày 01/11/2026, áp dụng triển khai trong nhóm. Tài liệu không xác nhận API đã được lập trình. Chủ trì: An; WBS 2.1. Chỉ STAFF. CLOSED trả 409 INVALID_STATE; không có API mở lại STOPPED trong phạm vi hiện tại."
+      description: "Chủ trì An, WBS 2.1. Chỉ STAFF. OPEN chuyển STOPPED; STOPPED gọi lại trả nguyên phiên và giữ thời điểm/người ngừng. CLOSED trả 409 INVALID_STATE. Không có body hoặc JSON rỗng. Khóa QueueSession trong cùng giao dịch với cập nhật trạng thái; phiếu cũ tiếp tục được xử lý."
       parameters:
         -
           name: "sessionId"
@@ -492,7 +492,7 @@ paths:
             "application/json":
               schema:
                 "$ref": "#/components/schemas/Error"
-      description: "Thiết kế phiên bản 1.0 ban hành ngày 01/11/2026, áp dụng triển khai trong nhóm. Tài liệu không xác nhận API đã được lập trình. Chủ trì: An; WBS 2.1. Chỉ STAFF. Chỉ đóng từ STOPPED; OPEN trả 409 INVALID_STATE, STOPPED còn phiếu hoạt động trả 409 ACTIVE_TICKETS_REMAIN."
+      description: "Chủ trì An, WBS 2.1. Chỉ STAFF. Chỉ đóng STOPPED khi không còn WAITING, CALLED hoặc REGISTERING. Khóa QueueSession trước khi kiểm tra phiếu trong cùng giao dịch. OPEN trả 409 INVALID_STATE; còn phiếu trả 409 ACTIVE_TICKETS_REMAIN. CLOSED gọi lại trả nguyên phiên và giữ người/thời điểm đóng. Không có body hoặc JSON rỗng."
       parameters:
         -
           name: "sessionId"

@@ -76,6 +76,7 @@ export function createRoutes({ pool, noShowTimeoutSeconds }) {
   router.use('/sessions', createSessionRouter({
     sessionService: createSessionService({
       repository: createSessionRepository(pool),
+      pool,
     }),
     authenticate,
     requireStaff,
