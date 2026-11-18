@@ -15,7 +15,7 @@ const TICKET_KEYS = ['createdAt', 'lastCalledAt', 'number', 'patientId', 'sessio
 
 test('WBS 1.8: router refuses to start without shared authentication or services', async () => {
   const { createTicketRouter } = await import('../../src/modules/tickets/ticket.routes.js');
-  const issueService = { issue: async () => {} };
+  const issueService = { issueWithStatus: async () => {} };
   const queryService = { getById: async () => {}, getActive: async () => {} };
   const cancelService = { cancel: async () => {} };
   assert.throws(() => createTicketRouter({ issueService, queryService, cancelService }), TypeError);
