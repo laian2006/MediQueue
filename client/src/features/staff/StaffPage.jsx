@@ -157,7 +157,9 @@ export default function StaffPage({ api = staffApi, sessionPanel = null, demo = 
   }
 
   // Chốt thiết kế, mục 2: SessionPanel gọi onSessionChange sau khi API xác nhận đổi phiên.
-  const panel = isValidElement(sessionPanel) ? cloneElement(sessionPanel, { onSessionChange: reload }) : sessionPanel;
+  const panel = isValidElement(sessionPanel)
+    ? cloneElement(sessionPanel, { onSessionChange: reload, currentSession: snapshot?.session })
+    : sessionPanel;
 
   return (
     <main className="staff-page">
