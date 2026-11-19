@@ -1,6 +1,6 @@
 # Sprint 1 · Bàn giao của An
 
-Đối chiếu lần đầu ngày 12/11/2026 trên `main` tại `7a90974`, cập nhật ngày 18/11. Sprint 1 kéo dài từ 02–15/11, các đầu việc tổng hợp theo kế hoạch có hạn 13/11. Tài liệu này ghi kết quả rà soát và chuẩn bị buổi review, chưa có biên bản họp hoặc giờ thực tế được xác nhận.
+Đối chiếu lần đầu ngày 12/11/2026 trên `main` tại `7a90974`, cập nhật ngày 19/11. Sprint 1 kéo dài từ 02–15/11, các đầu việc tổng hợp theo kế hoạch có hạn 13/11. Tài liệu này ghi kết quả rà soát và chuẩn bị buổi review, chưa có biên bản họp hoặc giờ thực tế được xác nhận.
 
 ## Yêu cầu và kiến trúc đã rà soát
 
@@ -17,7 +17,7 @@
 - **1.7 và 1.8** đã có trên `main`, gồm migration `004`, nhật ký trong cùng giao dịch và API cấp, xem phiếu. **1.14** đã ghép giao diện người bệnh với các API này. [PR #11](https://github.com/laian2006/MediQueue/pull/11) · [PR #14](https://github.com/laian2006/MediQueue/pull/14)
 - **1.10 và 1.11:** Hoàng Anh đã sửa mock mất kết nối DB và ghép router có API hủy. An chạy lại đạt 198/198, không bỏ qua; #13 đã merge tại `67fe385` ngày 14/11. [PR #13](https://github.com/laian2006/MediQueue/pull/13)
 - **1.17:** Trung đã nối màn hình quầy với API thật và sửa ca polling lỗi khi request còn lại đang treo. An chạy lại frontend 9/9, build và E2E 12/12 đạt. #18 đã merge tại `5d5940e` ngày 16/11. [PR #18](https://github.com/laian2006/MediQueue/pull/18)
-- **1.19** đã có trên `main`. Với **1.20**, An đã duyệt tiêu chí PLAT-01 đến PLAT-05 trên #9. Ngày 18/11, #9 vẫn Draft tại `8720a19`. Trực cần cập nhật theo main đã có #13/#18, chạy lại ca lấy số → gọi số → `/board` với API thật. Trung review và đối chiếu số đang gọi, hàng chờ với **1.17**. [Review #9](https://github.com/laian2006/MediQueue/pull/9#pullrequestreview-5902613547)
+- **1.19** đã có trên `main`. Với **1.20**, An đã duyệt PLAT-01 đến PLAT-05 và kiểm tra lại bản `6aa81db` ngày 19/11. Backend 231/231, frontend 13/13, build và E2E lấy số → gọi số → `/board` đều đạt. An đối chiếu độc lập số đang gọi/hàng chờ của quầy và bảng, duyệt và merge #9 tại `56a946a`. Review chéo và demo/retro của nhóm tiếp tục ghi bằng chứng thực tế. [Review #9](https://github.com/laian2006/MediQueue/pull/9#pullrequestreview-5970963499)
 
 - **1.6:** An duyệt các tiêu chí AUTH-01 đến AUTH-05. Tài liệu và bằng chứng tích hợp đã merge qua [PR #17](https://github.com/laian2006/MediQueue/pull/17). Review chéo và hoạt động Sprint ghi theo thực tế.
 - **Kiểm tra trên `main` (`4f21920`, 14/11):** 144 test server đạt trên PostgreSQL 18.6, 7 test client đạt và build thành công. Commit này có thêm API hủy phiếu **2.13** qua [PR #15](https://github.com/laian2006/MediQueue/pull/15), thuộc Sprint 2.

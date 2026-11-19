@@ -18,7 +18,7 @@ Một quầy đăng ký ngoại trú, một hàng thông thường, dữ liệu 
 
 ## Mục tiêu chất lượng và nghiệm thu
 
-Yêu cầu chi tiết phần Trực: [khung, nhật ký và bảng công khai](platform.md). Bản bổ sung 1.21 đang chờ An duyệt, không thay thế trạng thái nghiệm thu/tích hợp.
+Yêu cầu chi tiết phần Trực tại [khung, nhật ký và bảng công khai](platform.md). An đã duyệt PLAT-01 đến PLAT-05 và nghiệm thu phần tích hợp bảng công khai qua PR #9 ngày 19/11/2026. Demo/retro và giờ thực tế của nhóm tiếp tục được ghi nhận theo hoạt động đã diễn ra.
 
 50 client trong 5 phút, polling 3 giây; mục tiêu p95 API ≤2 giây, UI cập nhật ≤5 giây trong điều kiện thử bình thường. Chưa có kết quả đo. Lưu bền sau API restart, rollback nguyên tử, quyền không lẫn tài khoản/hồ sơ, cài sạch được theo README.
 

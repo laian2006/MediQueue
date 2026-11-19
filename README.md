@@ -67,6 +67,8 @@ TEST_DATABASE_URL='postgresql://USER:PASSWORD@localhost:5432/mediqueue_test' npm
 
 Không có `TEST_DATABASE_URL` thì test tích hợp ghi SKIP. Các test tạo/xóa schema tạm riêng, không reset schema public. Kết quả khung: [ca 1.19](docs/testing/cases/1-19.md). Helper và DDL bàn giao ở [thiết kế TicketEvent](docs/architecture/ticket-event.md); 004 chỉ được ghép sau Ticket 003 trong task 1.7.
 
+`npm test` ở server chạy tối đa bốn tệp test song song để các pool thử cùng chia sẻ được giới hạn kết nối PostgreSQL. Các ca gửi nhiều yêu cầu đồng thời trong từng tệp vẫn được giữ. [Kết quả tích hợp ngày 19/11](docs/testing/reviews/2026-11-19-integration.md).
+
 ### Bảng gọi số công khai — task 1.20
 
 Mở http://localhost:5173/board, không cần đăng nhập. `GET /api/v1/public/board` trả đúng `{data:{currentTicket:{number,status}|null,waitingNumbers:[...],updatedAt}}`. Chỉ đọc phiên OPEN/STOPPED; số chờ tăng dần; không có phiên trả null và danh sách rỗng. Không trả tên, mã hồ sơ, ticketId/sessionId/patientId hoặc dữ liệu sức khỏe. Phản hồi không cache.

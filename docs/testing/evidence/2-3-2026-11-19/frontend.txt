@@ -1,0 +1,21 @@
+✔ each role goes to its own area; unknown role goes home (0.6913ms)
+✔ form validation asks for both fields; the password is not trimmed (0.8572ms)
+✔ error messages: wrong credentials, bad input, forbidden origin, network (0.2478ms)
+✔ only 401 counts as unauthenticated (0.1146ms)
+✔ board uses the public endpoint, preserves cancellation and validates successful responses (1.0262ms)
+✔ slow request never overlaps; next successful snapshot replaces old numbers (2.3576ms)
+✔ failure reports an error, retries and recovers without synthesizing data (1.6082ms)
+✔ cleanup aborts pending fetch and ignores late completion (0.807ms)
+✔ staff API uses the 1.11 endpoints through http.js with cookies (23.6405ms)
+✔ server rejections keep error.code for StaffPage (0.5728ms)
+✔ JSON, session credentials and AbortSignal are preserved (21.5231ms)
+✔ structured API failures and invalid JSON are errors, never success (0.8239ms)
+✔ network errors propagate and 204 has no body (0.2048ms)
+ℹ tests 13
+ℹ suites 0
+ℹ pass 13
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 133.8491

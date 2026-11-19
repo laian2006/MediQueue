@@ -1,0 +1,14 @@
+▶ 1.14: luồng phiếu người bệnh qua trình duyệt và API thật
+  ✔ đăng nhập và chỉ thấy hồ sơ được cấp quyền, phiên rỗng không cấp số (907.8711ms)
+  ✔ mất phản hồi sau khi ghi DB, gửi lại cùng body và đọc lại cùng phiếu (292.3391ms)
+  ✔ đổi hồ sơ ẩn phiếu cũ, khi cấp đồng thời đọc lại phiếu đúng quyền (168.5441ms)
+  ✔ phản hồi cấp số 201 hiện đúng phiếu của hồ sơ đang chọn (273.8351ms)
+✔ 1.14: luồng phiếu người bệnh qua trình duyệt và API thật (2689.8501ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2765.8071
