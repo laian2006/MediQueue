@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "node --env-file-if-exists=.env --watch src/app/server.js",
     "start": "node --env-file-if-exists=.env src/app/server.js",
-    "test": "node --env-file-if-exists=.env --test",
+    "test": "node --env-file-if-exists=.env --test --test-concurrency=4",
     "db:migrate": "node --env-file-if-exists=.env scripts/database.js migrate",
     "db:seed": "node --env-file-if-exists=.env scripts/database.js seed"
   },

@@ -18,10 +18,12 @@ test('WBS 1.8: router refuses to start without shared authentication or services
   const issueService = { issueWithStatus: async () => {} };
   const queryService = { getById: async () => {}, getActive: async () => {} };
   const cancelService = { cancel: async () => {} };
-  assert.throws(() => createTicketRouter({ issueService, queryService, cancelService }), TypeError);
-  assert.throws(() => createTicketRouter({ queryService, cancelService, authenticate: () => {} }), TypeError);
-  assert.throws(() => createTicketRouter({ issueService, cancelService, authenticate: () => {} }), TypeError);
-  assert.throws(() => createTicketRouter({ issueService, queryService, authenticate: () => {} }), TypeError);
+  const requireRepresentative = () => {};
+  assert.throws(() => createTicketRouter({ issueService, queryService, cancelService, authenticate: () => {} }), /requireRepresentative middleware is required/);
+  assert.throws(() => createTicketRouter({ issueService, queryService, cancelService, requireRepresentative }), /authenticate middleware is required/);
+  assert.throws(() => createTicketRouter({ queryService, cancelService, authenticate: () => {}, requireRepresentative }), /issueService is required/);
+  assert.throws(() => createTicketRouter({ issueService, cancelService, authenticate: () => {}, requireRepresentative }), /queryService is required/);
+  assert.throws(() => createTicketRouter({ issueService, queryService, authenticate: () => {}, requireRepresentative }), /cancelService is required/);
 });
 
 // Full shared app (1.19) with real cookie login (1.4), sessions (1.1), transaction and TicketEvent.

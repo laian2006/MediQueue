@@ -70,5 +70,6 @@ test('GET /patients: STAFF is 403 and never reaches the repository; no login is 
 });
 
 test('createPatientRouter refuses to start without authenticate', () => {
-  assert.throws(() => createPatientRouter({ patientAccessService: {} }), TypeError);
+  assert.throws(() => createPatientRouter({ patientAccessService: {}, requireRepresentative }), /authenticate middleware is required/);
+  assert.throws(() => createPatientRouter({ patientAccessService: {}, authenticate: () => {} }), /requireRepresentative middleware is required/);
 });
