@@ -1,54 +1,52 @@
-# Bàn giao Sprint 1 — phần của Phan Trung Trực
+# Bàn giao Sprint 1 - phần của Phan Trung Trực
 
-WBS: 1.19, 1.20, 1.21. Ngày cập nhật: 05/11/2026. Lịch trong kế hoạch: Sprint 1 tuần 10–11; task 1.21 từ 02–13/11. Giờ dự kiến 8 giờ cho 1.21 là phân bổ công việc, không phải giờ thực tế đã ghi nhận.
+Cập nhật 19/11/2026. WBS 1.19, 1.20, 1.21. Bản bàn giao PR #9 tích hợp `main@70dfca1`.
 
-## Bằng chứng hiện có
+## Trạng thái thực tế
 
-| Phần 1.21 | Đầu ra/bằng chứng | Trạng thái |
+| Phần | Bằng chứng | Trạng thái |
 | --- | --- | --- |
-| Yêu cầu module | [platform requirements](../requirements/platform.md) | Đã bổ sung, chờ An duyệt; không ghi đã duyệt trước code |
-| Module/API docs | [platform module](../modules/platform.md), README/code/test trên nhánh 1.19 và 1.20 | Đã viết, chờ reviewer |
-| Review chéo | [review kỹ thuật phần An](../testing/reviews/1-21-sessions.md) | 1.1 đã đọc/thử cùng khung; 1.2 chưa có mã để review |
-| Tích hợp khung | Auth thật + phiên + PostgreSQL, test cookie/restart/đồng thời | Đã kiểm tra trên nhánh bàn giao, chưa chạy lại sau merge main |
-| Tích hợp bảng | SQL/DTO/UI/polling trên PostgreSQL thật với fixture Ticket | Đã kiểm tra; chờ API 1.8/1.11 và schema 003/004 để thử toàn luồng |
-| Demo, Sprint Review, Retrospective | Kịch bản/checklist bên dưới | Đã chuẩn bị; chưa diễn ra, chưa có biên bản/xác nhận nhóm |
-| Giờ thực tế | Do Trực ghi theo thời gian làm việc của mình | Chưa cung cấp, không tự điền 8 giờ |
+| 1.19 - khung và nhật ký | PR #8 đã merge; npm ci, migration/seed chạy lại, test DB/cookie/restart; rollback Ticket/Event qua API thật | Đã kiểm tra lại cùng nền main mới nhất; chờ xác nhận nghiệm thu nhóm nếu chưa có |
+| 1.20 - bảng công khai | [Báo cáo](../testing/cases/1-20.md), luồng `/patient` → `/staff` → `/board` và JSON ẩn danh | Đã tự kiểm tra trên bản ghép; chờ Trung review và An merge PR #9 |
+| 1.11 và 1.17 - gọi số và màn hình quầy | PR #13 và #18 đã merge; các ca gọi số dùng API thật | Đã chạy cùng 1.20; chờ Trung đối chiếu độc lập |
+| 1.21 - yêu cầu/tài liệu | PR #10 đã merge; An duyệt PLAT-01 đến PLAT-05 trên PR #9 | Tài liệu và bằng chứng cập nhật; chờ xác nhận hoạt động nhóm |
+| Review phần An | [Review 1.1/1.2](../testing/reviews/1-21-sessions.md), đọc mã và thử UI quyền/mở phiên | Đã bổ sung review kỹ thuật 1.2; chưa gửi Approve hoặc xác nhận thay người khác |
+| Demo/Review/Retro | Kịch bản bên dưới | Chưa có biên bản nhóm; kiểm tra kỹ thuật không thay buổi họp |
+| Giờ thực tế | Trực ghi theo thời gian của mình | Chưa cung cấp; không dùng 8 giờ dự kiến làm số thực tế |
 
-## Bàn giao theo người nhận
+## Việc còn lại theo người
 
-- An: yêu cầu/AC chờ duyệt, nhánh 1.19/1.20 và trạng thái tích hợp; cần review/merge theo quy trình. Không tự merge thay An.
-- Hưng: cookie/Origin/http.js đã ghép; cần rà lại allowlist JSON công khai cùng Trực khi nghiệm thu.
-- Đức Anh: pool/transaction/helper và thiết kế 004 trên 1.19; ghép 003/004, API 1.8, thử rollback Ticket/Event thật.
-- Hoàng Anh: service gọi dùng cùng transaction/helper; cung cấp API 1.11 và dữ liệu cập nhật Ticket để kiểm tra bảng.
-- Đạt/Trung: routes chung và API client có sẵn; Trung đối chiếu số hiện tại/hàng chờ của console với bảng công khai và review phần Trực.
+- Trực: xử lý phản hồi review và kiểm tra lại trên main sau khi PR #9 merge.
+- Trung: đối chiếu số chờ/số đang gọi của `/staff` với `/board`; review PR #9.
+- Hưng: rà JSON công khai và quyền truy cập trong bản tích hợp.
+- An: nghiệm thu và merge theo quy trình.
+- Cả nhóm: demo/review/retro, ghi kết quả và quyết định thật.
 
-Danh sách này là nội dung cần bàn giao; chưa khẳng định đã gửi tin nhắn hoặc thành viên đã nhận/xác nhận.
+Đây là danh sách bàn giao, không khẳng định đã gửi tin nhắn hoặc những người trên đã xác nhận.
 
-## Kịch bản demo sau khi phụ thuộc được ghép
+## Kịch bản demo sau tích hợp
 
-1. Cài sạch theo README trên DB thử riêng, chạy migration/seed và khởi động client/server.
-2. Mở `/board` ở cửa sổ không đăng nhập. Không có phiên thì số hiện tại rỗng, không có số chờ; JSON không có danh tính.
-3. STAFF đăng nhập/mở phiên; đại diện đăng nhập và lấy phiếu qua API/UI thật của các chủ mô đun. So sánh số đã lưu với bảng.
-4. STAFF gọi tiếp qua API/UI 1.11/1.17. Bảng tự cập nhật cùng số; phiếu được gọi rời danh sách chờ. Trung đối chiếu console.
-5. Kiểm tra JSON công khai bằng Network: chỉ currentTicket={number,status}|null, waitingNumbers, updatedAt; không UUID/ID/tên/hồ sơ.
-6. Dừng API thử: bảng báo mất kết nối/dữ liệu có thể đã cũ. Chạy lại: bảng tự phục hồi, không tự cấp/đổi số.
-7. Ghi commit, DB/migration, bước và kết quả thật vào ca kiểm tra; reviewer xác nhận, An nghiệm thu sau khi ghép main.
+1. Cài theo README trên DB demo riêng, migrate/seed, khởi động API và client.
+2. Mở /board không đăng nhập; không có phiên thì bảng rỗng đúng hợp đồng.
+3. staff_01 đăng nhập/mở phiên thật. rep_a đăng nhập, chọn hồ sơ được phép và lấy vé qua /patient.
+4. Kiểm tra số chờ trên /board. Bấm gọi tại /staff, đối chiếu số đang gọi và các số còn chờ trên hai màn hình.
+5. Đối chiếu JSON chỉ có currentTicket={number,status}|null, waitingNumbers, updatedAt; không ID/tên/hồ sơ.
+6. Dừng API thử, xác nhận cảnh báo dữ liệu cũ; chạy lại, xác nhận tự phục hồi.
+7. Ghi phiên bản, bước, kết quả, reviewer và phản hồi thật. Không dùng nút gọi mock hoặc SQL UPDATE làm bằng chứng gọi thật.
 
-Không dùng SQL UPDATE hoặc UI mock trong bước 3–4 để thay bằng chứng toàn luồng. Bản kiểm tra 1.20 hiện dùng dữ liệu thử trực tiếp và đã ghi rõ giới hạn đó.
+## Nội dung chuẩn bị cho retro
 
-## Nội dung để nhóm thảo luận trong retro
+Ghi nhận xung đột tích hợp ở router chung, thời điểm bàn giao các API phụ thuộc và kết quả đối chiếu quầy/bảng. Ghi quyết định và người phụ trách sau buổi retro.
 
-- Điểm thuận lợi quan sát được: khung auth/phiên dùng một pool và hợp đồng chung; helper bàn giao độc lập khi Ticket chưa có; test có schema riêng.
-- Vấn đề còn mở: nhánh khung chưa merge làm các task sau chưa thử được trên main; API 1.8/1.11 và UI phiên 1.2 chưa có tại thời điểm kiểm tra.
-- Đề xuất để nhóm quyết định: ưu tiên review/merge 1.19, chốt bàn giao schema/API và một buổi kiểm tra số giữa console/bảng công khai.
-- Chưa có quyết định/owner/thời hạn được nhóm xác nhận. Đây là nội dung chuẩn bị, không phải biên bản họp đã diễn ra.
+## Checklist trước khi đóng phần việc
 
-## Checklist còn lại trước khi đóng 1.21
-
-- [ ] An duyệt user stories/AC của Trực.
-- [ ] Trung review các thay đổi khung/bảng/tài liệu của Trực.
-- [ ] Trực review UI 1.2 khi An bàn giao; xử lý phản hồi review có thật.
-- [ ] Ghép các phụ thuộc, chạy luồng lấy/gọi số thật và đối chiếu với Trung/Hưng.
-- [ ] Chạy lại kiểm tra trên main sau merge.
-- [ ] Tham gia demo/review/retro và ghi biên bản/xác nhận thực tế.
-- [ ] Trực ghi giờ thực tế, An cập nhật tiến độ theo quy trình; chưa tự đánh dấu Done.
+- [x] Tích hợp `main@70dfca1`, giữ auth/patients/sessions/tickets/queue và thêm public board.
+- [x] Bỏ fixture Ticket cũ, dùng migration thật, thử cấp vé và rollback Ticket/Event qua API.
+- [x] Server 231/231 không SKIP; client 13/13 và build đạt.
+- [x] Luồng lấy số → gọi tại quầy → bảng công khai và JSON ẩn danh đạt trên trình duyệt; hồi quy quầy, phiên và người bệnh đạt.
+- [x] Bổ sung review kỹ thuật UI phiên 1.2 và cập nhật tài liệu.
+- [x] An duyệt PLAT-01 đến PLAT-05.
+- [ ] Trung review và đối chiếu độc lập với `/staff`; Hưng rà dữ liệu công khai.
+- [ ] An merge PR #9; chạy lại kiểm tra trên main.
+- [ ] Demo/Review/Retro có biên bản/xác nhận thực tế.
+- [ ] Trực ghi giờ thực tế; An cập nhật tiến độ. Chưa tự đánh dấu Done.

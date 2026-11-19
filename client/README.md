@@ -13,7 +13,9 @@ Khung task 1.19 dùng React 19, React Router 7 và Vite 8. Cài `npm ci`, chạy
 
 Unit/component test nằm __tests__ cạnh feature. Không nối thẳng PostgreSQL hoặc đưa bí mật server vào client. Khi dùng API thật, bỏ nguồn mock khỏi luồng bàn giao.
 
-`src/app/routes.jsx` hiện có `/` kiểm tra kết nối DB thật qua API và `/patient-demo` để xem UI mock 1.13. Không gán UI mock vào luồng thật. Chủ feature thêm route vào file chung theo PR; chưa có LoginPage, StaffPage, bảng công khai trong 1.19.
+`src/app/routes.jsx` có `/` kiểm tra kết nối DB, `/patient-demo` để xem UI mock 1.13 và `/board` cho bảng công khai 1.20. Các route `/login`, `/patient` và `/staff` dùng API thật để đăng nhập, lấy số, quản lý phiên và gọi số.
+
+Bảng công khai đọc `/public/board` qua http.js; chỉ nhận số/trạng thái/thời điểm. Khi API lỗi, hiển thị cảnh báo và đánh dấu dữ liệu có thể đã cũ, giữ số lần đọc thành công gần nhất. Polling không chồng yêu cầu, dừng và hủy fetch khi rời trang. Migration Ticket 003 đã có trên nền main; thiếu schema là lỗi, không hiển thị hàng rỗng giả.
 
 API client giữ nguyên envelope `{data: ...}`; gửi cookie bằng `credentials: 'include'`, JSON cho body, hỗ trợ AbortSignal và lỗi ApiError có status/code/details:
 

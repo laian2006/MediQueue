@@ -1,0 +1,42 @@
+TAP version 13
+# Subtest: WBS 1.20: real login, issuance, audit rollback and public board
+    # Subtest: authorized selection and issue API put the stored number on the anonymous board
+    ok 1 - authorized selection and issue API put the stored number on the anonymous board
+      ---
+      duration_ms: 15.2636
+      type: 'test'
+      ...
+# API request failed.
+    # Subtest: database audit failure rolls back the ticket, allocation and board change
+    ok 2 - database audit failure rolls back the ticket, allocation and board change
+      ---
+      duration_ms: 20.7922
+      type: 'test'
+      ...
+    # Subtest: real call-next API moves FIFO ticket from waiting to current
+    ok 3 - real call-next API moves FIFO ticket from waiting to current
+      ---
+      duration_ms: 10.1654
+      type: 'test'
+      ...
+    # Subtest: API restart preserves the public snapshot and real staff cookie
+    ok 4 - API restart preserves the public snapshot and real staff cookie
+      ---
+      duration_ms: 11.7755
+      type: 'test'
+      ...
+    1..4
+ok 1 - WBS 1.20: real login, issuance, audit rollback and public board
+  ---
+  duration_ms: 278.3646
+  type: 'test'
+  ...
+1..1
+# tests 5
+# suites 0
+# pass 5
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 450.2135

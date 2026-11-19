@@ -4,6 +4,8 @@ Chủ trì: Phan Trung Trực (TV6). Reviewer: Trần Quang Trung. Căn cứ: [p
 
 Trạng thái ngày 05/11/2026: bổ sung yêu cầu/AC để An duyệt; không phải bản đã được phê duyệt. Khung 1.19 và bảng 1.20 đã có trên nhánh bàn giao riêng, chưa ở main. Tài liệu này được viết sau phần triển khai đó, không ghi nhận giả bước duyệt trước khi code.
 
+Cập nhật kỹ thuật 14/11/2026: khung 1.19 và tài liệu 1.21 đã merge, schema 003/004 và API cấp vé đã có trên main. Bảng 1.20 tích hợp nền main b8bae9e; API gọi 1.11 còn PR #13, đã thử trong bản ghép riêng. Trạng thái yêu cầu ngày 05/11 ở trên là lịch sử; chưa có bằng chứng An duyệt AC. Xem [bàn giao hiện tại](../sprints/sprint-1-platform.md).
+
 ## Phạm vi
 
 Trực chủ trì khung React/Express/PostgreSQL, cấu hình/pool/transaction, helper TicketEvent, API và UI công khai. Không viết thay auth/PatientAccess (Hưng), Ticket/cấp số (Đức Anh), FIFO/gọi lượt (Hoàng Anh), vòng đời phiên (An), UI người bệnh (Đạt) hay console nhân viên (Trung).

@@ -24,6 +24,9 @@ import { createTicketRouter } from '../modules/tickets/ticket.routes.js';
 import { withTransaction } from '../shared/db/transaction.js';
 import { appendTicketEvent } from '../modules/audit/append-ticket-event.js';
 
+import { createPublicBoardRepository } from '../modules/public-board/public-board.repository.js';
+import { createPublicBoardService } from '../modules/public-board/public-board.service.js';
+import { createPublicBoardRouter } from '../modules/public-board/public-board.routes.js';
 import { createQueueService } from '../modules/queue/queue.service.js';
 import { createQueueRouter } from '../modules/queue/queue.routes.js';
 
@@ -125,6 +128,10 @@ export function createRoutes({ pool, noShowTimeoutSeconds }) {
     queueService,
     authenticate,
     requireStaff,
+  }));
+
+  router.use('/public', createPublicBoardRouter({
+    boardService: createPublicBoardService({ repository: createPublicBoardRepository(pool) }),
   }));
 
   return router;

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, Route, Routes } from 'react-router-dom';
 import { http } from '../shared/api/http.js';
+import PublicBoardPage from '../features/public-board/PublicBoardPage.jsx';
 import PatientPage from '../features/patient/PatientPage.jsx';
 import { patientMockApi } from '../features/patient/mocks/patient.mock.js';
 import StaffPage from '../features/staff/StaffPage.jsx';
@@ -28,6 +29,7 @@ function HomePage() {
           : 'Chưa kết nối được hệ thống. Vui lòng thử lại.'}</p>
       {status === 'error' && <button onClick={() => setAttempt((n) => n + 1)}>Thử lại</button>}
     </section>
+    <p><Link to="/board">Mở bảng gọi số công khai</Link></p>
     <p><Link to="/login">Đăng nhập</Link></p>
     <p><Link to="/patient-demo">Xem thử giao diện người bệnh</Link></p>
     <p className="app-note">Bản xem thử dùng dữ liệu mô phỏng, không tạo phiếu đăng ký thật.</p>
@@ -37,6 +39,7 @@ function HomePage() {
 export default function AppRoutes() {
   return <Routes>
     <Route path="/" element={<HomePage />} />
+    <Route path="/board" element={<PublicBoardPage />} />
     <Route path="/login" element={<LoginPage />} />
     <Route path="/patient" element={<PatientPage key="patient" />} />
     <Route path="/staff" element={<StaffPage sessionPanel={<SessionPanel />} />} />
