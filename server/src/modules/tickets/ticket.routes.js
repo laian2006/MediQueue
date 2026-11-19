@@ -25,7 +25,10 @@ function handle(operation) {
  * - cancelService: createTicketCancelService(...) (WBS 2.13).
  * express.json() must run before this router (shared app, WBS 1.19).
  */
-export function createTicketRouter({ issueService, queryService, cancelService, authenticate }) {
+export function createTicketRouter({ issueService, queryService, cancelService, authenticate, requireRepresentative }) {
+  if (typeof requireRepresentative !== 'function') {
+    throw new TypeError('Shared requireRepresentative middleware is required.');
+  }
   // No fallback authentication: missing shared middleware must fail at startup.
   if (typeof authenticate !== 'function') {
     throw new TypeError('Shared authenticate middleware is required.');
@@ -41,7 +44,7 @@ export function createTicketRouter({ issueService, queryService, cancelService, 
     next();
   });
 
-  router.post('/', authenticate, handle(async (req, res) => {
+  router.post('/', authenticate, requireRepresentative, handle(async (req, res) => {
     if (!req.is('application/json') || req.body === undefined) {
       throw new TicketError(400, 'VALIDATION_ERROR', 'Dữ liệu gửi kèm phải là JSON.');
     }
@@ -53,17 +56,17 @@ export function createTicketRouter({ issueService, queryService, cancelService, 
   }));
 
   // Registered before '/:ticketId' so "active" is never parsed as an id.
-  router.get('/active', authenticate, handle(async (req, res) => {
+  router.get('/active', authenticate, requireRepresentative, handle(async (req, res) => {
     const data = await queryService.getActive(req.user, { ...req.query });
     res.status(200).json({ data });
   }));
 
-  router.get('/:ticketId', authenticate, handle(async (req, res) => {
+  router.get('/:ticketId', authenticate, requireRepresentative, handle(async (req, res) => {
     const data = await queryService.getById(req.user, req.params.ticketId);
     res.status(200).json({ data });
   }));
 
-  router.post('/:ticketId/cancel', authenticate, handle(async (req, res) => {
+  router.post('/:ticketId/cancel', authenticate, requireRepresentative, handle(async (req, res) => {
     if (req.body !== undefined) {
       throw new TicketError(400, 'VALIDATION_ERROR', 'Hủy phiếu không nhận dữ liệu gửi kèm.');
     }

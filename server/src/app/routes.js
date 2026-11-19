@@ -6,6 +6,7 @@ import { createAuthRouter } from '../modules/auth/auth.routes.js';
 
 import { createAuthenticate } from '../shared/middleware/authenticate.js';
 import { requireStaff } from '../shared/middleware/require-staff.js';
+import { requireRepresentative } from '../shared/middleware/require-representative.js';
 
 import { createSessionRepository } from '../modules/sessions/session.repository.js';
 import { createSessionService } from '../modules/sessions/session.service.js';
@@ -70,6 +71,7 @@ export function createRoutes({ pool, noShowTimeoutSeconds }) {
       repository: createPatientAccessRepository(pool),
     }),
     authenticate,
+    requireRepresentative,
   }));
 
   // Đăng ký API quản lý phiên.
@@ -112,6 +114,7 @@ export function createRoutes({ pool, noShowTimeoutSeconds }) {
     }),
 
     authenticate,
+    requireRepresentative,
   }));
 
   // Truyền cấu hình thời gian chờ vào service hàng chờ.
