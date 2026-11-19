@@ -4,6 +4,7 @@ import test from 'node:test';
 import express from 'express';
 import { createPatientAccessService } from '../patient-access.service.js';
 import { createPatientRouter } from '../patient.routes.js';
+import { requireRepresentative } from '../../../shared/middleware/require-representative.js';
 
 const rep = { userId: '00000000-0000-4000-8000-000000000002', role: 'REPRESENTATIVE', displayName: 'A' };
 const staff = { userId: '00000000-0000-4000-8000-000000000001', role: 'STAFF', displayName: 'S' };
@@ -32,6 +33,7 @@ async function start(t) {
   app.use('/patients', createPatientRouter({
     patientAccessService: createPatientAccessService({ repository }),
     authenticate: fakeAuthenticate,
+    requireRepresentative,
   }));
   const server = app.listen(0, '127.0.0.1');
   await once(server, 'listening');
