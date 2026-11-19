@@ -7,7 +7,8 @@
   kiểm tra phiếu hoạt động → tăng `last_issued_number` → tạo WAITING → ghi
   TicketEvent `ISSUED`.
 - `POST /api/v1/tickets`: chỉ REPRESENTATIVE có PatientAccess, body đúng
-  `{patientId, sessionId, requestId}`. Thành công trả 201 `{data: TicketView}`.
+  `{patientId, sessionId, requestId}`. Cấp mới trả 201, gửi lại hợp lệ trả 200,
+  cả hai đều là `{data: TicketView}`.
 - `GET /api/v1/tickets/{ticketId}`: đọc phiếu theo id, ở mọi trạng thái.
 - `GET /api/v1/tickets/active?patientId=&sessionId=`: phiếu WAITING, CALLED
   hoặc REGISTERING của hồ sơ trong phiên. Không có thì trả `200 {data: null}`.
@@ -15,8 +16,12 @@
   sessionId, patientId, number, status, lastCalledAt, createdAt, updatedAt.
   Thời gian là UTC ISO 8601. `waitingAhead` là số phiếu WAITING cùng phiên có
   number nhỏ hơn; null khi phiếu không WAITING. Đây không phải thời gian chờ.
-- **Chưa có:** trả lại phiếu cũ khi gửi lại cùng `requestId` (2.7). Ở Sprint 1,
-  trùng (người gửi, requestId) trả 409 `IDEMPOTENCY_CONFLICT`.
+- **Gửi lại (2.7):** khóa là (`issued_by_user_id` lấy từ đăng nhập, `requestId`),
+  tra trên toàn bộ lịch sử phiếu, sau khi kiểm tra quyền và trước khi kiểm tra
+  phiên OPEN. Cùng khóa, cùng `patientId` và `sessionId` thì trả **200** với đúng
+  phiếu đã lưu ở trạng thái hiện tại, kể cả khi phiếu đã hủy/kết thúc hoặc phiên đã
+  đóng; không cấp số và không ghi sự kiện. Cùng khóa nhưng khác nội dung trả 409
+  `IDEMPOTENCY_CONFLICT`. Gửi lại đồng thời chỉ tạo một phiếu.
 - Migration `004_ticket_events.sql` đúng DDL Trực bàn giao trong
   `docs/architecture/ticket-event.md`.
 
@@ -30,7 +35,7 @@
 | 404 | NOT_FOUND | Không có phiên (`POST`) hoặc không có phiếu (`GET /{ticketId}`) |
 | 409 | INVALID_STATE | Phiên STOPPED/CLOSED (An chốt 04/11) |
 | 409 | ACTIVE_TICKET_EXISTS | Hồ sơ đã có phiếu hoạt động; `details.ticketId` là phiếu đó |
-| 409 | IDEMPOTENCY_CONFLICT | Sprint 1: cùng người gửi dùng lại requestId |
+| 409 | IDEMPOTENCY_CONFLICT | Cùng người gửi dùng lại requestId với patientId hoặc sessionId khác |
 
 Body lỗi luôn là `{error: {code, message, details?}}`. Mọi phản hồi của router
 đều có `Cache-Control: no-store`.
@@ -82,8 +87,10 @@ main; thay đổi sau này dùng số mới. `scaffold.test.js` giữ danh sách
   `patientId` có trong danh sách này; hồ sơ khác sẽ nhận 403.
 - **Lấy số:** sinh `requestId` (UUID v4) **một lần** cho mỗi lượt bấm, rồi gửi
   `{patientId, sessionId, requestId}`. Không gửi người tạo, số phiếu hay trạng
-  thái. Khi thử lại cùng một lượt thì giữ nguyên `requestId`. Ở Sprint 1 việc
-  thử lại vẫn nhận 409; từ 2.7 sẽ nhận lại phiếu cũ.
+  thái. Khi thử lại cùng một lượt thì giữ nguyên cả ba trường. Thử lại
+  hợp lệ nhận **200** với đúng phiếu đã cấp (lần đầu là 201); xử lý 200 và 201 như
+  nhau. Phiếu trả về có thể đã ở trạng thái khác WAITING nếu đã bị hủy hoặc gọi.
+  Lượt bấm mới (sau khi phiếu cũ kết thúc) phải sinh `requestId` mới.
 - **409 `ACTIVE_TICKET_EXISTS`:** dùng `details.ticketId` để mở phiếu đang có,
   không báo lỗi chung chung.
 - **Sau khi tải lại trang:** gọi `GET /active` cho hồ sơ đang chọn. `data: null`

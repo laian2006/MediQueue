@@ -8,62 +8,73 @@ function readError(error) {
   return 'Không tải được phiên hiện tại. Vui lòng thử lại.';
 }
 
-export default function SessionPanel({ onSessionChange }) {
+const actionMessages = {
+  open: { pending: 'Đang mở phiên…', success: 'Đã mở phiên đăng ký.' },
+  stop: { pending: 'Đang ngừng cấp số…', success: 'Đã ngừng cấp số mới. Tiếp tục xử lý các phiếu còn lại.' },
+  close: { pending: 'Đang đóng phiên…', success: 'Đã đóng phiên đăng ký.' },
+};
+
+const conflicts = {
+  SESSION_ALREADY_ACTIVE: 'Máy chủ từ chối mở thêm vì đã có phiên chưa đóng.',
+  INVALID_STATE: 'Trạng thái phiên đã thay đổi. Thao tác vừa gửi không được chấp nhận.',
+  ACTIVE_TICKETS_REMAIN: 'Còn phiếu đang chờ hoặc tiếp nhận. Hãy xử lý hết trước khi đóng phiên.',
+  NOT_FOUND: 'Không tìm thấy phiên vừa thao tác.',
+};
+
+export default function SessionPanel({ onSessionChange, currentSession }) {
   const headingId = useId();
   const request = useRef(null);
   const [session, setSession] = useState(undefined);
   const [pending, setPending] = useState('refresh');
   const [notice, setNotice] = useState(null);
 
-  const load = useCallback(async (action) => {
+  const load = useCallback(async (action, sessionId) => {
     if (request.current) return false;
     const controller = new AbortController();
     const { signal } = controller;
     request.current = controller;
     setPending(action);
     setNotice(null);
-    let openProblem = '';
-
+    let unconfirmed = false;
     try {
-      if (action === 'open') {
+      if (action !== 'refresh') {
         try {
-          const opened = await sessionApi.open({ signal });
+          const changed = action === 'open'
+            ? await sessionApi.open({ signal })
+            : await sessionApi[action](sessionId, { signal });
           if (signal.aborted) return false;
-          setSession(opened);
-          setNotice({ message: 'Đã mở phiên đăng ký.', success: true });
-          return true;
+          setSession(changed.status === 'CLOSED' ? null : changed);
+          setNotice({ message: actionMessages[action].success, success: true });
         } catch (error) {
           if (signal.aborted || error?.status === 401 || error?.status === 403) throw error;
           setSession(undefined);
-          openProblem = error?.code === 'SESSION_ALREADY_ACTIVE'
-            ? 'Máy chủ từ chối mở thêm vì đã có phiên chưa đóng.'
-            : 'Chưa nhận được xác nhận mở phiên.';
-          setNotice({ message: `${openProblem} Đang tải lại trạng thái.` });
+          unconfirmed = !conflicts[error?.code];
+          setNotice({ message: conflicts[error?.code]
+            ?? 'Chưa nhận được xác nhận thao tác. Đang tải lại trạng thái từ máy chủ.' });
         }
       } else {
         setSession(undefined);
       }
 
       const current = await sessionApi.getStaffCurrent({ signal });
-      if (!signal.aborted) {
-        setSession(current);
-        if (openProblem) {
-          const result = current ? 'Đã tải phiên hiện tại từ máy chủ.' : 'Hiện chưa có phiên. Bạn có thể thử mở lại.';
-          setNotice({ message: `${openProblem} ${result}` });
-        }
+      if (signal.aborted) return false;
+      setSession(current);
+      if (unconfirmed) {
+        setNotice({ message: 'Chưa nhận được xác nhận thao tác. Đã tải lại trạng thái phiên từ máy chủ.' });
       }
+      return true;
     } catch (error) {
       if (!signal.aborted) {
         setSession(undefined);
         setNotice({ message: readError(error), signIn: error?.status === 401 });
       }
+      return false;
     } finally {
       if (request.current === controller) {
         request.current = null;
         setPending(null);
       }
     }
-    return false;
   }, []);
 
   useEffect(() => {
@@ -77,8 +88,13 @@ export default function SessionPanel({ onSessionChange }) {
     };
   }, [load]);
 
-  async function open() {
-    if (session === null && await load('open')) onSessionChange?.();
+  // StaffPage supplies its authoritative polling snapshot, including other windows' changes.
+  useEffect(() => {
+    if (currentSession !== undefined && !request.current) setSession(currentSession);
+  }, [currentSession]);
+
+  async function perform(action) {
+    if (await load(action, session?.sessionId)) onSessionChange?.();
   }
 
   return (
@@ -88,12 +104,23 @@ export default function SessionPanel({ onSessionChange }) {
       {session === null && <strong>Chưa có phiên</strong>}
       {session && <strong>{session.status === 'STOPPED' ? 'Đã ngừng cấp số mới' : 'Đang nhận số'}</strong>}
       {session && <span className="staff-muted">Số đã cấp gần nhất: {session.lastIssuedNumber}</span>}
+      {session?.status === 'STOPPED' && <p>Tiếp tục gọi và xử lý phiếu cũ. Đóng phiên sau khi hết phiếu hoạt động.</p>}
       {session === null && (
-        <button type="button" className="staff-button staff-button--secondary" disabled={Boolean(pending)} onClick={open}>
-          {pending === 'open' ? 'Đang mở phiên…' : 'Mở phiên'}
+        <button type="button" className="staff-button staff-button--secondary" disabled={Boolean(pending)} onClick={() => perform('open')}>
+          {pending === 'open' ? actionMessages.open.pending : 'Mở phiên'}
         </button>
       )}
-      <button type="button" className="staff-button staff-button--secondary" disabled={Boolean(pending)} onClick={() => load('refresh')}>
+      {session?.status === 'OPEN' && (
+        <button type="button" className="staff-button staff-button--secondary" disabled={Boolean(pending)} onClick={() => perform('stop')}>
+          {pending === 'stop' ? actionMessages.stop.pending : 'Ngừng cấp số'}
+        </button>
+      )}
+      {session?.status === 'STOPPED' && (
+        <button type="button" className="staff-button staff-button--secondary" disabled={Boolean(pending)} onClick={() => perform('close')}>
+          {pending === 'close' ? actionMessages.close.pending : 'Đóng phiên'}
+        </button>
+      )}
+      <button type="button" className="staff-button staff-button--secondary" disabled={Boolean(pending)} onClick={() => perform('refresh')}>
         Tải lại phiên
       </button>
       {notice && <p role={notice.success ? 'status' : 'alert'}>{notice.message}</p>}

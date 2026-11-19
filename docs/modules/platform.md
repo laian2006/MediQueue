@@ -4,12 +4,7 @@ Chủ trì: Phan Trung Trực. WBS Sprint 1: 1.19, 1.20, tài liệu/review 1.21
 
 ## Phiên bản và trạng thái bàn giao
 
-Cập nhật 14/11/2026. Khung 1.19 và tài liệu 1.21 đã merge qua PR #8/#10. Bản bàn giao 1.20 tích hợp nền main b8bae9e, giữ login/patient/staff/SessionPanel và API cấp/đọc vé. Bảng công khai ở PR #9, chưa merge.
-
-- Schema 001-004 thật đã có; không còn dùng fixture Ticket sao từ nhánh 1.7.
-- 156 test server đạt, 0 lỗi, 1 ca gọi thật chờ 1.11; 11 test client và build đạt.
-- Bản ghép thử riêng với PR #13@258fbf1 đạt luồng cấp/gọi số -> bảng; không thay thế nghiệm thu main.
-- Chờ 1.11 merge, console 1.17, review/đối chiếu nhóm và kiểm tra sau merge PR #9.
+Cập nhật 19/11/2026. Khung 1.19 và tài liệu 1.21 đã merge qua PR #8/#10. Bản 1.20 trong PR #9 đã tích hợp `main@70dfca1`, gồm API gọi số #13, màn hình quầy #18, gửi lại requestId #19 và vòng đời phiên. Kết quả tự kiểm tra và các bước nghiệm thu còn lại nằm trong [báo cáo 1.20](../testing/cases/1-20.md).
 
 ## Khung và cấu hình
 
@@ -47,8 +42,8 @@ Polling tải ngay và đợi 3 giây sau khi xong mới tải tiếp. Cleanup h
 
 ## Phụ thuộc và bằng chứng
 
-- 1.7/1.8 đã có trên main; 1.11 còn ở PR #13. Console hàng đợi staff vẫn là mock 1.16 chờ 1.17.
-- Test 1.20 dùng schema 003 thật. Test public-board-flow cấp vé qua API, kiểm tra bảng, lỗi audit và restart; tự SKIP ca gọi khi queue.routes.js chưa có.
+- Test tích hợp `public-board-flow.test.js` dùng migration thật, kiểm tra cấp vé, gọi FIFO, quầy bận, rollback TicketEvent và lưu bền sau khi API khởi động lại.
+- Test `public-board-flow.spec.js` cấp và gọi số từ giao diện thật, so sánh hàng chờ/lượt đang gọi ở `/staff` và `/board`, và kiểm tra đúng các trường JSON công khai.
 - Dùng DB test riêng cho server npm test; client npm test và npm run build. Không thêm framework/lockfile.
 - [Báo cáo 1.20](../testing/cases/1-20.md), [khung 1.19](../testing/cases/1-19.md), [review phần An](../testing/reviews/1-21-sessions.md), [checklist](../sprints/sprint-1-platform.md).
-- Chưa có xác nhận reviewer/AC/demo/retro hoặc kết quả tải/p95; không suy ra Done từ kết quả kỹ thuật.
+- An đã duyệt PLAT-01 đến PLAT-05. Trung review PR #9, An nghiệm thu và nhóm ghi nhận demo/retro theo kết quả thực tế.

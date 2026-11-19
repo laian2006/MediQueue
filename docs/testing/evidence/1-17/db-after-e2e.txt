@@ -1,0 +1,24 @@
+ number |  status   | called_at_set | code 
+--------+-----------+---------------+------
+      1 | CANCELLED | f             | P002
+      2 | CANCELLED | f             | P001
+      3 | CANCELLED | f             | P003
+      4 | CALLED    | t             | P002
+      5 | WAITING   | f             | P001
+      6 | WAITING   | f             | P003
+(6 rows)
+
+ number |  action   | from_status | to_status | username 
+--------+-----------+-------------+-----------+----------
+      1 | ISSUED    |             | WAITING   | rep_a
+      2 | ISSUED    |             | WAITING   | rep_a
+      3 | ISSUED    |             | WAITING   | rep_b
+      1 | CANCELLED | WAITING     | CANCELLED | rep_a
+      2 | CANCELLED | WAITING     | CANCELLED | rep_a
+      3 | CANCELLED | WAITING     | CANCELLED | rep_b
+      4 | ISSUED    |             | WAITING   | rep_a
+      5 | ISSUED    |             | WAITING   | rep_a
+      6 | ISSUED    |             | WAITING   | rep_b
+      4 | CALLED    | WAITING     | CALLED    | staff_01
+(10 rows)
+

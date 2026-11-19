@@ -2,7 +2,6 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
 import { once } from 'node:events';
-import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import pg from 'pg';
 import { createApp } from '../../src/app/app.js';
@@ -118,10 +117,7 @@ test('WBS 1.20: real login, issuance, audit rollback and public board', {
     assert.equal(retried.body.data.ticket.number, first.number + 1);
     assert.deepEqual((await board()).waitingNumbers, [first.number, first.number + 1]);
   });
-  await t.test('real call-next API moves FIFO ticket from waiting to current', {
-    skip: !existsSync(new URL('../../src/modules/queue/queue.routes.js', import.meta.url))
-      && 'Waiting for WBS 1.11 / PR #13 to merge; no simulated call is accepted.',
-  }, async () => {
+  await t.test('real call-next API moves FIFO ticket from waiting to current', async () => {
     const called = await call('POST', '/queue/call-next', staff, { sessionId });
     assert.equal(called.status, 200);
     assert.equal(called.body.data.ticketId, first.ticketId);

@@ -1,0 +1,16 @@
+▶ 2.2: session controls on the real staff screen
+  ✔ opens once, syncs another window, stops and closes an empty session (9439.1471ms)
+  ✔ new session starts at zero; real tickets arrive in both windows (2962.0685ms)
+  ✔ double stop sends once; STOPPED rejects new tickets and keeps old tickets (3467.9877ms)
+  ✔ close refuses active tickets; real cancellations allow close and clear the other window (2999.2604ms)
+  ✔ lost stop response shows uncertainty and reloads the committed state (130.0932ms)
+  ✔ 360px layout remains within the viewport (229.4927ms)
+✔ 2.2: session controls on the real staff screen (21735.0306ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 21812.6426

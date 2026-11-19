@@ -6,7 +6,7 @@ Mô phỏng một quầy đăng ký ngoại trú và một hàng chờ thông th
 
 ## Cài và chạy — task 1.19
 
-Bản tích hợp nền main b8bae9e đã có khung React → Express → PostgreSQL (1.19), xác thực/hồ sơ (1.4/1.5), phiên (1.1/1.2), cấp/đọc vé (1.7/1.8) và giao diện người bệnh thật (1.14). Nhánh 1.20 bổ sung bảng công khai `/board`; `/patient-demo` vẫn là mock riêng. API gọi số 1.11 đang ở PR #13; hàng đợi nhân viên còn dùng mock 1.16, chưa phải luồng thật 1.17.
+Ứng dụng chạy trên React, Express và PostgreSQL. Đăng nhập tại `/login`, lấy và xem phiếu tại `/patient`, mở/ngừng/đóng phiên và gọi số tại `/staff`. Bảng `/board` hiển thị số đang gọi và số đang chờ, không yêu cầu đăng nhập. `/patient-demo` dùng dữ liệu mô phỏng. API hỗ trợ hủy phiếu WAITING và gửi lại cùng requestId.
 
 Yêu cầu: **Node.js 22.12+ (khuyến nghị 24 LTS), npm 10+, PostgreSQL 18**. Dùng npm, giữ một `package-lock.json` trong mỗi package. Các phiên bản thư viện được khóa chính xác; máy mới dùng `npm ci`, không tạo lockfile của yarn/pnpm.
 
@@ -39,7 +39,7 @@ Yêu cầu: **Node.js 22.12+ (khuyến nghị 24 LTS), npm 10+, PostgreSQL 18**.
 
    Mở **http://localhost:5173**. Trang chủ phải báo cơ sở dữ liệu đã kết nối. Client không cần `.env` với cấu hình mặc định; nếu đổi cổng API, sao chép `client/.env.example` thành `.env` rồi đổi `API_PROXY_TARGET` và các cổng/origin tương ứng. Vite chuyển `/api` đến Express và giữ Origin của trình duyệt. `localhost` và `127.0.0.1` là hai origin khác nhau, dùng nhất quán `localhost` khi mở UI.
 
-Tài khoản seed: `staff_01`, `rep_a`, `rep_b`, mật khẩu thử `Demo@12345`; xem [hợp đồng xác thực](docs/modules/auth.md). Mở `/login` để đăng nhập; người đại diện vào `/patient`, nhân viên vào `/staff`. Panel phiên 1.2 dùng API thật; hàng đợi/nút gọi của staff hiện vẫn là mock 1.16. Cookie HttpOnly và store `auth_sessions` PostgreSQL được tạo bởi thư viện khi dùng phiên lần đầu; đăng nhập vẫn còn sau restart API. Origin khác cấu hình bị từ chối, lớp `http.js` gửi cookie và JSON. Khung này dành cho phát triển/demo; triển khai sau reverse proxy HTTPS cần chốt cấu hình proxy tin cậy trước khi bật cookie Secure, không tự tin cậy mọi proxy.
+Tài khoản seed: `staff_01`, `rep_a`, `rep_b`, mật khẩu thử `Demo@12345`; xem [hợp đồng xác thực](docs/modules/auth.md). Đăng nhập tại `/login`; dùng cửa sổ riêng tư để mở tài khoản đại diện song song với nhân viên. Cookie HttpOnly và store `auth_sessions` PostgreSQL được tạo bởi thư viện khi dùng phiên lần đầu; đăng nhập vẫn còn sau restart API. Origin khác cấu hình bị từ chối, lớp `http.js` gửi cookie và JSON. Khung này dành cho phát triển/demo; triển khai sau reverse proxy HTTPS cần chốt cấu hình proxy tin cậy trước khi bật cookie Secure, không tự tin cậy mọi proxy.
 
 ### Kiểm tra
 
@@ -73,7 +73,7 @@ Mở http://localhost:5173/board, không cần đăng nhập. `GET /api/v1/publi
 
 UI tải ngay khi mở rồi đọc lại sau mỗi 3 giây kể từ khi yêu cầu trước kết thúc; không gửi chồng yêu cầu. Mất kết nối có cảnh báo và giữ nhãn dữ liệu có thể đã cũ; không tự tạo số hoặc báo thành công giả. Chuyển trang hủy yêu cầu đang chờ.
 
-Ngày 14/11/2026, nhánh 1.20 đã tích hợp nền main b8bae9e và dùng migration 001–004 thật; đã bỏ fixture Ticket cũ. Test cấp vé → bảng công khai và rollback Ticket/Event chạy trên DB thật. Ca gọi số qua API tự ghi SKIP khi module 1.11 chưa có; bản ghép thử riêng với PR #13 đã đạt, chưa thay thế kiểm tra trên main sau merge. Dùng DB test riêng, không dùng DB demo; xem [kết quả 1.20](docs/testing/cases/1-20.md).
+Kiểm thử toàn luồng dùng một DB PostgreSQL thử mới đã migrate/seed. Lấy hai số tại `/patient`, gọi số đầu tại `/staff` và đối chiếu số đang gọi, hàng chờ và JSON ẩn danh tại `/board`. Xem [cách chạy E2E](tests/README.md) và [kết quả 1.20](docs/testing/cases/1-20.md).
 
 ## Đọc trước khi làm
 

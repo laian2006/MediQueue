@@ -7,7 +7,7 @@
 - `POST /api/v1/auth/login` và `GET /api/v1/auth/me` (server session, cookie `mediqueue.sid`).
 - Middleware dùng chung `authenticate.js`, `require-staff.js` và hàm quyền `patients/patient-access.service.js`.
 - Task 1.5: `GET /api/v1/patients` (`patient.routes.js`) và `LoginPage` ở `client/src/features/auth`. Điều hướng sau đăng nhập: REPRESENTATIVE → `/patient`, STAFF → `/staff`; hai màn hình này vẫn dùng mock đến khi Đạt (1.14) và Trung (1.17) nối API thật.
-- Chưa làm: `POST /auth/logout` (task 2.5). Kiểm tra Origin và cấu hình app chung do Trực làm ở 1.19. Chưa đánh dấu task Done.
+- Chưa làm: `POST /auth/logout` (task 2.5). Giới hạn số lần thử mật khẩu chưa được chốt ở task nào, ngoài phạm vi hiện tại. Kiểm tra Origin và cấu hình app chung do Trực làm ở 1.19, đã có trên `main`.
 
 ## Tài khoản thử (chỉ dùng cho DB thử/demo)
 
@@ -100,9 +100,22 @@ TEST_DATABASE_URL='postgresql://USER:PASSWORD@localhost:5432/mediqueue_test' nod
 
 Thiếu `TEST_DATABASE_URL` thì test ghi SKIP, không được báo là đã pass. Kết quả lần chạy: `docs/testing/cases/1-4.md`.
 
-## Điều kiện để Done
+## Trạng thái và điều kiện để Done
 
-Chạy lại test trên PostgreSQL thật và khung chung sau khi Trực bàn giao 1.19; An review; gửi hợp đồng xác thực/quyền cho An, Đức Anh, Hoàng Anh, Đạt; kiểm tra với cookie thật qua store PostgreSQL và trình duyệt.
+Cập nhật 14/11/2026, đối chiếu trên `main` tại `fbbcf79`. Yêu cầu và AC: [requirements/auth.md](../requirements/auth.md). Kết quả kiểm tra tích hợp: [ca thử 1.6](../testing/cases/1-6.md).
+
+Đã đạt:
+
+- An đã review và merge 1.4 và 1.5 vào `main`.
+- Đã chạy lại trên PostgreSQL thật và khung chung 1.19: toàn bộ test server 142 đạt, test client 7 đạt, `npm run build` thành công.
+- Đã kiểm tra cookie thật qua store PostgreSQL (`auth_sessions`, phiên còn sau khi khởi động lại API) và trình duyệt: đăng nhập, `GET /patients` trả 200 cho đại diện, 403 cho STAFF, 401 khi chưa đăng nhập.
+- Hợp đồng xác thực/quyền đang được dùng trên `main` bởi mô đun phiên (An) và mô đun phiếu (Đức Anh). Mô đun hàng đợi (Hoàng Anh, 1.10 và 1.11) và màn hình người bệnh (Đạt, 1.14) dùng trên nhánh riêng, chưa vào `main`.
+
+Còn lại:
+
+- Xác nhận của Đạt về cách dùng `patientsApi.list()` và `isUnauthenticated` trên `/patient`, chờ 1.14 vào `main`.
+- Chạy lại phần tích hợp trên `main` sau khi PR của task 1.6 được merge.
+- Đăng xuất (2.5); cookie `Secure` qua HTTPS thật. Giới hạn số lần thử mật khẩu chưa có task, ngoài phạm vi hiện tại.
 
 ## Danh sách hồ sơ và đăng nhập trên giao diện — task 1.5
 
@@ -120,7 +133,7 @@ Bàn giao cho Đạt (chọn hồ sơ trong `PatientPage`):
 
 - Gọi `patientsApi.list()` thay cho `api.getPatients()` mock; dữ liệu nằm trong `response.data`.
 - Danh sách rỗng là `200` với `[]`: giải thích rõ và không cho lấy số.
-- Phản hồi 401 (hết phiên 8 giờ hoặc chưa đăng nhập): dùng `isUnauthenticated(error)` và đưa người dùng về `/login`, không hiển thị dữ liệu cũ.
+- Phản hồi 401 (hết phiên 8 giờ hoặc chưa đăng nhập): dùng `isUnauthenticated(error)`, báo cần đăng nhập kèm đường dẫn về `/login` (như #14), không hiển thị dữ liệu cũ. Tự chuyển trang để Sprint 2 cùng luồng đăng xuất.
 
 Chạy test 1.5 từ thư mục `server`:
 

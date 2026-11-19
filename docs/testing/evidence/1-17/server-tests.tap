@@ -1,0 +1,1033 @@
+
+> mediqueue-server@0.1.0 test
+> node --env-file-if-exists=.env --test --test-reporter=tap
+
+.env not found. Continuing without it.
+TAP version 13
+# .env not found. Continuing without it.
+# Subtest: business write and event share one client; helper executes only its parameterized INSERT
+ok 1 - business write and event share one client; helper executes only its parameterized INSERT
+  ---
+  duration_ms: 5.9059
+  ...
+# Subtest: event failure propagates and rolls back the whole business operation
+ok 2 - event failure propagates and rolls back the whole business operation
+  ---
+  duration_ms: 0.9732
+  ...
+# Subtest: rollback failure discards connection and preserves original error
+ok 3 - rollback failure discards connection and preserves original error
+  ---
+  duration_ms: 0.648
+  ...
+# Subtest: reject malformed event before any SQL; recall keeps CALLED as before/after
+ok 4 - reject malformed event before any SQL; recall keeps CALLED as before/after
+  ---
+  duration_ms: 1.2773
+  ...
+# .env not found. Continuing without it.
+# Subtest: valid login returns the user DTO (no hash/username) and an 8h absolute expiry
+ok 5 - valid login returns the user DTO (no hash/username) and an 8h absolute expiry
+  ---
+  duration_ms: 143.8391
+  ...
+# Subtest: username is trimmed before lookup
+ok 6 - username is trimmed before lookup
+  ---
+  duration_ms: 95.2021
+  ...
+# Subtest: wrong password and unknown user give the identical 401
+ok 7 - wrong password and unknown user give the identical 401
+  ---
+  duration_ms: 292.4471
+  ...
+# Subtest: invalid input is a 400 and never reaches the repository
+ok 8 - invalid input is a 400 and never reaches the repository
+  ---
+  duration_ms: 2.3544
+  ...
+# Subtest: repository failures propagate to the shared error handler
+ok 9 - repository failures propagate to the shared error handler
+  ---
+  duration_ms: 0.3623
+  ...
+# .env not found. Continuing without it.
+# Subtest: hash is salted, never contains the plain password, and verifies
+ok 10 - hash is salted, never contains the plain password, and verifies
+  ---
+  duration_ms: 475.1553
+  ...
+# Subtest: malformed or unsupported stored hashes never verify and never throw
+ok 11 - malformed or unsupported stored hashes never verify and never throw
+  ---
+  duration_ms: 125.6601
+  ...
+# Subtest: hashPassword rejects empty or non-string input
+ok 12 - hashPassword rejects empty or non-string input
+  ---
+  duration_ms: 1.0456
+  ...
+# .env not found. Continuing without it.
+# Subtest: listPatients returns only the three DTO fields
+ok 13 - listPatients returns only the three DTO fields
+  ---
+  duration_ms: 4.1059
+  ...
+# Subtest: STAFF and malformed actors cannot list or assert, and never reach the repository
+ok 14 - STAFF and malformed actors cannot list or assert, and never reach the repository
+  ---
+  duration_ms: 3.4436
+  ...
+# Subtest: canAccessPatient: granted → true; other profile, staff, bad id → false
+ok 15 - canAccessPatient: granted → true; other profile, staff, bad id → false
+  ---
+  duration_ms: 0.4255
+  ...
+# Subtest: assertCanAccessPatient: 400 bad id, 403 outside access, resolves when granted
+ok 16 - assertCanAccessPatient: 400 bad id, 403 outside access, resolves when granted
+  ---
+  duration_ms: 0.2717
+  ...
+# Subtest: repository failures propagate unchanged
+ok 17 - repository failures propagate unchanged
+  ---
+  duration_ms: 1.1862
+  ...
+# .env not found. Continuing without it.
+# Subtest: GET /patients: representative gets only the DTO fields, no-store
+ok 18 - GET /patients: representative gets only the DTO fields, no-store
+  ---
+  duration_ms: 140.2333
+  ...
+# Subtest: GET /patients: userId in the query string is ignored
+ok 19 - GET /patients: userId in the query string is ignored
+  ---
+  duration_ms: 16.4137
+  ...
+# Subtest: GET /patients: STAFF is 403 and never reaches the repository; no login is 401
+ok 20 - GET /patients: STAFF is 403 and never reaches the repository; no login is 401
+  ---
+  duration_ms: 30.8985
+  ...
+# Subtest: createPatientRouter refuses to start without authenticate
+ok 21 - createPatientRouter refuses to start without authenticate
+  ---
+  duration_ms: 1.11
+  ...
+# .env not found. Continuing without it.
+# Subtest: FIFO selects the lowest number regardless of array order
+ok 22 - FIFO selects the lowest number regardless of array order
+  ---
+  duration_ms: 2.3049
+  ...
+# Subtest: FIFO skips completed, cancelled and no-show tickets
+ok 23 - FIFO skips completed, cancelled and no-show tickets
+  ---
+  duration_ms: 0.2781
+  ...
+# Subtest: Tickets from another session do not affect selection or counter occupancy
+ok 24 - Tickets from another session do not affect selection or counter occupancy
+  ---
+  duration_ms: 0.3134
+  ...
+# Subtest: An empty queue returns null and leaves the counter idle
+ok 25 - An empty queue returns null and leaves the counter idle
+  ---
+  duration_ms: 0.4446
+  ...
+# Subtest: Selection does not mutate input rows or array order
+ok 26 - Selection does not mutate input rows or array order
+  ---
+  duration_ms: 1.56
+  ...
+# Subtest: CALLED blocks selection with or without waiting tickets
+ok 27 - CALLED blocks selection with or without waiting tickets
+  ---
+  duration_ms: 0.7003
+  ...
+# Subtest: REGISTERING blocks selection with or without waiting tickets
+ok 28 - REGISTERING blocks selection with or without waiting tickets
+  ---
+  duration_ms: 1.2984
+  ...
+# Subtest: State transition: WAITING -> WAITING
+ok 29 - State transition: WAITING -> WAITING
+  ---
+  duration_ms: 0.246
+  ...
+# Subtest: State transition: WAITING -> CALLED
+ok 30 - State transition: WAITING -> CALLED
+  ---
+  duration_ms: 0.4383
+  ...
+# Subtest: State transition: WAITING -> REGISTERING
+ok 31 - State transition: WAITING -> REGISTERING
+  ---
+  duration_ms: 0.4554
+  ...
+# Subtest: State transition: WAITING -> COMPLETED
+ok 32 - State transition: WAITING -> COMPLETED
+  ---
+  duration_ms: 0.2059
+  ...
+# Subtest: State transition: WAITING -> CANCELLED
+ok 33 - State transition: WAITING -> CANCELLED
+  ---
+  duration_ms: 0.1025
+  ...
+# Subtest: State transition: WAITING -> NO_SHOW
+ok 34 - State transition: WAITING -> NO_SHOW
+  ---
+  duration_ms: 0.0696
+  ...
+# Subtest: State transition: CALLED -> WAITING
+ok 35 - State transition: CALLED -> WAITING
+  ---
+  duration_ms: 0.0534
+  ...
+# Subtest: State transition: CALLED -> CALLED
+ok 36 - State transition: CALLED -> CALLED
+  ---
+  duration_ms: 0.0487
+  ...
+# Subtest: State transition: CALLED -> REGISTERING
+ok 37 - State transition: CALLED -> REGISTERING
+  ---
+  duration_ms: 0.0616
+  ...
+# Subtest: State transition: CALLED -> COMPLETED
+ok 38 - State transition: CALLED -> COMPLETED
+  ---
+  duration_ms: 0.0576
+  ...
+# Subtest: State transition: CALLED -> CANCELLED
+ok 39 - State transition: CALLED -> CANCELLED
+  ---
+  duration_ms: 0.0566
+  ...
+# Subtest: State transition: CALLED -> NO_SHOW
+ok 40 - State transition: CALLED -> NO_SHOW
+  ---
+  duration_ms: 0.0502
+  ...
+# Subtest: State transition: REGISTERING -> WAITING
+ok 41 - State transition: REGISTERING -> WAITING
+  ---
+  duration_ms: 0.0482
+  ...
+# Subtest: State transition: REGISTERING -> CALLED
+ok 42 - State transition: REGISTERING -> CALLED
+  ---
+  duration_ms: 0.0538
+  ...
+# Subtest: State transition: REGISTERING -> REGISTERING
+ok 43 - State transition: REGISTERING -> REGISTERING
+  ---
+  duration_ms: 0.0479
+  ...
+# Subtest: State transition: REGISTERING -> COMPLETED
+ok 44 - State transition: REGISTERING -> COMPLETED
+  ---
+  duration_ms: 0.0489
+  ...
+# Subtest: State transition: REGISTERING -> CANCELLED
+ok 45 - State transition: REGISTERING -> CANCELLED
+  ---
+  duration_ms: 0.0554
+  ...
+# Subtest: State transition: REGISTERING -> NO_SHOW
+ok 46 - State transition: REGISTERING -> NO_SHOW
+  ---
+  duration_ms: 0.0662
+  ...
+# Subtest: State transition: COMPLETED -> WAITING
+ok 47 - State transition: COMPLETED -> WAITING
+  ---
+  duration_ms: 0.0483
+  ...
+# Subtest: State transition: COMPLETED -> CALLED
+ok 48 - State transition: COMPLETED -> CALLED
+  ---
+  duration_ms: 0.0424
+  ...
+# Subtest: State transition: COMPLETED -> REGISTERING
+ok 49 - State transition: COMPLETED -> REGISTERING
+  ---
+  duration_ms: 0.0502
+  ...
+# Subtest: State transition: COMPLETED -> COMPLETED
+ok 50 - State transition: COMPLETED -> COMPLETED
+  ---
+  duration_ms: 0.0471
+  ...
+# Subtest: State transition: COMPLETED -> CANCELLED
+ok 51 - State transition: COMPLETED -> CANCELLED
+  ---
+  duration_ms: 0.1124
+  ...
+# Subtest: State transition: COMPLETED -> NO_SHOW
+ok 52 - State transition: COMPLETED -> NO_SHOW
+  ---
+  duration_ms: 0.0687
+  ...
+# Subtest: State transition: CANCELLED -> WAITING
+ok 53 - State transition: CANCELLED -> WAITING
+  ---
+  duration_ms: 0.0486
+  ...
+# Subtest: State transition: CANCELLED -> CALLED
+ok 54 - State transition: CANCELLED -> CALLED
+  ---
+  duration_ms: 0.0484
+  ...
+# Subtest: State transition: CANCELLED -> REGISTERING
+ok 55 - State transition: CANCELLED -> REGISTERING
+  ---
+  duration_ms: 0.0454
+  ...
+# Subtest: State transition: CANCELLED -> COMPLETED
+ok 56 - State transition: CANCELLED -> COMPLETED
+  ---
+  duration_ms: 0.0504
+  ...
+# Subtest: State transition: CANCELLED -> CANCELLED
+ok 57 - State transition: CANCELLED -> CANCELLED
+  ---
+  duration_ms: 0.1331
+  ...
+# Subtest: State transition: CANCELLED -> NO_SHOW
+ok 58 - State transition: CANCELLED -> NO_SHOW
+  ---
+  duration_ms: 0.078
+  ...
+# Subtest: State transition: NO_SHOW -> WAITING
+ok 59 - State transition: NO_SHOW -> WAITING
+  ---
+  duration_ms: 0.062
+  ...
+# Subtest: State transition: NO_SHOW -> CALLED
+ok 60 - State transition: NO_SHOW -> CALLED
+  ---
+  duration_ms: 0.0898
+  ...
+# Subtest: State transition: NO_SHOW -> REGISTERING
+ok 61 - State transition: NO_SHOW -> REGISTERING
+  ---
+  duration_ms: 0.1712
+  ...
+# Subtest: State transition: NO_SHOW -> COMPLETED
+ok 62 - State transition: NO_SHOW -> COMPLETED
+  ---
+  duration_ms: 0.3968
+  ...
+# Subtest: State transition: NO_SHOW -> CANCELLED
+ok 63 - State transition: NO_SHOW -> CANCELLED
+  ---
+  duration_ms: 0.1343
+  ...
+# Subtest: State transition: NO_SHOW -> NO_SHOW
+ok 64 - State transition: NO_SHOW -> NO_SHOW
+  ---
+  duration_ms: 0.1065
+  ...
+# Subtest: Unknown statuses are rejected
+ok 65 - Unknown statuses are rejected
+  ---
+  duration_ms: 0.2852
+  ...
+# Subtest: Invalid input is rejected
+ok 66 - Invalid input is rejected
+  ---
+  duration_ms: 0.7389
+  ...
+# .env not found. Continuing without it.
+# Subtest: DTO exposes only the six API fields, UTC and explicit null times
+ok 67 - DTO exposes only the six API fields, UTC and explicit null times
+  ---
+  duration_ms: 3.6257
+  ...
+# Subtest: DTO converts stopped/closed timestamps to UTC
+ok 68 - DTO converts stopped/closed timestamps to UTC
+  ---
+  duration_ms: 0.448
+  ...
+# Subtest: no current session returns null
+ok 69 - no current session returns null
+  ---
+  duration_ms: 0.5058
+  ...
+# Subtest: both authenticated roles may read current session
+ok 70 - both authenticated roles may read current session
+  ---
+  duration_ms: 0.4879
+  ...
+# Subtest: missing/malformed actor cannot read or open, and never reaches the repository
+ok 71 - missing/malformed actor cannot read or open, and never reaches the repository
+  ---
+  duration_ms: 1.4903
+  ...
+# Subtest: unknown roles are rejected before DB access
+ok 72 - unknown roles are rejected before DB access
+  ---
+  duration_ms: 0.5119
+  ...
+# Subtest: representative cannot open even if a route middleware is misconfigured
+ok 73 - representative cannot open even if a route middleware is misconfigured
+  ---
+  duration_ms: 0.3583
+  ...
+# Subtest: staff opens using the trusted actor ID and gets a DTO
+ok 74 - staff opens using the trusted actor ID and gets a DTO
+  ---
+  duration_ms: 0.302
+  ...
+# Subtest: the active-session unique violation becomes a business conflict
+ok 75 - the active-session unique violation becomes a business conflict
+  ---
+  duration_ms: 0.729
+  ...
+# Subtest: unrelated unique/FK/connection errors must not masquerade as an active session
+ok 76 - unrelated unique/FK/connection errors must not masquerade as an active session
+  ---
+  duration_ms: 1.8635
+  ...
+# Subtest: read failures propagate to the shared error handler
+ok 77 - read failures propagate to the shared error handler
+  ---
+  duration_ms: 1.8803
+  ...
+# .env not found. Continuing without it.
+# Subtest: DTO exposes exactly the eight contract fields in UTC and hides internal columns
+ok 78 - DTO exposes exactly the eight contract fields in UTC and hides internal columns
+  ---
+  duration_ms: 3.8003
+  ...
+# Subtest: OPEN session: lock, check, allocate, insert and ISSUED event share one transaction client
+ok 79 - OPEN session: lock, check, allocate, insert and ISSUED event share one transaction client
+  ---
+  duration_ms: 1.7227
+  ...
+# Subtest: missing or malformed actor is 401 before any access check or DB call
+ok 80 - missing or malformed actor is 401 before any access check or DB call
+  ---
+  duration_ms: 1.2263
+  ...
+# Subtest: STAFF and unknown roles cannot issue tickets
+ok 81 - STAFF and unknown roles cannot issue tickets
+  ---
+  duration_ms: 0.5936
+  ...
+# Subtest: invalid bodies are 400 and never reach the DB
+ok 82 - invalid bodies are 400 and never reach the DB
+  ---
+  duration_ms: 2.3815
+  ...
+# Subtest: upper-case UUIDs are normalised before access check and insert
+ok 83 - upper-case UUIDs are normalised before access check and insert
+  ---
+  duration_ms: 0.4809
+  ...
+# Subtest: no PatientAccess is 403 FORBIDDEN and no transaction starts
+ok 84 - no PatientAccess is 403 FORBIDDEN and no transaction starts
+  ---
+  duration_ms: 0.5322
+  ...
+# Subtest: unknown session is 404; nothing is allocated or inserted
+ok 85 - unknown session is 404; nothing is allocated or inserted
+  ---
+  duration_ms: 0.2943
+  ...
+# Subtest: STOPPED and CLOSED sessions are 409 and issue nothing
+ok 86 - STOPPED and CLOSED sessions are 409 and issue nothing
+  ---
+  duration_ms: 0.648
+  ...
+# Subtest: patient with an active ticket gets 409 ACTIVE_TICKET_EXISTS with that ticketId
+ok 87 - patient with an active ticket gets 409 ACTIVE_TICKET_EXISTS with that ticketId
+  ---
+  duration_ms: 0.7794
+  ...
+# Subtest: event helper failure propagates so the whole transaction rolls back
+ok 88 - event helper failure propagates so the whole transaction rolls back
+  ---
+  duration_ms: 0.4667
+  ...
+# Subtest: reused requestId of the same sender is 409 in Sprint 1 (replay arrives in 2.7)
+ok 89 - reused requestId of the same sender is 409 in Sprint 1 (replay arrives in 2.7)
+  ---
+  duration_ms: 0.2744
+  ...
+# Subtest: unrelated unique/FK/connection errors are not disguised as business conflicts
+ok 90 - unrelated unique/FK/connection errors are not disguised as business conflicts
+  ---
+  duration_ms: 0.7035
+  ...
+# Subtest: service refuses to start without the shared transaction/event/access dependencies
+ok 91 - service refuses to start without the shared transaction/event/access dependencies
+  ---
+  duration_ms: 0.7392
+  ...
+# .env not found. Continuing without it.
+# Subtest: TicketView: waitingAhead only for WAITING, null for every other status
+ok 92 - TicketView: waitingAhead only for WAITING, null for every other status
+  ---
+  duration_ms: 5.0329
+  ...
+# Subtest: getById: authorised representative gets the view; access is checked on the ticket patient
+ok 93 - getById: authorised representative gets the view; access is checked on the ticket patient
+  ---
+  duration_ms: 0.917
+  ...
+# Subtest: getById: no access is 403 and returns nothing; unknown id is 404; bad id is 400 without DB
+ok 94 - getById: no access is 403 and returns nothing; unknown id is 404; bad id is 400 without DB
+  ---
+  duration_ms: 1.9416
+  ...
+# Subtest: getActive: access is checked BEFORE the ticket query; outsider never reaches the DB
+ok 95 - getActive: access is checked BEFORE the ticket query; outsider never reaches the DB
+  ---
+  duration_ms: 0.9829
+  ...
+# Subtest: getActive: returns the view, or null when the patient has no active ticket
+ok 96 - getActive: returns the view, or null when the patient has no active ticket
+  ---
+  duration_ms: 0.5554
+  ...
+# Subtest: getActive: missing, extra, repeated or malformed parameters are 400 without DB
+ok 97 - getActive: missing, extra, repeated or malformed parameters are 400 without DB
+  ---
+  duration_ms: 0.9104
+  ...
+# Subtest: STAFF and unauthenticated actors are rejected before any read
+ok 98 - STAFF and unauthenticated actors are rejected before any read
+  ---
+  duration_ms: 0.6363
+  ...
+# Subtest: unexpected access-service errors are not disguised as 403
+ok 99 - unexpected access-service errors are not disguised as 403
+  ---
+  duration_ms: 0.3881
+  ...
+# .env not found. Continuing without it.
+# Subtest: environment defaults match architecture and reject invalid configuration
+ok 100 - environment defaults match architecture and reject invalid configuration
+  ---
+  duration_ms: 2.0266
+  ...
+# .env not found. Continuing without it.
+# Subtest: factory requires a repository
+ok 101 - factory requires a repository
+  ---
+  duration_ms: 1.6903
+  ...
+# Subtest: no session / no userId / malformed userId → 401 without touching the DB
+ok 102 - no session / no userId / malformed userId → 401 without touching the DB
+  ---
+  duration_ms: 1.5222
+  ...
+# Subtest: user identity comes from the session + DB, never from body/query/headers
+ok 103 - user identity comes from the session + DB, never from body/query/headers
+  ---
+  duration_ms: 3.3538
+  ...
+# Subtest: absolute expiry is enforced and the session is destroyed
+ok 104 - absolute expiry is enforced and the session is destroyed
+  ---
+  duration_ms: 0.6179
+  ...
+# Subtest: a user deleted after login is rejected
+ok 105 - a user deleted after login is rejected
+  ---
+  duration_ms: 0.4351
+  ...
+# Subtest: database failures go to the shared error handler, not the client
+ok 106 - database failures go to the shared error handler, not the client
+  ---
+  duration_ms: 0.3364
+  ...
+# Subtest: requireStaff: STAFF passes, REPRESENTATIVE 403, missing user 401
+ok 107 - requireStaff: STAFF passes, REPRESENTATIVE 403, missing user 401
+  ---
+  duration_ms: 0.3988
+  ...
+# .env not found. Continuing without it.
+# Subtest: WBS 1.4: identity schema, seed, login and permissions on Express + PostgreSQL
+    # Subtest: seed: 1 STAFF, 2 REPRESENTATIVE, one shared profile, one private profile each
+    ok 1 - seed: 1 STAFF, 2 REPRESENTATIVE, one shared profile, one private profile each
+      ---
+      duration_ms: 8.4382
+      ...
+    # Subtest: seed can be re-run without duplicates
+    ok 2 - seed can be re-run without duplicates
+      ---
+      duration_ms: 4.056
+      ...
+    # Subtest: constraints reject bad identity data
+    ok 3 - constraints reject bad identity data
+      ---
+      duration_ms: 324.5667
+      ...
+    # Subtest: 002_sessions applies on top of 001: opened_by must be a real user
+    ok 4 - 002_sessions applies on top of 001: opened_by must be a real user
+      ---
+      duration_ms: 132.1009
+      ...
+    # Subtest: repositories: lookups are parameterized and shaped correctly
+    ok 5 - repositories: lookups are parameterized and shaped correctly
+      ---
+      duration_ms: 6.3746
+      ...
+    # Subtest: patient access: each representative sees exactly their profiles; staff none
+    ok 6 - patient access: each representative sees exactly their profiles; staff none
+      ---
+      duration_ms: 12.4588
+      ...
+    # Subtest: login success: user + expiresAt, HttpOnly/SameSite=Lax cookie with 8h absolute expiry, no secrets
+    ok 7 - login success: user + expiresAt, HttpOnly/SameSite=Lax cookie with 8h absolute expiry, no secrets
+      ---
+      duration_ms: 222.9932
+      ...
+    # Subtest: GET /auth/me identifies the sender; no or fake cookie → 401
+    ok 8 - GET /auth/me identifies the sender; no or fake cookie → 401
+      ---
+      duration_ms: 112.7998
+      ...
+    # Subtest: wrong password and unknown user: identical 401, no cookie, no login state
+    ok 9 - wrong password and unknown user: identical 401, no cookie, no login state
+      ---
+      duration_ms: 243.5556
+      ...
+    # Subtest: invalid login bodies are 400
+    ok 10 - invalid login bodies are 400
+      ---
+      duration_ms: 29.5411
+      ...
+    # Subtest: role checks: only STAFF passes requireStaff; role/userId spoofing changes nothing
+    ok 11 - role checks: only STAFF passes requireStaff; role/userId spoofing changes nothing
+      ---
+      duration_ms: 206.2565
+      ...
+    # Subtest: patient access over HTTP: own and shared profiles allowed, others 403, staff 403, bad id 400
+    ok 12 - patient access over HTTP: own and shared profiles allowed, others 403, staff 403, bad id 400
+      ---
+      duration_ms: 202.4661
+      ...
+    # Subtest: login issues a NEW session id; the old cookie stops working (session fixation)
+    ok 13 - login issues a NEW session id; the old cookie stops working (session fixation)
+      ---
+      duration_ms: 103.7418
+      ...
+    # Subtest: absolute 8h expiry: the same cookie is rejected once the clock passes expiresAt
+    ok 14 - absolute 8h expiry: the same cookie is rejected once the clock passes expiresAt
+      ---
+      duration_ms: 109.0372
+      ...
+    # Subtest: a user removed after login loses access on the next request
+    ok 15 - a user removed after login loses access on the next request
+      ---
+      duration_ms: 92.1999
+      ...
+    1..15
+ok 108 - WBS 1.4: identity schema, seed, login and permissions on Express + PostgreSQL
+  ---
+  duration_ms: 2426.8955
+  ...
+# .env not found. Continuing without it.
+# Subtest: WBS 1.5: GET /patients on the real app, real cookie login and PostgreSQL
+    # Subtest: rep_a sees P001 (shared) and P002 only, with exactly the DTO fields
+    ok 1 - rep_a sees P001 (shared) and P002 only, with exactly the DTO fields
+      ---
+      duration_ms: 239.6411
+      ...
+    # Subtest: rep_b sees P001 (the same patientId) and P003 only
+    ok 2 - rep_b sees P001 (the same patientId) and P003 only
+      ---
+      duration_ms: 187.9978
+      ...
+    # Subtest: a representative with no granted profile gets 200 and an empty list
+    ok 3 - a representative with no granted profile gets 200 and an empty list
+      ---
+      duration_ms: 154.9162
+      ...
+    # Subtest: STAFF is 403; no cookie and a fake cookie are 401
+    ok 4 - STAFF is 403; no cookie and a fake cookie are 401
+      ---
+      duration_ms: 129.11
+      ...
+    # Subtest: wrong password: 401, no cookie, and the list stays closed
+    ok 5 - wrong password: 401, no cookie, and the list stays closed
+      ---
+      duration_ms: 85.2224
+      ...
+    # Subtest: profile outside the grant is refused by the shared check and data is unchanged
+    ok 6 - profile outside the grant is refused by the shared check and data is unchanged
+      ---
+      duration_ms: 5.9722
+      ...
+    1..6
+ok 109 - WBS 1.5: GET /patients on the real app, real cookie login and PostgreSQL
+  ---
+  duration_ms: 1424.9888
+  ...
+# .env not found. Continuing without it.
+# Subtest: Queue API and PostgreSQL integration
+    # Subtest: Waiting and current endpoints return the agreed DTOs
+    ok 1 - Waiting and current endpoints return the agreed DTOs
+      ---
+      duration_ms: 121.8301
+      ...
+    # Subtest: Call next persists FIFO selection and the CALLED event
+    ok 2 - Call next persists FIFO selection and the CALLED event
+      ---
+      duration_ms: 132.7977
+      ...
+    # Subtest: Concurrent calls produce exactly one occupied counter slot
+    ok 3 - Concurrent calls produce exactly one occupied counter slot
+      ---
+      duration_ms: 102.7401
+      ...
+    # Subtest: Cancelled tickets are skipped and an empty queue returns 409
+    ok 4 - Cancelled tickets are skipped and an empty queue returns 409
+      ---
+      duration_ms: 112.9099
+      ...
+    # Subtest: STOPPED sessions continue serving existing tickets
+    ok 5 - STOPPED sessions continue serving existing tickets
+      ---
+      duration_ms: 76.8903
+      ...
+    # Subtest: CLOSED and missing sessions are rejected
+    ok 6 - CLOSED and missing sessions are rejected
+      ---
+      duration_ms: 89.8141
+      ...
+    # Subtest: Authentication, staff role and UUID input are enforced
+    ok 7 - Authentication, staff role and UUID input are enforced
+      ---
+      duration_ms: 76.032
+      ...
+    # Subtest: Audit failure rolls back both the ticket and real event insert
+    ok 8 - Audit failure rolls back both the ticket and real event insert
+      ---
+      duration_ms: 87.5511
+      ...
+    1..8
+ok 110 - Queue API and PostgreSQL integration
+  ---
+  duration_ms: 1977.8223
+  ...
+# .env not found. Continuing without it.
+# Subtest: WBS 1.19: common app, migration history, PostgreSQL sessions and rollback
+    # Subtest: fresh migrations apply once; seed can run twice
+    ok 1 - fresh migrations apply once; seed can run twice
+      ---
+      duration_ms: 559.8344
+      ...
+    # Subtest: changed applied migration and out-of-order migration are refused
+    ok 2 - changed applied migration and out-of-order migration are refused
+      ---
+      duration_ms: 70.2973
+      ...
+    # Subtest: failed migration rolls back DDL and does not record completion
+    ok 3 - failed migration rolls back DDL and does not record completion
+      ---
+      duration_ms: 9.6845
+      ...
+    # Subtest: real cookie login uses PostgreSQL store; representative cannot open session
+    ok 4 - real cookie login uses PostgreSQL store; representative cannot open session
+      ---
+      duration_ms: 479.8996
+      ...
+    # Subtest: session remains valid after app restart, concurrent opens use real auth
+    ok 5 - session remains valid after app restart, concurrent opens use real auth
+      ---
+      duration_ms: 3069.0582
+      ...
+    # Subtest: Origin, Fetch Metadata and malformed JSON reject writes before business changes
+    ok 6 - Origin, Fetch Metadata and malformed JSON reject writes before business changes
+      ---
+      duration_ms: 13.0546
+      ...
+    # Subtest: transaction rollback on PostgreSQL preserves original data
+    ok 7 - transaction rollback on PostgreSQL preserves original data
+      ---
+      duration_ms: 3.0941
+      ...
+# API request failed.
+    # Subtest: database outage gives generic health/API errors without SQL or credentials
+    ok 8 - database outage gives generic health/API errors without SQL or credentials
+      ---
+      duration_ms: 12.1779
+      ...
+    1..8
+ok 111 - WBS 1.19: common app, migration history, PostgreSQL sessions and rollback
+  ---
+  duration_ms: 4377.4769
+  ...
+# .env not found. Continuing without it.
+# Subtest: WBS 1.1: Express + PostgreSQL integration
+    # Subtest: anonymous read/open is 401 and does not write
+    ok 1 - anonymous read/open is 401 and does not write
+      ---
+      duration_ms: 56.2653
+      ...
+    # Subtest: both roles get data=null when there is no active session
+    ok 2 - both roles get data=null when there is no active session
+      ---
+      duration_ms: 15.175
+      ...
+    # Subtest: representative cannot open; no write
+    ok 3 - representative cannot open; no write
+      ---
+      duration_ms: 4.6392
+      ...
+    # Subtest: client cannot set actor/status/number or send non-object bodies
+    ok 4 - client cannot set actor/status/number or send non-object bodies
+      ---
+      duration_ms: 71.0407
+      ...
+    # Subtest: malformed JSON and raw text are rejected before writing
+    ok 5 - malformed JSON and raw text are rejected before writing
+      ---
+      duration_ms: 5.8761
+      ...
+    # Subtest: staff opens 201: UUID, OPEN, zero, UTC, null times and exact DTO
+    ok 6 - staff opens 201: UUID, OPEN, zero, UTC, null times and exact DTO
+      ---
+      duration_ms: 30.1101
+      ...
+    # Subtest: both roles read the same OPEN session
+    ok 7 - both roles read the same OPEN session
+      ---
+      duration_ms: 6.5123
+      ...
+    # Subtest: another OPEN request returns 409 without changing the existing session
+    ok 8 - another OPEN request returns 409 without changing the existing session
+      ---
+      duration_ms: 40.0022
+      ...
+    # Subtest: STOPPED remains current and blocks a new OPEN
+    ok 9 - STOPPED remains current and blocks a new OPEN
+      ---
+      duration_ms: 43.9211
+      ...
+    # Subtest: CLOSED is excluded; opening starts at zero and preserves history
+    ok 10 - CLOSED is excluded; opening starts at zero and preserves history
+      ---
+      duration_ms: 34.3165
+      ...
+    # Subtest: 3 rounds of 20 concurrent opens: exactly 1 created, 19 conflicts and 1 DB row each
+    ok 11 - 3 rounds of 20 concurrent opens: exactly 1 created, 19 conflicts and 1 DB row each
+      ---
+      duration_ms: 1015.3634
+      ...
+    # Subtest: DB also rejects a direct second OPEN and mixed OPEN/STOPPED
+    ok 12 - DB also rejects a direct second OPEN and mixed OPEN/STOPPED
+      ---
+      duration_ms: 212.6947
+      ...
+    # Subtest: DB protects status, counter, lifecycle, UUID FK and required audit actor
+    ok 13 - DB protects status, counter, lifecycle, UUID FK and required audit actor
+      ---
+      duration_ms: 336.4167
+      ...
+    # Subtest: restart of the Express app preserves the same session in PostgreSQL
+    ok 14 - restart of the Express app preserves the same session in PostgreSQL
+      ---
+      duration_ms: 10.9015
+      ...
+    # Subtest: missing middleware fails closed at router creation
+    ok 15 - missing middleware fails closed at router creation
+      ---
+      duration_ms: 0.2144
+      ...
+    # Subtest: unexpected service errors reach the shared handler without leaking DB detail
+    ok 16 - unexpected service errors reach the shared handler without leaking DB detail
+      ---
+      duration_ms: 3.7074
+      ...
+    1..16
+ok 112 - WBS 1.1: Express + PostgreSQL integration
+  ---
+  duration_ms: 2462.2238
+  ...
+# .env not found. Continuing without it.
+# Subtest: WBS 1.8: router refuses to start without shared authentication or services
+ok 113 - WBS 1.8: router refuses to start without shared authentication or services
+  ---
+  duration_ms: 255.9802
+  ...
+# Subtest: WBS 1.8: ticket API on the shared app with real login and PostgreSQL
+    # Subtest: API-01 POST → 201 {data:{ticket, waitingAhead}}, ISSUED event by the logged-in user
+    ok 1 - API-01 POST → 201 {data:{ticket, waitingAhead}}, ISSUED event by the logged-in user
+      ---
+      duration_ms: 51.1252
+      ...
+    # Subtest: API-02 second patient → \#2 with one WAITING ahead
+    ok 2 - API-02 second patient → \#2 with one WAITING ahead
+      ---
+      duration_ms: 61.8813
+      ...
+    # Subtest: API-03 GET /:id by another representative of the same patient → 200
+    ok 3 - API-03 GET /:id by another representative of the same patient → 200
+      ---
+      duration_ms: 8.258
+      ...
+    # Subtest: API-04 GET /:id without PatientAccess → 403 and no ticket field in the body
+    ok 4 - API-04 GET /:id without PatientAccess → 403 and no ticket field in the body
+      ---
+      duration_ms: 9.7109
+      ...
+    # Subtest: API-05 GET /:id unknown → 404; malformed → 400; STAFF → 403; no cookie → 401
+    ok 5 - API-05 GET /:id unknown → 404; malformed → 400; STAFF → 403; no cookie → 401
+      ---
+      duration_ms: 19.3732
+      ...
+    # Subtest: API-06 GET /active: found, null, 403 outside access, 400 bad query, 403 STAFF
+    ok 6 - API-06 GET /active: found, null, 403 outside access, 400 bad query, 403 STAFF
+      ---
+      duration_ms: 30.1523
+      ...
+    # Subtest: API-07 second representative, same patient → 409 ACTIVE_TICKET_EXISTS with details.ticketId
+    ok 7 - API-07 second representative, same patient → 409 ACTIVE_TICKET_EXISTS with details.ticketId
+      ---
+      duration_ms: 9.2629
+      ...
+    # Subtest: API-08 waitingAhead skips CANCELLED and CALLED; CALLED ticket shows null
+    ok 8 - API-08 waitingAhead skips CANCELLED and CALLED; CALLED ticket shows null
+      ---
+      duration_ms: 38.3896
+      ...
+    # Subtest: API-09 ended tickets stay readable by id but are not "active"
+    ok 9 - API-09 ended tickets stay readable by id but are not "active"
+      ---
+      duration_ms: 10.7904
+      ...
+    # Subtest: API-10 POST rejections write nothing and carry no-store
+    ok 10 - API-10 POST rejections write nothing and carry no-store
+      ---
+      duration_ms: 38.479
+      ...
+    # Subtest: API-11 hostile Origin is refused before the ticket module runs
+    ok 11 - API-11 hostile Origin is refused before the ticket module runs
+      ---
+      duration_ms: 3.1749
+      ...
+    # Subtest: API-12 STOPPED session → 409 INVALID_STATE; existing tickets stay readable
+    ok 12 - API-12 STOPPED session → 409 INVALID_STATE; existing tickets stay readable
+      ---
+      duration_ms: 27.0538
+      ...
+    # Subtest: API-13 restarting the API keeps tickets, events and the login session
+    ok 13 - API-13 restarting the API keeps tickets, events and the login session
+      ---
+      duration_ms: 10.3489
+      ...
+    # Subtest: API-15 sprint 1 flow: choose an allowed patient from /patients, issue, reload finds the same ticket
+    ok 14 - API-15 sprint 1 flow: choose an allowed patient from /patients, issue, reload finds the same ticket
+      ---
+      duration_ms: 72.7932
+      ...
+# API request failed.
+    # Subtest: API-14 unexpected DB errors give the shared generic 500 without SQL detail
+    ok 15 - API-14 unexpected DB errors give the shared generic 500 without SQL detail
+      ---
+      duration_ms: 72.7425
+      ...
+    # Subtest: 2.13 checks ownership, state and records one cancellation for concurrent requests
+    ok 16 - 2.13 checks ownership, state and records one cancellation for concurrent requests
+      ---
+      duration_ms: 200.2011
+      ...
+# API request failed.
+    # Subtest: 2.13 cancels in STOPPED and rolls back when the audit write fails
+    ok 17 - 2.13 cancels in STOPPED and rolls back when the audit write fails
+      ---
+      duration_ms: 66.0844
+      ...
+    1..17
+ok 114 - WBS 1.8: ticket API on the shared app with real login and PostgreSQL
+  ---
+  duration_ms: 2178.5703
+  ...
+# .env not found. Continuing without it.
+# Subtest: WBS 1.7: ticket schema and transactional number allocation on PostgreSQL
+    # Subtest: OPEN + PatientAccess → WAITING \#1 in that session, counter 1, one ISSUED event
+    ok 1 - OPEN + PatientAccess → WAITING \#1 in that session, counter 1, one ISSUED event
+      ---
+      duration_ms: 25.2793
+      ...
+    # Subtest: second patient gets \#2; one account may issue for several authorised patients
+    ok 2 - second patient gets \#2; one account may issue for several authorised patients
+      ---
+      duration_ms: 6.3206
+      ...
+    # Subtest: another representative of the same patient → 409 ACTIVE_TICKET_EXISTS, no write
+    ok 3 - another representative of the same patient → 409 ACTIVE_TICKET_EXISTS, no write
+      ---
+      duration_ms: 4.9926
+      ...
+    # Subtest: patient outside PatientAccess and STAFF are 403; nothing is written
+    ok 4 - patient outside PatientAccess and STAFF are 403; nothing is written
+      ---
+      duration_ms: 3.0606
+      ...
+    # Subtest: unknown sessionId → 404 NOT_FOUND
+    ok 5 - unknown sessionId → 404 NOT_FOUND
+      ---
+      duration_ms: 2.3424
+      ...
+    # Subtest: event failure rolls back ticket, counter and event together
+    ok 6 - event failure rolls back ticket, counter and event together
+      ---
+      duration_ms: 5.269
+      ...
+    # Subtest: ended ticket frees the patient but its number is never reused
+    ok 7 - ended ticket frees the patient but its number is never reused
+      ---
+      duration_ms: 7.8417
+      ...
+    # Subtest: same sender reusing a requestId → 409 in Sprint 1, no second ticket
+    ok 8 - same sender reusing a requestId → 409 in Sprint 1, no second ticket
+      ---
+      duration_ms: 12.823
+      ...
+    # Subtest: STOPPED and CLOSED sessions issue nothing
+    ok 9 - STOPPED and CLOSED sessions issue nothing
+      ---
+      duration_ms: 25.547
+      ...
+    # Subtest: a new session starts its own sequence at 1
+    ok 10 - a new session starts its own sequence at 1
+      ---
+      duration_ms: 18.7094
+      ...
+    # Subtest: parallel requests: distinct numbers; same patient via two representatives → one ticket
+    ok 11 - parallel requests: distinct numbers; same patient via two representatives → one ticket
+      ---
+      duration_ms: 134.8881
+      ...
+    # Subtest: TicketEvent: one ISSUED row per ticket, DB-generated id/time, FK and no cascade
+    ok 12 - TicketEvent: one ISSUED row per ticket, DB-generated id/time, FK and no cascade
+      ---
+      duration_ms: 34.5282
+      ...
+    # Subtest: DB constraints hold even when the service is bypassed
+    ok 13 - DB constraints hold even when the service is bypassed
+      ---
+      duration_ms: 690.7237
+      ...
+    1..13
+ok 115 - WBS 1.7: ticket schema and transactional number allocation on PostgreSQL
+  ---
+  duration_ms: 1543.6093
+  ...
+1..115
+# tests 198
+# suites 0
+# pass 198
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 5247.216

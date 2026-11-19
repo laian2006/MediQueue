@@ -1,4 +1,4 @@
-# Mô đun phiên — task 1.1 và 1.2 của An
+# Mô đun phiên — task 1.1, 1.2, 2.1 và 2.2 của An
 
 ## Phạm vi đã triển khai
 
@@ -6,13 +6,13 @@
 - `GET /api/v1/sessions/current`: tài khoản đã xác thực đọc phiên OPEN/STOPPED, không có trả `200 {"data":null}`.
 - `POST /api/v1/sessions`: chỉ STAFF mở một phiên OPEN, bộ đếm 0; trả 201. Còn OPEN hoặc STOPPED trả `409 SESSION_ALREADY_ACTIVE`.
 - Hai API dùng DTO sáu trường: sessionId, status, lastIssuedNumber, openedAt, stoppedAt, closedAt. Thời gian UTC ISO 8601; thời gian chưa có là null.
-- Task 1.2 ghép `SessionPanel` vào `/staff` qua prop `sessionPanel` của `StaffPage`. Thao tác ngừng và đóng phiên thuộc task 2.1/2.2.
+- Task 1.2 ghép `SessionPanel` vào `/staff` qua prop `sessionPanel` của `StaffPage`. Task 2.1/2.2 bổ sung ngừng và đóng phiên theo phần bàn giao Sprint 2 bên dưới.
 
 ## Giao diện quản lý phiên (1.2)
 
 - `client/src/features/sessions/session.api.js` xác minh vai trò bằng `/auth/me` và dùng `http.js` để đọc `/sessions/current` hoặc mở bằng `POST /sessions`. PostgreSQL và middleware phía server quyết định kết quả.
 - Nhân viên mở được phiên khi máy chủ trả `data: null`. Panel đọc lại phiên khi bấm **Tải lại phiên** hoặc quay lại cửa sổ. Khi bị 409 hoặc mất phản hồi mở phiên, panel đọc lại trạng thái và chỉ báo mở thành công sau khi nhận phản hồi POST thành công.
-- Khi ghép 1.17, đặt `<SessionPanel onSessionChange={refresh} />` trong `StaffPage` và bỏ panel tĩnh khỏi route `/staff`. `refresh` là hàm đọc lại phiên và hàng đợi của quầy. Panel gọi callback sau khi máy chủ xác nhận mở phiên. Giao diện hàng đợi tại thời điểm bàn giao 1.2 vẫn là mock 1.16.
+- Task 1.17 đã nối API thật. `StaffPage` nhận `<SessionPanel />` từ route `/staff`, truyền `onSessionChange` và `currentSession` từ bản đọc định kỳ. Callback tải lại phiên và hàng đợi sau thao tác hoặc sau khi đối chiếu xung đột. Các lần đọc cũ được bảo vệ ở `StaffPage` bằng số thứ tự tải.
 - Xem [ca thử 1.2](../testing/cases/1-2.md) để chạy lại bằng tài khoản giả lập và PostgreSQL riêng.
 
 ## Vì sao không thể mở trùng
@@ -50,6 +50,8 @@ app.use('/api/v1/sessions', createSessionRouter({
   requireStaff,
 }));
 ```
+
+Khi dùng vòng đời Sprint 2, khởi tạo service bằng `createSessionService({ repository: createSessionRepository(pool), pool })`. Đọc/mở dùng repository đã truyền; ngừng/đóng dùng `withTransaction` chung và repository trên đúng client được giữ trong giao dịch. Chữ ký đọc/mở của các caller cũ vẫn được hỗ trợ.
 
 Đăng ký `express.json()` trước router và middleware lỗi sau router. Thiếu middleware xác thực/quyền làm router báo lỗi khởi tạo; không có chế độ bỏ qua auth. Lỗi hệ thống phải trả 500 với thông báo chung, không trả SQL, mật khẩu hoặc stack trace. Mã lỗi xác thực dùng UNAUTHENTICATED/FORBIDDEN; đầu vào sai dùng VALIDATION_ERROR.
 
@@ -100,3 +102,12 @@ Không đóng task chỉ vì tài liệu hoặc test với auth double đã đ�
 - [PostgreSQL: partial unique indexes](https://www.postgresql.org/docs/18/indexes-partial.html).
 - [node-postgres: parameterized queries](https://node-postgres.com/features/queries).
 - [Express: routing and Router](https://expressjs.com/en/guide/routing/).
+
+## Bàn giao Sprint 2 ngày 18/11/2026
+
+- `POST /sessions/{sessionId}/stop` chỉ dành cho STAFF. OPEN thành STOPPED; STOPPED gọi lại trả 200 với nguyên người/thời điểm. CLOSED trả 409 `INVALID_STATE`.
+- `POST /sessions/{sessionId}/close` chỉ dành cho STAFF. OPEN trả 409 `INVALID_STATE`; STOPPED còn WAITING, CALLED hoặc REGISTERING trả 409 `ACTIVE_TICKETS_REMAIN`; hết phiếu hoạt động mới CLOSED. CLOSED gọi lại trả nguyên phiên 200. Phiên cũ và bộ đếm được lưu lại.
+- Hai API chấp nhận không body hoặc `{}`. UUID sai trả 400, không tìm thấy trả 404. Cùng DTO sáu trường, cùng xác thực cookie, Origin và `Cache-Control: no-store` như API mở phiên.
+- Thứ tự khóa là QueueSession trước Ticket, thống nhất với cấp số, gọi số và hủy. Khóa phiên được giữ đến khi commit/rollback. Thời điểm ngừng/đóng lấy từ câu UPDATE sau khi có khóa. Không thêm TicketEvent cho đổi trạng thái phiên.
+- SessionPanel chỉ hiện Ngừng trong OPEN và Đóng trong STOPPED. Các nút bị khóa lúc gửi; phản hồi thành công được đọc lại qua API. Khi mất phản hồi, hiển thị chưa xác nhận và tải lại trạng thái. Bản polling từ StaffPage đồng bộ thay đổi ở cửa sổ khác.
+- [AC phiên](../requirements/sessions.md), [kiểm thử 2.1](../testing/cases/2-1.md) và [kiểm thử 2.2](../testing/cases/2-2.md) ghi phạm vi và kết quả. Nghiệm thu FF của 2.2 còn phụ thuộc ghi vắng 2.11 và việc Trung kiểm tra lại trong luồng tiếp nhận đầy đủ.

@@ -15,4 +15,14 @@ export const sessionApi = {
     const { data } = await http.post('/sessions', undefined, options);
     return data;
   },
+
+  async stop(sessionId, options) {
+    const { data } = await http.post(`/sessions/${encodeURIComponent(sessionId)}/stop`, undefined, options);
+    return data;
+  },
+
+  async close(sessionId, options) {
+    const { data } = await http.post(`/sessions/${encodeURIComponent(sessionId)}/close`, undefined, options);
+    return data;
+  },
 };

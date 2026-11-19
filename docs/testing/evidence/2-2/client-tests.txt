@@ -1,0 +1,17 @@
+✔ each role goes to its own area; unknown role goes home (0.705ms)
+✔ form validation asks for both fields; the password is not trimmed (0.7763ms)
+✔ error messages: wrong credentials, bad input, forbidden origin, network (0.158ms)
+✔ only 401 counts as unauthenticated (0.0782ms)
+✔ staff API uses the 1.11 endpoints through http.js with cookies (15.6649ms)
+✔ server rejections keep error.code for StaffPage (0.6527ms)
+✔ JSON, session credentials and AbortSignal are preserved (19.703ms)
+✔ structured API failures and invalid JSON are errors, never success (1.1637ms)
+✔ network errors propagate and 204 has no body (0.2326ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 130.6856

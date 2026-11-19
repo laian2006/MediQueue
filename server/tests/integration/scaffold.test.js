@@ -118,17 +118,49 @@ test('WBS 1.19: common app, migration history, PostgreSQL sessions and rollback'
     }), /business failed/);
     assert.notEqual((await pool.query("SELECT display_name FROM users WHERE username = 'rep_a'")).rows[0].display_name, 'must roll back');
   });
-  await t.test('database outage gives generic health/API errors without SQL or credentials', async () => {
-    const offlinePool = { query: async () => { throw new Error('SECRET postgres://password SELECT users'); } };
-    const app = createApp({ pool: offlinePool, config });
-    const server = app.listen(0, '127.0.0.1');
-    running.push({ app, server });
-    await once(server, 'listening');
-    const response = await fetch(`http://127.0.0.1:${server.address().port}/api/v1/health`);
-    assert.equal(response.status, 503);
-    assert.doesNotMatch(await response.text(), /SECRET|password|SELECT/);
-    const failedLogin = await login(`http://127.0.0.1:${server.address().port}/api/v1`, 'staff_01');
-    assert.equal(failedLogin.status, 500);
-    assert.doesNotMatch(await failedLogin.text(), /SECRET|password|SELECT/);
-  });
+    await t.test(
+    'database outage gives generic health/API errors without SQL or credentials',
+    async () => {
+      // Mô phỏng cùng một lỗi cho truy vấn và lấy kết nối.
+      const rejectDatabaseOperation = async () => {
+        throw new Error('SECRET postgres://password SELECT users');
+      };
+
+      const offlinePool = {
+        query: rejectDatabaseOperation,
+        connect: rejectDatabaseOperation,
+      };
+
+      const app = createApp({
+        pool: offlinePool,
+        config,
+      });
+
+      const server = app.listen(0, '127.0.0.1');
+      running.push({ app, server });
+
+      await once(server, 'listening');
+
+      const baseUrl =
+        `http://127.0.0.1:${server.address().port}/api/v1`;
+
+      // Kiểm tra health trả 503 và không làm lộ thông tin lỗi.
+      const response = await fetch(`${baseUrl}/health`);
+
+      assert.equal(response.status, 503);
+      assert.doesNotMatch(
+        await response.text(),
+        /SECRET|password|SELECT/,
+      );
+
+      // Kiểm tra API đăng nhập trả 500 với phản hồi không lộ thông tin lỗi.
+      const failedLogin = await login(baseUrl, 'staff_01');
+
+      assert.equal(failedLogin.status, 500);
+      assert.doesNotMatch(
+        await failedLogin.text(),
+        /SECRET|password|SELECT/,
+      );
+    },
+  );
 });

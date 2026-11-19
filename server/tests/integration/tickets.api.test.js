@@ -15,11 +15,13 @@ const TICKET_KEYS = ['createdAt', 'lastCalledAt', 'number', 'patientId', 'sessio
 
 test('WBS 1.8: router refuses to start without shared authentication or services', async () => {
   const { createTicketRouter } = await import('../../src/modules/tickets/ticket.routes.js');
-  const issueService = { issue: async () => {} };
+  const issueService = { issueWithStatus: async () => {} };
   const queryService = { getById: async () => {}, getActive: async () => {} };
-  assert.throws(() => createTicketRouter({ issueService, queryService }), TypeError);
-  assert.throws(() => createTicketRouter({ queryService, authenticate: () => {} }), TypeError);
-  assert.throws(() => createTicketRouter({ issueService, authenticate: () => {} }), TypeError);
+  const cancelService = { cancel: async () => {} };
+  assert.throws(() => createTicketRouter({ issueService, queryService, cancelService }), TypeError);
+  assert.throws(() => createTicketRouter({ queryService, cancelService, authenticate: () => {} }), TypeError);
+  assert.throws(() => createTicketRouter({ issueService, cancelService, authenticate: () => {} }), TypeError);
+  assert.throws(() => createTicketRouter({ issueService, queryService, authenticate: () => {} }), TypeError);
 });
 
 // Full shared app (1.19) with real cookie login (1.4), sessions (1.1), transaction and TicketEvent.
@@ -270,6 +272,39 @@ test('WBS 1.8: ticket API on the shared app with real login and PostgreSQL', {
     assert.deepEqual(byId.body.data, created.body.data);
   });
 
+  await t.test('API-16 (2.7) retry with the same requestId: 201 then 200 same ticket; conflict 409; after cancel still 200 with CANCELLED', async () => {
+    const session = (await call('GET', '/sessions/current', 'staff_01')).body.data;
+    const body = { patientId: IDS.p2, sessionId: session.sessionId, requestId: randomUUID() };
+    const first = await call('POST', '/tickets', 'rep_a', { json: body });
+    assert.equal(first.status, 201);
+    const afterFirst = await counts();
+
+    const retry = await call('POST', '/tickets', 'rep_a', { json: body });
+    assert.equal(retry.status, 200);
+    assert.equal(retry.headers.get('cache-control'), 'no-store');
+    assert.deepEqual(retry.body, first.body);
+    assert.deepEqual(await counts(), afterFirst, 'a retry writes no ticket and no event');
+
+    const conflict = await call('POST', '/tickets', 'rep_a', { json: { ...body, patientId: IDS.p1 } });
+    assert.equal(conflict.status, 409);
+    assert.equal(conflict.body.error.code, 'IDEMPOTENCY_CONFLICT');
+    assert.equal('data' in conflict.body, false);
+    assert.deepEqual(await counts(), afterFirst);
+
+    const cancelled = await call('POST', `/tickets/${first.body.data.ticket.ticketId}/cancel`, 'rep_a'); // Đạt's API (2.13)
+    assert.equal(cancelled.status, 200);
+    const afterCancel = await counts();
+    const late = await call('POST', '/tickets', 'rep_a', { json: body });
+    assert.equal(late.status, 200);
+    assert.equal(late.body.data.ticket.ticketId, first.body.data.ticket.ticketId);
+    assert.equal(late.body.data.ticket.status, 'CANCELLED');
+    assert.equal(late.body.data.waitingAhead, null);
+    assert.deepEqual(await counts(), afterCancel, 'retry after cancel does not issue a new number');
+    const issued = await one(`SELECT count(*)::int AS n FROM ticket_events WHERE ticket_id = $1 AND action = 'ISSUED'`,
+      [first.body.data.ticket.ticketId]);
+    assert.equal(issued.n, 1);
+  });
+
   await t.test('API-14 unexpected DB errors give the shared generic 500 without SQL detail', async () => {
     await pool.query('ALTER TABLE tickets RENAME TO tickets_hidden_for_test');
     try {
@@ -280,5 +315,58 @@ test('WBS 1.8: ticket API on the shared app with real login and PostgreSQL', {
     } finally {
       await pool.query('ALTER TABLE tickets_hidden_for_test RENAME TO tickets');
     }
+  });
+
+  await t.test('2.13 checks ownership, state and records one cancellation for concurrent requests', async () => {
+    const session = (await call('GET', '/sessions/current', 'staff_01')).body.data;
+    const shared = (await issue('rep_a', session.sessionId, IDS.p1)).body.data.ticket;
+    const privateTicket = (await issue('rep_a', session.sessionId, IDS.p2)).body.data.ticket;
+    const path = `/tickets/${privateTicket.ticketId}/cancel`;
+    const before = await counts();
+    assert.equal((await call('POST', path)).status, 401);
+    for (const actor of ['staff_01', 'rep_b']) {
+      const denied = await call('POST', path, actor);
+      assert.equal(denied.status, 403);
+      assert.equal(denied.body.data, undefined);
+    }
+    assert.equal((await call('POST', path, 'rep_a', { json: {} })).status, 400);
+    assert.equal((await call('POST', '/tickets/not-a-uuid/cancel', 'rep_a')).status, 400);
+    assert.equal((await call('POST', `/tickets/${randomUUID()}/cancel`, 'rep_a')).status, 404);
+    assert.deepEqual(await counts(), before);
+
+    const sharedPath = `/tickets/${shared.ticketId}/cancel`;
+    const results = await Promise.all([call('POST', sharedPath, 'rep_b'), call('POST', sharedPath, 'rep_b')]);
+    assert.deepEqual(results.map(({ status }) => status).sort(), [200, 409]);
+    const success = results.find(({ status }) => status === 200);
+    assert.equal(success.body.data.ticket.status, 'CANCELLED');
+    assert.equal(success.body.data.ticket.ticketId, shared.ticketId);
+    assert.equal(success.body.data.waitingAhead, null);
+    assert.equal(results.find(({ status }) => status === 409).body.error.code, 'INVALID_STATE');
+    assert.deepEqual((await active(IDS.p1, 'rep_a', session.sessionId)).body, { data: null });
+    const events = await pool.query(`SELECT e.from_status, e.to_status, u.username
+      FROM ticket_events e JOIN users u ON u.user_id = e.actor_user_id
+      WHERE e.ticket_id = $1 AND e.action = 'CANCELLED'`, [shared.ticketId]);
+    assert.deepEqual(events.rows, [{ from_status: 'WAITING', to_status: 'CANCELLED', username: 'rep_b' }]);
+
+    await setStatus(privateTicket.ticketId, 'CALLED', true);
+    assert.equal((await call('POST', path, 'rep_a')).body.error.code, 'INVALID_STATE');
+    assert.equal((await call('GET', `/tickets/${privateTicket.ticketId}`, 'rep_a')).body.data.ticket.status, 'CALLED');
+  });
+
+  await t.test('2.13 cancels in STOPPED and rolls back when the audit write fails', async () => {
+    const session = (await call('GET', '/sessions/current', 'staff_01')).body.data;
+    const waiting = (await active(IDS.p3, 'rep_b', session.sessionId)).body.data.ticket;
+    const path = `/tickets/${waiting.ticketId}/cancel`;
+    await pool.query(`UPDATE queue_sessions SET status = 'STOPPED', stopped_by = opened_by,
+      stopped_at = CURRENT_TIMESTAMP WHERE session_id = $1`, [session.sessionId]);
+    await pool.query('ALTER TABLE ticket_events RENAME TO ticket_events_hidden_for_test');
+    try {
+      const rejected = await call('POST', path, 'rep_b');
+      assert.equal(rejected.status, 500);
+      assert.equal((await active(IDS.p3, 'rep_b', session.sessionId)).body.data.ticket.status, 'WAITING');
+    } finally {
+      await pool.query('ALTER TABLE ticket_events_hidden_for_test RENAME TO ticket_events');
+    }
+    assert.equal((await call('POST', path, 'rep_b')).body.data.ticket.status, 'CANCELLED');
   });
 });

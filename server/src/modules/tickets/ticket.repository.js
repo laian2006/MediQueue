@@ -35,6 +35,16 @@ export function createTicketRepository(db) {
       return result.rows[0] ?? null;
     },
 
+    // WBS 2.7: retry key over the whole ticket history (uq_tickets_request).
+    async findByRequestKey(issuedByUserId, requestId) {
+      const result = await db.query(`
+        SELECT ${TICKET_COLUMNS}
+        FROM tickets
+        WHERE issued_by_user_id = $1 AND request_id = $2
+      `, [issuedByUserId, requestId]);
+      return result.rows[0] ?? null;
+    },
+
     async findActiveForPatient(sessionId, patientId) {
       const result = await db.query(`
         SELECT ${TICKET_COLUMNS}
@@ -66,6 +76,21 @@ export function createTicketRepository(db) {
       const result = await db.query(`${VIEW_SELECT}
         WHERE t.session_id = $1 AND t.patient_id = $2
           AND t.status IN ('WAITING', 'CALLED', 'REGISTERING')`, [sessionId, patientId]);
+      return result.rows[0] ?? null;
+    },
+
+    async findTicketLocation(ticketId) {
+      const result = await db.query('SELECT session_id, patient_id FROM tickets WHERE ticket_id = $1', [ticketId]);
+      return result.rows[0] ?? null;
+    },
+
+    async cancelWaiting(ticketId, sessionId, patientId) {
+      const result = await db.query(`
+        UPDATE tickets
+        SET status = 'CANCELLED', updated_at = CURRENT_TIMESTAMP
+        WHERE ticket_id = $1 AND session_id = $2 AND patient_id = $3 AND status = 'WAITING'
+        RETURNING ${TICKET_COLUMNS}
+      `, [ticketId, sessionId, patientId]);
       return result.rows[0] ?? null;
     },
 

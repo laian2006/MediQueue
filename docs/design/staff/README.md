@@ -2,10 +2,9 @@
 
 Chủ trì: Trần Quang Trung. Reviewer: Đặng Thành Đạt.
 
-Trạng thái: bản nháp, dùng mock theo thiết kế v1.0. Chờ An xác nhận user
-stories/AC ở nhánh `task/1.18`, Hoàng Anh đối chiếu quy tắc, Đạt review và
-Trực bàn giao khung 1.19 để ghép vào ứng dụng. Chưa có bằng chứng tích hợp
-API/PostgreSQL hoặc Done.
+Trạng thái: 1.16 (UI, mock) đã merge. Task 1.17 nối `/staff` với API 1.11,
+SessionPanel 1.2 và PostgreSQL thật; bằng chứng ở `docs/testing/cases/1-17.md`.
+Chờ review, An nghiệm thu và chạy lại trên `main` sau merge; chưa Done.
 
 ## Luồng và wireframe
 
@@ -46,42 +45,39 @@ sơ, và UUID nội bộ không được hiện ra màn hình.
 
 ## Tệp và cách ghép
 
-- `client/src/features/staff/StaffPage.jsx`: UI mock, export mặc định.
+- `client/src/features/staff/StaffPage.jsx`: màn hình quầy, export mặc định; mặc
+  định dùng `staff.api.js`.
+- `staff.api.js` (1.17): bốn phương thức nối API thật qua `http.js`.
 - `components/CurrentTicket.jsx`: lượt hiện tại, không suy ra quy tắc hàng chờ.
 - `components/WaitingList.jsx`: hàng chờ theo đúng thứ tự máy chủ trả về.
 - `mocks/staff.mock.js`: fixture và adapter Promise trả envelope `{data}`.
 - `staff.css`: CSS chỉ trong phạm vi class `staff-`.
 
-Sau khi có khung React của Trực, import `StaffPage` vào route `/staff` qua PR có
-Trực phối hợp. Không tạo ứng dụng thứ hai, không sửa package, lockfile, route
-chung, đăng nhập, phiên hoặc backend trong task này.
-
-Vì SessionPanel (1.2) chưa có trong repo, StaffPage nhận panel qua prop
-`sessionPanel`. Khi chưa truyền, khu vực phiên chỉ đọc từ mock và không có nút
-phiên giả. Sau khi An bàn giao:
+Route `/staff` của khung 1.19 truyền SessionPanel của An (1.2):
 
 ```jsx
-import StaffPage from './features/staff/StaffPage.jsx';
-import SessionPanel from './features/sessions/SessionPanel.jsx';
-
 <StaffPage sessionPanel={<SessionPanel />} />
 ```
 
-Khi đó cần chốt với An cách báo phiên đã đổi để StaffPage đọc lại hàng chờ; câu
-hỏi này được ghi ở `docs/requirements/staff.md`.
+StaffPage tự gắn `onSessionChange` vào panel này; sau khi API xác nhận mở phiên,
+StaffPage đọc lại phiên và hàng chờ (chốt thiết kế, mục 2). Khi không truyền
+`sessionPanel`, khu vực phiên chỉ đọc và không có nút phiên giả.
 
-Task 1.17 sẽ tạo `staff.api.js` qua `http.js` chung thay nguồn mock, giữ các
-phương thức đang dùng và DTO OpenAPI:
+`staff.api.js` giữ đúng phương thức của mock và DTO OpenAPI:
 
 | Phương thức | API thật |
 | --- | --- |
 | `getCurrentSession()` | `GET /sessions/current` |
 | `getWaitingQueue({sessionId})` | `GET /queue/waiting?sessionId=...` |
 | `getCurrentQueue({sessionId})` | `GET /queue/current?sessionId=...` |
-| `callNext({sessionId})` | `POST /queue/call-next` |
+| `callNext({sessionId})` | `POST /queue/call-next`, body `{sessionId}` |
 
-UI đọc mã lỗi từ `error.code`, nên lỗi do `http.js` ném ra cần giữ `code` trong
-envelope lỗi. Hiện không có request mạng, lưu bền hoặc polling.
+UI đọc `error.code` của `ApiError` (`http.js`). Ngoài các mã ở trên, `NOT_FOUND`
+khi gọi số được báo là phiên không còn tồn tại; lỗi mạng hoặc mã khác báo chưa có
+xác nhận. Màn hình đọc lại mỗi 3 giây khi đã có dữ liệu, không chạy lượt mới khi
+lần đọc trước hoặc thao tác gọi chưa xong, dừng khi rời trang hoặc gặp 401/403
+(chốt thiết kế, mục 3). Lượt polling không bật trạng thái đang tải để màn hình
+không nhấp nháy; lỗi polling hiện cảnh báo dữ liệu cũ như tải lại thủ công.
 
 ## Dữ liệu và cách thử trạng thái
 
@@ -96,8 +92,10 @@ màn hình người dùng:
 import { createStaffMockApi } from './features/staff/mocks/staff.mock.js';
 
 const previewApi = createStaffMockApi({ scenario: 'called', delay: 250 });
-<StaffPage api={previewApi} />
+<StaffPage api={previewApi} demo />
 ```
+
+Prop `demo` hiện nhãn "Dữ liệu mô phỏng"; bản thật ở `/staff` không có nhãn này.
 
 Các scenario: `default`, `called`, `registering`, `empty-queue`, `no-session`,
 `stopped-session`, `load-error`, `counter-busy`, `queue-empty`, `invalid-state`,
@@ -108,10 +106,6 @@ khởi tạo lại sau mỗi render. Không coi mock là kiểm tra quyền ở 
 
 ## Bằng chứng và phần chờ
 
-Ca thử/kết quả: `docs/testing/cases/1-16.md`.
-Ảnh: `docs/testing/evidence/1-16/`.
-
-Repo chưa có scripts/dependencies React ở thời điểm thực hiện. Kiểm tra UI dùng
-harness tạm ngoài repo, không thay thế bước ghép/chạy lại trên khung 1.19. Khi
-khung được bàn giao, dùng lệnh chạy/test thực tế trong README của nhóm, rồi chạy
-lại các ca đã ghi.
+- UI mock 1.16: `docs/testing/cases/1-16.md`, ảnh `docs/testing/evidence/1-16/`.
+- Tích hợp thật 1.17: `docs/testing/cases/1-17.md`, E2E
+  `tests/e2e/staff-flow.spec.js`, bằng chứng `docs/testing/evidence/1-17/`.
