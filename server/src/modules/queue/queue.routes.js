@@ -58,6 +58,8 @@ export function createQueueRouter({
     'recall',
     'start',
     'complete',
+    'noShow',
+
   ];
 
   if (
@@ -113,6 +115,11 @@ export function createQueueRouter({
   router.post('/tickets/:ticketId/complete', handle((req) => {
     requireEmptyRequest(req);
     return queueService.complete(req.user, req.params.ticketId);
+  }));
+
+  router.post('/tickets/:ticketId/no-show', handle((req) => {
+    requireEmptyRequest(req);
+    return queueService.noShow(req.user, req.params.ticketId);
   }));
 
   return router;
