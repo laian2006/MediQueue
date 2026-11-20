@@ -169,3 +169,23 @@ export function getLifecycleTransition(action, currentStatus) {
 
   return transition;
 }
+
+// Giá trị dương nghĩa là chưa đến hạn, bằng hoặc nhỏ hơn 0 nghĩa là đủ hạn.
+export function evaluateNoShowWindow(remainingMilliseconds) {
+  if (
+    typeof remainingMilliseconds !== 'number'
+    || !Number.isFinite(remainingMilliseconds)
+  ) {
+    throw new TypeError(
+      'remainingMilliseconds must be a finite number.',
+    );
+  }
+
+  return {
+    allowed: remainingMilliseconds <= 0,
+    remainingSeconds: Math.max(
+      0,
+      Math.ceil(remainingMilliseconds / 1000),
+    ),
+  };
+}
