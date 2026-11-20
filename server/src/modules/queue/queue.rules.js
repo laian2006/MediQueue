@@ -126,3 +126,46 @@ export function selectNextWaitingTicket(tickets, sessionId) {
 
   return next;
 }
+
+// Mỗi thao tác có một trạng thái nguồn và một sự kiện xác định.
+const lifecycleTransitions = Object.freeze({
+  recall: Object.freeze({
+    fromStatus: 'CALLED',
+    toStatus: 'CALLED',
+    eventAction: 'RECALLED',
+    refreshCalledAt: true,
+  }),
+  start: Object.freeze({
+    fromStatus: 'CALLED',
+    toStatus: 'REGISTERING',
+    eventAction: 'STARTED',
+    refreshCalledAt: false,
+  }),
+  complete: Object.freeze({
+    fromStatus: 'REGISTERING',
+    toStatus: 'COMPLETED',
+    eventAction: 'COMPLETED',
+    refreshCalledAt: false,
+  }),
+});
+
+// Kiểm tra thao tác cụ thể, ngoài việc kiểm tra sơ đồ chuyển trạng thái.
+export function getLifecycleTransition(action, currentStatus) {
+  if (!Object.hasOwn(lifecycleTransitions, action)) {
+    throw new TypeError('Unknown queue lifecycle action.');
+  }
+
+  const transition = lifecycleTransitions[action];
+
+  if (
+    currentStatus !== transition.fromStatus
+    || !canTransition(currentStatus, transition.toStatus)
+  ) {
+    throw new QueueRuleError(
+      'INVALID_STATE',
+      'The ticket state does not allow this action.',
+    );
+  }
+
+  return transition;
+}
