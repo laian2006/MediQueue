@@ -10,4 +10,5 @@ export const patientApi = {
   },
   getTicket: (ticketId, options) => http.get(`/tickets/${encodeURIComponent(ticketId)}`, options),
   issueTicket: (body, options) => http.post('/tickets', body, options),
+  cancelTicket: (ticketId, options) => http.post(`/tickets/${encodeURIComponent(ticketId)}/cancel`, undefined, options),
 };
