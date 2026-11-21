@@ -58,7 +58,7 @@ export function createQueueRepository(db) {
       return result.rows[0] ?? null;
     },
 
-        async findTicketSession(ticketId) {
+    async findTicketSession(ticketId) {
       // Chỉ đọc vị trí phiếu, chưa khóa phiếu trước phiên.
       const result = await db.query(`
         SELECT session_id
@@ -112,6 +112,42 @@ export function createQueueRepository(db) {
       ]);
 
       return result.rows[0] ?? null;
+    },
+
+    async getNoShowRemainingMilliseconds({
+      ticketId,
+      sessionId,
+      timeoutSeconds,
+      referenceTime = null,
+    }) {
+      // Service phải khóa phiên và phiếu trước khi kiểm tra thời gian.
+      // Mặc định dùng đồng hồ PostgreSQL, chỉ lấy một mốc thời gian.
+      // referenceTime được truyền từ service khi kiểm thử, không từ request.
+      const result = await db.query(`
+        WITH decision_clock AS MATERIALIZED (
+          SELECT COALESCE(
+            $4::timestamptz,
+            clock_timestamp()
+          ) AS checked_at
+        )
+        SELECT
+          EXTRACT(EPOCH FROM (
+            t.last_called_at
+            + ($3::integer * interval '1 second')
+            - c.checked_at
+          )) * 1000 AS remaining_milliseconds
+        FROM tickets t
+        CROSS JOIN decision_clock c
+        WHERE t.ticket_id = $1
+          AND t.session_id = $2
+      `, [
+        ticketId,
+        sessionId,
+        timeoutSeconds,
+        referenceTime,
+      ]);
+
+      return result.rows[0]?.remaining_milliseconds ?? null;
     },
   };
 }

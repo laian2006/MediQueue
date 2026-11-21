@@ -15,6 +15,10 @@ import {
   createQueueLifecycleService,
 } from './queue.lifecycle.service.js';
 
+import {
+  createQueueNoShowService,
+} from './queue.no-show.service.js';
+
 const UUID =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -84,6 +88,7 @@ export function createQueueService({
   noShowTimeoutSeconds,
   appendEvent = appendTicketEvent,
   now = () => new Date(),
+  noShowClock,
 }) {
   if (typeof pool?.connect !== 'function') {
     throw new TypeError('A shared PostgreSQL pool is required.');
@@ -122,8 +127,19 @@ export function createQueueService({
   }
 
   return {
-    // Ghép ba thao tác gọi lại, bắt đầu và hoàn tất từ task 2.10.
-    ...createQueueLifecycleService({ pool, appendEvent }),
+    // Giữ các thao tác gọi lại, bắt đầu và hoàn tất của task 2.10.
+    ...createQueueLifecycleService({
+      pool,
+      appendEvent,
+    }),
+
+    // Bổ sung ghi vắng, dùng cùng cấu hình thời gian của ứng dụng.
+    ...createQueueNoShowService({
+      pool,
+      noShowTimeoutSeconds,
+      appendEvent,
+      noShowClock,
+    }),
 
     async getWaiting(actor, input) {
       return inSession(

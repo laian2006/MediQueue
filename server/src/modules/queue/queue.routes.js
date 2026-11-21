@@ -9,11 +9,18 @@ function handle(operation) {
       res.status(200).json({ data });
     } catch (error) {
       if (error instanceof QueueError) {
+        const responseError = {
+          code: error.code,
+          message: error.message,
+        };
+
+        // Chỉ bổ sung thông tin nghiệp vụ do service cung cấp.
+        if (error.details !== undefined) {
+          responseError.details = error.details;
+        }
+
         return res.status(error.statusCode).json({
-          error: {
-            code: error.code,
-            message: error.message,
-          },
+          error: responseError,
         });
       }
 
@@ -51,6 +58,8 @@ export function createQueueRouter({
     'recall',
     'start',
     'complete',
+    'noShow',
+
   ];
 
   if (
@@ -106,6 +115,11 @@ export function createQueueRouter({
   router.post('/tickets/:ticketId/complete', handle((req) => {
     requireEmptyRequest(req);
     return queueService.complete(req.user, req.params.ticketId);
+  }));
+
+  router.post('/tickets/:ticketId/no-show', handle((req) => {
+    requireEmptyRequest(req);
+    return queueService.noShow(req.user, req.params.ticketId);
   }));
 
   return router;
