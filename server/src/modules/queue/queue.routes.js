@@ -17,10 +17,26 @@ function handle(operation) {
         });
       }
 
-      // Lỗi hệ thống được chuyển đến handler chung của Trực.
+      // Lỗi hệ thống được chuyển đến handler chung.
       next(error);
     }
   };
+}
+
+function requireEmptyRequest(req) {
+  // Các thao tác nhận ticketId từ đường dẫn, không nhận body hay query.
+  if (
+    Object.keys(req.query).length > 0
+    || req.body !== undefined
+    || Number(req.get('content-length') ?? 0) > 0
+    || req.get('transfer-encoding')
+  ) {
+    throw new QueueError(
+      400,
+      'VALIDATION_ERROR',
+      'This endpoint does not accept a request body or query parameters.',
+    );
+  }
 }
 
 export function createQueueRouter({
@@ -28,10 +44,17 @@ export function createQueueRouter({
   authenticate,
   requireStaff,
 }) {
+  const methods = [
+    'getWaiting',
+    'getCurrent',
+    'callNext',
+    'recall',
+    'start',
+    'complete',
+  ];
+
   if (
-    typeof queueService?.getWaiting !== 'function'
-    || typeof queueService?.getCurrent !== 'function'
-    || typeof queueService?.callNext !== 'function'
+    methods.some((name) => typeof queueService?.[name] !== 'function')
     || typeof authenticate !== 'function'
     || typeof requireStaff !== 'function'
   ) {
@@ -47,7 +70,7 @@ export function createQueueRouter({
     next();
   });
 
-  // Cả ba API đều yêu cầu đăng nhập và vai trò nhân viên.
+  // Mọi API quầy đều yêu cầu đăng nhập và quyền nhân viên.
   router.use(authenticate, requireStaff);
 
   router.get('/waiting', handle((req) =>
@@ -68,6 +91,21 @@ export function createQueueRouter({
     }
 
     return queueService.callNext(req.user, req.body);
+  }));
+
+  router.post('/tickets/:ticketId/recall', handle((req) => {
+    requireEmptyRequest(req);
+    return queueService.recall(req.user, req.params.ticketId);
+  }));
+
+  router.post('/tickets/:ticketId/start', handle((req) => {
+    requireEmptyRequest(req);
+    return queueService.start(req.user, req.params.ticketId);
+  }));
+
+  router.post('/tickets/:ticketId/complete', handle((req) => {
+    requireEmptyRequest(req);
+    return queueService.complete(req.user, req.params.ticketId);
   }));
 
   return router;

@@ -57,5 +57,61 @@ export function createQueueRepository(db) {
 
       return result.rows[0] ?? null;
     },
+
+        async findTicketSession(ticketId) {
+      // Chỉ đọc vị trí phiếu, chưa khóa phiếu trước phiên.
+      const result = await db.query(`
+        SELECT session_id
+        FROM tickets
+        WHERE ticket_id = $1
+      `, [ticketId]);
+
+      return result.rows[0] ?? null;
+    },
+
+    async lockTicket(ticketId, sessionId) {
+      // Service phải khóa phiên trước khi gọi method này.
+      const result = await db.query(`
+        SELECT ${TICKET_COLUMNS}
+        FROM tickets
+        WHERE ticket_id = $1
+          AND session_id = $2
+        FOR UPDATE
+      `, [ticketId, sessionId]);
+
+      return result.rows[0] ?? null;
+    },
+
+    async updateLifecycle({
+      ticketId,
+      sessionId,
+      fromStatus,
+      toStatus,
+      refreshCalledAt,
+    }) {
+      // Kiểm tra lại trạng thái ngay trong câu cập nhật.
+      // Chỉ thao tác gọi lại mới thay đổi last_called_at.
+      const result = await db.query(`
+        UPDATE tickets
+        SET status = $4,
+            last_called_at = CASE
+              WHEN $5::boolean THEN statement_timestamp()
+              ELSE last_called_at
+            END,
+            updated_at = statement_timestamp()
+        WHERE ticket_id = $1
+          AND session_id = $2
+          AND status = $3
+        RETURNING ${TICKET_COLUMNS}
+      `, [
+        ticketId,
+        sessionId,
+        fromStatus,
+        toStatus,
+        refreshCalledAt,
+      ]);
+
+      return result.rows[0] ?? null;
+    },
   };
 }

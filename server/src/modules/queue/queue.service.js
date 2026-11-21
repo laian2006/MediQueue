@@ -11,7 +11,12 @@ import {
 import { QueueError } from './queue.errors.js';
 import { createQueueRepository } from './queue.repository.js';
 
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+import {
+  createQueueLifecycleService,
+} from './queue.lifecycle.service.js';
+
+const UUID =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 function requireStaffActor(actor) {
   // Danh tính phải do middleware máy chủ cung cấp.
@@ -117,6 +122,9 @@ export function createQueueService({
   }
 
   return {
+    // Ghép ba thao tác gọi lại, bắt đầu và hoàn tất từ task 2.10.
+    ...createQueueLifecycleService({ pool, appendEvent }),
+
     async getWaiting(actor, input) {
       return inSession(
         actor,
