@@ -6,7 +6,7 @@ Mô phỏng một quầy đăng ký ngoại trú và một hàng chờ thông th
 
 ## Cài và chạy — task 1.19
 
-Ứng dụng chạy trên React, Express và PostgreSQL. Đăng nhập tại `/login`, lấy và xem phiếu tại `/patient`, mở/ngừng/đóng phiên và gọi số tại `/staff`. Bảng `/board` hiển thị số đang gọi và số đang chờ, không yêu cầu đăng nhập. `/patient-demo` dùng dữ liệu mô phỏng. API hỗ trợ hủy phiếu WAITING và gửi lại cùng requestId.
+Ứng dụng chạy trên React, Express và PostgreSQL. Đăng nhập tại `/login`, lấy và xem phiếu tại `/patient`, mở/ngừng/đóng phiên và gọi số tại `/staff`. Bảng `/board` hiển thị số đang gọi và số đang chờ, không yêu cầu đăng nhập. `/patient-demo` dùng dữ liệu mô phỏng. API đã hỗ trợ hủy phiếu WAITING, gửi lại cùng requestId, gọi lại, bắt đầu/hoàn tất tiếp nhận và ghi vắng khi đủ thời gian. Các nút gọi lại/tiếp nhận/ghi vắng trên quầy tiếp tục do Trung làm trong 2.16/2.17.
 
 Yêu cầu: **Node.js 22.12+ (khuyến nghị 24 LTS), npm 10+, PostgreSQL 18**. Dùng npm, giữ một `package-lock.json` trong mỗi package. Các phiên bản thư viện được khóa chính xác; máy mới dùng `npm ci`, không tạo lockfile của yarn/pnpm.
 

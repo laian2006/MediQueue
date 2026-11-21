@@ -1,0 +1,25 @@
+
+> mediqueue-client@0.1.0 test
+> node --test
+
+✔ each role goes to its own area; unknown role goes home (1.1413ms)
+✔ form validation asks for both fields; the password is not trimmed (1.2161ms)
+✔ error messages: wrong credentials, bad input, forbidden origin, network (0.3345ms)
+✔ only 401 counts as unauthenticated (0.2201ms)
+✔ board uses the public endpoint, preserves cancellation and validates successful responses (1.8824ms)
+✔ slow request never overlaps; next successful snapshot replaces old numbers (4.3718ms)
+✔ failure reports an error, retries and recovers without synthesizing data (1.2574ms)
+✔ cleanup aborts pending fetch and ignores late completion (1.8846ms)
+✔ staff API uses the 1.11 endpoints through http.js with cookies (26.5391ms)
+✔ server rejections keep error.code for StaffPage (0.7532ms)
+✔ JSON, session credentials and AbortSignal are preserved (43.7801ms)
+✔ structured API failures and invalid JSON are errors, never success (1.0948ms)
+✔ network errors propagate and 204 has no body (0.2982ms)
+ℹ tests 13
+ℹ suites 0
+ℹ pass 13
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 214.0373

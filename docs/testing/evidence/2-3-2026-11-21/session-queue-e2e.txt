@@ -1,0 +1,14 @@
+11:34:48 AM [vite] (client) Re-optimizing dependencies because vite config has changed
+▶ 2.2: stop, complete/no-show/cancel remaining tickets, close and open a new session
+  ✔ STOPPED keeps CALLED/REGISTERING tickets active and allows recall/start/complete (272.7133ms)
+  ✔ no-show checks server timeout and keeps session open while a WAITING ticket remains (60406.5343ms)
+  ✔ real cancellation drains the last ticket and the UI closes/reopens at number zero (210.476ms)
+✔ 2.2: stop, complete/no-show/cancel remaining tickets, close and open a new session (65066.3918ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 65191.6004

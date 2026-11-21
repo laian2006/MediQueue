@@ -12,4 +12,4 @@ Nhân viên cần mở một phiên, ngừng cấp số mới và đóng sau khi
 - **SES-06** SessionPanel dùng API thật, khóa thao tác đang gửi, thông báo lỗi cụ thể và đọc lại sau xung đột/mất phản hồi. Màn hình quầy đồng bộ phiên từ bản đọc định kỳ của StaffPage. Giao diện dùng được ở 360 px.
 - **SES-07** Đóng sau luồng ghi vắng/tiếp nhận đầy đủ cần nghiệm thu với 2.10, 2.11, 2.16 và 2.17. Các bài thử dùng trạng thái chuẩn bị bằng SQL phải ghi rõ là fixture.
 
-SES-01/02 đã có bằng chứng 1.1, 1.2. SES-03–05 được đối chiếu ở [ca 2.1](../testing/cases/2-1.md), SES-06 ở [ca 2.2](../testing/cases/2-2.md). SES-07 đang chờ các mô đun liên quan.
+SES-01/02 đã có bằng chứng 1.1, 1.2. SES-03–05 được đối chiếu ở [ca 2.1](../testing/cases/2-1.md), SES-06 ở [ca 2.2](../testing/cases/2-2.md). Ngày 21/11, phần SES-07 với API 2.10/2.11 thật đã đạt trong `session-queue-flow.spec.js`. Kiểm tra qua các nút tiếp nhận/ghi vắng mới tiếp tục khi Trung bàn giao giao diện 2.16/2.17.
