@@ -1,0 +1,45 @@
+▶ 2.1: session lifecycle with real authentication, locking and PostgreSQL
+  ✔ authentication, role, UUID and empty-body checks reject without writes (71.6479ms)
+  ✔ stop/close retries preserve timestamps, actors, history and the six-field DTO (112.0458ms)
+  ✔ STOPPED rejects new issuance, replays old keys and permits cancellation (86.1556ms)
+  ✔ WAITING, CALLED and REGISTERING each prevent close; calling still works after stop (58.9589ms)
+  ✔ four stop/issue races keep a coherent counter and no issuance after STOPPED (158.0388ms)
+  ✔ close/cancel race drains safely; concurrent close is repeatable (44.8219ms)
+✔ 2.1: session lifecycle with real authentication, locking and PostgreSQL (1307.8414ms)
+✔ DTO exposes only the six API fields, UTC and explicit null times (5.3998ms)
+✔ DTO converts stopped/closed timestamps to UTC (0.2182ms)
+✔ no current session returns null (0.4415ms)
+✔ both authenticated roles may read current session (0.2968ms)
+✔ missing/malformed actor cannot read or open, and never reaches the repository (0.9428ms)
+✔ unknown roles are rejected before DB access (0.1735ms)
+✔ representative cannot open even if a route middleware is misconfigured (0.1686ms)
+✔ staff opens using the trusted actor ID and gets a DTO (0.1537ms)
+✔ the active-session unique violation becomes a business conflict (0.1945ms)
+✔ unrelated unique/FK/connection errors must not masquerade as an active session (0.354ms)
+✔ read failures propagate to the shared error handler (0.2567ms)
+▶ WBS 1.1: Express + PostgreSQL integration
+  ✔ anonymous read/open is 401 and does not write (83.653ms)
+  ✔ both roles get data=null when there is no active session (11.8907ms)
+  ✔ representative cannot open; no write (7.2507ms)
+  ✔ client cannot set actor/status/number or send non-object bodies (38.6476ms)
+  ✔ malformed JSON and raw text are rejected before writing (3.5894ms)
+  ✔ staff opens 201: UUID, OPEN, zero, UTC, null times and exact DTO (7.6615ms)
+  ✔ both roles read the same OPEN session (3.0656ms)
+  ✔ another OPEN request returns 409 without changing the existing session (46.6763ms)
+  ✔ STOPPED remains current and blocks a new OPEN (157.1638ms)
+  ✔ CLOSED is excluded; opening starts at zero and preserves history (12.1181ms)
+  ✔ 3 rounds of 20 concurrent opens: exactly 1 created, 19 conflicts and 1 DB row each (730.0762ms)
+  ✔ DB also rejects a direct second OPEN and mixed OPEN/STOPPED (103.8199ms)
+  ✔ DB protects status, counter, lifecycle, UUID FK and required audit actor (298.8321ms)
+  ✔ restart of the Express app preserves the same session in PostgreSQL (25.2384ms)
+  ✔ missing middleware fails closed at router creation (0.4164ms)
+  ✔ unexpected service errors reach the shared handler without leaking DB detail (7.1988ms)
+✔ WBS 1.1: Express + PostgreSQL integration (4725.8831ms)
+ℹ tests 35
+ℹ suites 0
+ℹ pass 35
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 4998.1616
