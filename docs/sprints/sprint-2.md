@@ -1,6 +1,14 @@
 # Sprint 2 — Tiến độ và bàn giao của An
 
-Đối chiếu GitHub ngày 21/11/2026. Sprint 2 theo kế hoạch là tuần 12–13, từ 16–29/11. Phân công, 20 giờ/người/sprint và các phụ thuộc giữ theo [Sprint Plan EN](../planning/MediQueue_Group11_Sprint_Plan.xlsx) và [WBS](../planning/task-map.md). Giờ thực tế và biên bản họp được bổ sung khi có xác nhận thực tế.
+Đối chiếu GitHub ngày 23/11/2026, mã nguồn `main@d1e3210` trước đợt bổ sung hồ sơ này. Sprint 2 theo kế hoạch là tuần 12–13, từ 16–29/11. Phân công, 20 giờ/người/sprint và các phụ thuộc theo [Sprint Plan EN](../planning/MediQueue_Group11_Sprint_Plan.xlsx) và [WBS](../planning/task-map.md). Ngày 23/11 An xác nhận nhóm chưa họp Review/Demo/Retrospective Sprint 2; giờ thực tế chưa được cung cấp.
+
+## Theo dõi phần việc của An
+
+- [2.1 — Issue #23](https://github.com/laian2006/MediQueue/issues/23), dự kiến 6 giờ. Mã và test đã ghép main. Nhánh [task/2.1](https://github.com/laian2006/MediQueue/tree/task/2.1), commit `91af9e0`, bổ sung hồ sơ và log ngày 23/11, bộ test phiên đạt 35/35. Tiếp tục ghi nhận review của Trực và giờ thực tế.
+- [2.2 — Issue #24](https://github.com/laian2006/MediQueue/issues/24), dự kiến 6 giờ. Nhánh [task/2.2](https://github.com/laian2006/MediQueue/tree/task/2.2), commit `65bab2a`, bổ sung kết quả E2E ngày 23/11, SessionPanel 7/7 và phiên với API tiếp nhận/ghi vắng 4/4. Trung tiếp tục đối chiếu khi ghép giao diện quầy đầy đủ.
+- [2.3 — Issue #25](https://github.com/laian2006/MediQueue/issues/25), dự kiến 8 giờ gồm tài liệu 2 giờ, phối hợp/review 4 giờ, sự kiện 2 giờ. Đã có hồ sơ thiết kế, review API và kiểm tra tích hợp. FF 2.5 còn chờ Hưng; review chéo, sự kiện và giờ thực tế đang chờ cập nhật.
+
+Đợt bàn giao ngày 23/11 dùng ba nhánh độc lập `task/2.1`, `task/2.2`, `task/2.3-r5`, đều tạo từ `main@d1e3210`. Theo chỉ đạo của An, review qua Issue và commit cụ thể, không mở PR. Sau phản hồi review của Trực, An ghép các nhánh vào main và kiểm tra lại phần liên quan. Các Issue đang mở cho đến khi đủ điều kiện nghiệm thu theo CONTRIBUTING.md.
 
 ## Kết quả đã có
 
@@ -40,3 +48,15 @@ Các task nêu trên giữ nguyên chủ trì và lịch trong Excel. Chưa th�
 2. 2.8 dùng API stop thật; 2.14 dùng API hủy và requestId thật; Hưng bàn giao 2.5.
 3. Trung ghép 2.16/2.17 với API 2.10/2.11 đã có, chạy lại luồng đầy đủ qua các nút trên quầy. Phần FF 2.2 với API thật đã được An kiểm tra.
 4. Ghi kết quả review/demo, phản hồi, việc chuyển tiếp và giờ thực tế vào hồ sơ sprint trước khi đánh dấu Done toàn bộ.
+
+## Chuẩn bị Review/Demo/Retrospective Sprint 2
+
+Trạng thái ngày 23/11 là chưa diễn ra. Nội dung dưới đây chuẩn bị cho buổi họp và được cập nhật theo kết quả thực tế sau đó.
+
+1. Ghi ngày, người tham dự và commit được demo. Chạy ứng dụng với database thử và seed riêng.
+2. Nhân viên mở phiên, người đại diện lấy số, đối chiếu quầy và bảng công khai. Ngừng cấp số, kiểm tra yêu cầu cấp mới bị từ chối.
+3. Chạy tiếp nhận/ghi vắng/hủy với phần đã ghép; kiểm tra còn phiếu thì chưa đóng được. Xử lý hết phiếu, đóng và mở phiên mới với bộ đếm 0. Ghi rõ thao tác nào dùng giao diện và thao tác nào gọi API.
+4. Đối chiếu quyền và gửi lại requestId. Kiểm tra phần 2.5 sau khi Hưng bàn giao.
+5. Review theo AC, ghi ca đạt/chưa đạt, lỗi và người xử lý. Retrospective ghi điều cần giữ, vấn đề đã gặp, biện pháp, chủ trì và mốc xử lý do nhóm thống nhất.
+
+Biên bản sau họp cần có ngày, người tham dự, kết quả demo, phản hồi, quyết định và bằng chứng. An bổ sung giờ thực tế lũy kế cùng ước lượng giờ còn lại vào các Issue theo công việc đã thực hiện.

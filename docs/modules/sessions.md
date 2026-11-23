@@ -42,8 +42,8 @@ import { createSessionRepository } from '../modules/sessions/session.repository.
 import { createSessionService } from '../modules/sessions/session.service.js';
 import { createSessionRouter } from '../modules/sessions/session.routes.js';
 
-const repository = createSessionRepository(db);
-const sessionService = createSessionService({ repository });
+const repository = createSessionRepository(pool);
+const sessionService = createSessionService({ repository, pool });
 app.use('/api/v1/sessions', createSessionRouter({
   sessionService,
   authenticate,
@@ -51,7 +51,7 @@ app.use('/api/v1/sessions', createSessionRouter({
 }));
 ```
 
-Khi dùng vòng đời Sprint 2, khởi tạo service bằng `createSessionService({ repository: createSessionRepository(pool), pool })`. Đọc/mở dùng repository đã truyền; ngừng/đóng dùng `withTransaction` chung và repository trên đúng client được giữ trong giao dịch. Chữ ký đọc/mở của các caller cũ vẫn được hỗ trợ.
+Đọc/mở dùng repository đã truyền; ngừng/đóng dùng `withTransaction` chung và repository trên đúng client được giữ trong giao dịch. Chữ ký đọc/mở của các caller cũ vẫn được hỗ trợ.
 
 Đăng ký `express.json()` trước router và middleware lỗi sau router. Thiếu middleware xác thực/quyền làm router báo lỗi khởi tạo; không có chế độ bỏ qua auth. Lỗi hệ thống phải trả 500 với thông báo chung, không trả SQL, mật khẩu hoặc stack trace. Mã lỗi xác thực dùng UNAUTHENTICATED/FORBIDDEN; đầu vào sai dùng VALIDATION_ERROR.
 
@@ -86,16 +86,17 @@ Thay URL mẫu bằng DB test của máy. Tài khoản test cần quyền tạo 
 
 Kết quả kiểm thử lần này nằm tại `docs/testing/cases/1-1.md`.
 
-## Điều kiện bàn giao và nghiệm thu
+## Đối chiếu bàn giao và nghiệm thu ngày 23/11/2026
 
-Phần mã đã có và đã kiểm thử trong môi trường độc lập. Trước khi đánh dấu Done, cần:
+Mã phiên hiện có trên `main@d1e3210`. Các điểm tích hợp đã được kiểm tra trong hồ sơ 1.1/1.2 và 2.1/2.2:
 
-- Hưng ghép middleware thật và migration 001; kiểm tra với cookie đăng nhập, tài khoản STAFF/REPRESENTATIVE và trường hợp hết phiên đăng nhập.
-- Trực ghép router, pool, JSON parser, xử lý lỗi và Origin vào app chung; chạy lại test bằng dependency/lockfile đã chốt.
-- Chạy migration 001 → 002 trên DB test sạch; kiểm tra lại mở đồng thời trên app chung.
-- An/Trực kiểm tra các ca bắt buộc và phiên bản trên main; bàn giao sessionId/DTO cho Đức Anh, API cho Trung. Ghi link commit và kết quả thật trên Issue 1.1.
+- Middleware xác thực thật, migration 001 và các vai trò STAFF/REPRESENTATIVE đã tích hợp.
+- Router, pool, JSON parser, xử lý lỗi và Origin đã ghép vào app chung. API stop/close được kiểm tra qua cookie đăng nhập thật.
+- Migration/seed trên database thử mới và các ca mở/ngừng/đóng đồng thời đã có bằng chứng.
+- API 2.10/2.11 được dùng trong E2E phiên với thời gian chờ thật T=60 giây, gồm hoàn tất/ghi vắng/hủy hết phiếu rồi đóng/mở phiên mới.
+- Trực review phần An trên [Issue 2.1](https://github.com/laian2006/MediQueue/issues/23), [Issue 2.2](https://github.com/laian2006/MediQueue/issues/24) và [Issue 2.3](https://github.com/laian2006/MediQueue/issues/25). Trạng thái review tiếp tục cập nhật theo phản hồi thực tế.
 
-Không đóng task chỉ vì tài liệu hoặc test với auth double đã đạt. Giữ giờ thực tế do An tự ghi; không mặc định đã làm đủ 6 giờ dự kiến.
+Khi chốt Done, đối chiếu AC, bằng chứng trên main và phản hồi review. Giờ thực tế do An ghi theo công việc đã thực hiện; 6 giờ ở kế hoạch là ước lượng.
 
 ## Tài liệu kỹ thuật tham khảo
 

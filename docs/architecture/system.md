@@ -27,6 +27,39 @@ flowchart TD
 
 Audit helper nhận cùng giao dịch từ nghiệp vụ, không tự commit. Mỗi máy có DB thử riêng, cùng migration/seed; môi trường tích hợp dùng DB riêng được xác định rõ.
 
+## Quản lý phiên trong Sprint 2
+
+`SessionPanel` nằm trong `StaffPage`, gọi `session.api.js` qua `http.js` chung. StaffPage truyền bản đọc phiên định kỳ vào `currentSession`; callback `onSessionChange` tải lại phiên và hàng đợi sau thao tác. API kiểm tra quyền STAFF và lấy người thao tác từ phiên đăng nhập phía server.
+
+```mermaid
+sequenceDiagram
+  participant UI as SessionPanel
+  participant API as Session API
+  participant TX as Session service / transaction
+  participant DB as PostgreSQL
+  UI->>API: POST /sessions/{id}/stop hoặc /close
+  API->>API: authenticate, requireStaff, kiểm tra đầu vào
+  API->>TX: actor và sessionId
+  TX->>DB: BEGIN, SELECT QueueSession FOR UPDATE
+  alt Close từ STOPPED
+    TX->>DB: Kiểm tra WAITING/CALLED/REGISTERING
+  end
+  alt Trạng thái và điều kiện hợp lệ
+    TX->>DB: UPDATE trạng thái, người, thời điểm; COMMIT
+    TX-->>API: Session DTO
+    API-->>UI: 200 với trạng thái đã lưu
+  else Bị từ chối
+    TX->>DB: ROLLBACK
+    TX-->>API: Lỗi nghiệp vụ
+    API-->>UI: 409 và mã lỗi
+  end
+  UI->>API: Đọc lại phiên hiện tại
+```
+
+Các thao tác ghi của tickets/queue khóa cùng hàng QueueSession trước Ticket. Vì vậy cấp số/ngừng và hủy/đóng được tuần tự hóa theo phiên, giữ khóa đến khi commit hoặc rollback. Stop trên STOPPED và close trên CLOSED trả trạng thái đã lưu, giữ người và thời điểm audit ban đầu.
+
+OPEN → STOPPED chặn cấp số mới và giữ khả năng xử lý phiếu cũ. STOPPED → CLOSED chỉ khi hết phiếu hoạt động. Đổi trạng thái phiên được ghi ở các cột audit QueueSession. [Hợp đồng phiên](../api/openapi.yaml), [mô đun phiên](../modules/sessions.md), [AC](../requirements/sessions.md).
+
 ## Nguồn thống nhất
 
 - [Toàn bộ thiết kế và quy định triển khai](shared-design-v1.0.md).

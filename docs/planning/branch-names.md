@@ -15,6 +15,8 @@
 
 ## Danh sách tên nhánh đã giao
 
+Ngày 23/11/2026, An công bố nhánh `task/2.1` và `task/2.2` cho hồ sơ/bằng chứng bàn giao từng task, cùng `task/2.3-r5` cho thiết kế, điều phối và tổng hợp review. Cả ba nhánh lấy từ `main@d1e3210`. Mã chức năng 2.1/2.2 đã tích hợp trước đợt này. Theo chỉ đạo của An, review đợt này qua Issue #23/#24/#25 với commit cụ thể; không mở PR.
+
 ### Leader — Lại Quốc Bình An
 
 Sprint 1
