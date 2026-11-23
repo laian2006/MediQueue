@@ -1,0 +1,13 @@
+▶ 2.2: stop, complete/no-show/cancel remaining tickets, close and open a new session
+  ✔ STOPPED keeps CALLED/REGISTERING tickets active and allows recall/start/complete (281.967ms)
+  ✔ no-show checks server timeout and keeps session open while a WAITING ticket remains (60296.8081ms)
+  ✔ real cancellation drains the last ticket and the UI closes/reopens at number zero (343.9758ms)
+✔ 2.2: stop, complete/no-show/cancel remaining tickets, close and open a new session (62825.2694ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 62950.2126
