@@ -7,7 +7,7 @@
 - `POST /api/v1/auth/login` và `GET /api/v1/auth/me` (server session, cookie `mediqueue.sid`).
 - Middleware dùng chung `authenticate.js`, `require-staff.js` và hàm quyền `patients/patient-access.service.js`.
 - Task 1.5: `GET /api/v1/patients` (`patient.routes.js`) và `LoginPage` ở `client/src/features/auth`. Điều hướng sau đăng nhập: REPRESENTATIVE → `/patient`, STAFF → `/staff`; hai màn hình này vẫn dùng mock đến khi Đạt (1.14) và Trung (1.17) nối API thật.
-- Chưa làm: `POST /auth/logout` (task 2.5). Giới hạn số lần thử mật khẩu chưa được chốt ở task nào, ngoài phạm vi hiện tại. Kiểm tra Origin và cấu hình app chung do Trực làm ở 1.19, đã có trên `main`.
+- Task 2.5: `POST /api/v1/auth/logout` và bộ test nhiều người đại diện (`docs/testing/cases/2-5.md`). Giới hạn số lần thử mật khẩu chưa được chốt ở task nào, ngoài phạm vi hiện tại. Kiểm tra Origin và cấu hình app chung do Trực làm ở 1.19, đã có trên `main`.
 
 ## Tài khoản thử (chỉ dùng cho DB thử/demo)
 
@@ -33,11 +33,12 @@ node -e "import('./src/modules/auth/password.js').then(async m => console.log(aw
 |---|---|---|---|
 | POST | `/api/v1/auth/login` | công khai | 200 `{data:{user, expiresAt}}` + cookie |
 | GET | `/api/v1/auth/me` | đã đăng nhập | 200 `{data:{userId, displayName, role}}` |
+| POST | `/api/v1/auth/logout` | đã đăng nhập | 200 `{data:null}`; hủy phiên phía server và xóa cookie. Không nhận thân yêu cầu (400 `VALIDATION_ERROR`); cookie cũ gọi lại 401 |
 | GET | `/api/v1/patients` | REPRESENTATIVE | 200 `{data:[{patientId, code, displayName}]}`; chưa có hồ sơ thì `data: []` |
 
 Đầu vào login: JSON `{username, password}`, không nhận trường khác. Lỗi: 400 `VALIDATION_ERROR` (sai dạng); 401 `INVALID_CREDENTIALS` (sai tên hoặc mật khẩu, cùng một thông báo cho cả hai trường hợp); 401 `UNAUTHENTICATED` (chưa đăng nhập, hết hạn, user không còn tồn tại). Phản hồi `Cache-Control: no-store`.
 
-Phiên: cookie `mediqueue.sid` HttpOnly, SameSite=Lax, `Secure` khi HTTPS (`secure: true`). Hết hạn tuyệt đối 8 giờ kể từ lúc đăng nhập, không gia hạn theo hoạt động; `authenticate` kiểm tra lại `expiresAt` nên không phụ thuộc cách store gia hạn bản ghi. Mỗi lần đăng nhập tạo định danh phiên mới (`regenerate`), cookie cũ mất hiệu lực.
+Phiên: cookie `mediqueue.sid` HttpOnly, SameSite=Lax, `Secure` khi HTTPS (`secure: true`). Hết hạn tuyệt đối 8 giờ kể từ lúc đăng nhập, không gia hạn theo hoạt động; `authenticate` kiểm tra lại `expiresAt` nên không phụ thuộc cách store gia hạn bản ghi. Mỗi lần đăng nhập tạo định danh phiên mới (`regenerate`), cookie cũ mất hiệu lực. Đăng xuất (2.5) xóa bản ghi phiên trong `auth_sessions`, chỉ phiên đang dùng.
 
 ## Hợp đồng cho các chủ mô đun khác
 
