@@ -22,6 +22,12 @@
   phiếu đã lưu ở trạng thái hiện tại, kể cả khi phiếu đã hủy/kết thúc hoặc phiên đã
   đóng; không cấp số và không ghi sự kiện. Cùng khóa nhưng khác nội dung trả 409
   `IDEMPOTENCY_CONFLICT`. Gửi lại đồng thời chỉ tạo một phiếu.
+- **Đồng thời và ngừng nhận số (2.8):** cấp số, ngừng/đóng phiên (2.1), gọi và hủy
+  đều khóa dòng `queue_sessions` trước rồi mới đọc/ghi `tickets`. Trạng thái OPEN
+  được kiểm tra lại **sau** khi giữ khóa, nên yêu cầu nào giành khóa sau lệnh ngừng
+  đều nhận 409 `INVALID_STATE` và không để lại phiếu, sự kiện hay số. Gửi lại hợp lệ
+  vẫn trả phiếu cũ cả khi phiên đã ngừng. Mô đun phiếu không giữ bản trạng thái
+  phiên riêng; chỉ đọc `queue_sessions.status` của An.
 - Migration `004_ticket_events.sql` đúng DDL Trực bàn giao trong
   `docs/architecture/ticket-event.md`.
 
@@ -123,7 +129,9 @@ sau khi chạy. Thiếu `TEST_DATABASE_URL` thì test tích hợp ghi SKIP, khô
 tính là đạt. Test API chạy trên `createApp` thật, đăng nhập bằng tài khoản
 seed. Chuyển trạng thái phiếu và phiên trong test là SQL fixture.
 
-Kết quả: `docs/testing/cases/1-7.md`, `docs/testing/cases/1-8.md`.
+Kết quả: `docs/testing/cases/1-7.md`, `docs/testing/cases/1-8.md`,
+`docs/testing/cases/2-7.md`, `docs/testing/cases/2-8.md`. Thử tranh chấp nằm ở
+`server/tests/integration/ticket-concurrency.test.js` (pool 24 kết nối).
 
 ## Điều kiện bàn giao và nghiệm thu
 
