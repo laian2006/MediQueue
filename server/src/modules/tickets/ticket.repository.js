@@ -59,7 +59,10 @@ export function createTicketRepository(db) {
     async allocateNumber(sessionId) {
       const result = await db.query(`
         UPDATE queue_sessions
-        SET last_issued_number = last_issued_number + 1, updated_at = CURRENT_TIMESTAMP
+        -- 2.8: statement time, never moving backwards. CURRENT_TIMESTAMP is the transaction START,
+        -- so a request that waited for the session lock would rewind updated_at when it commits.
+        SET last_issued_number = last_issued_number + 1,
+            updated_at = GREATEST(updated_at, statement_timestamp())
         WHERE session_id = $1 AND status = 'OPEN'
         RETURNING last_issued_number
       `, [sessionId]);
