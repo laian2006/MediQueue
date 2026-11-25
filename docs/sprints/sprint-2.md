@@ -1,6 +1,6 @@
 # Sprint 2 — Tiến độ và bàn giao của An
 
-Đối chiếu GitHub ngày 23/11/2026, mã nguồn `main@d1e3210` trước đợt bổ sung hồ sơ này. Sprint 2 theo kế hoạch là tuần 12–13, từ 16–29/11. Phân công, 20 giờ/người/sprint và các phụ thuộc theo [Sprint Plan EN](../planning/MediQueue_Group11_Sprint_Plan.xlsx) và [WBS](../planning/task-map.md). Ngày 23/11 An xác nhận nhóm chưa họp Review/Demo/Retrospective Sprint 2; giờ thực tế chưa được cung cấp.
+Đối chiếu GitHub ngày 25/11/2026, mã nguồn `main@733fd1b` sau khi ghép 2.8. Sprint 2 theo kế hoạch là tuần 12–13, từ 16–29/11. Phân công, 20 giờ/người/sprint và các phụ thuộc theo [Sprint Plan EN](../planning/MediQueue_Group11_Sprint_Plan.xlsx) và [WBS](../planning/task-map.md). Ngày 23/11 An xác nhận nhóm chưa họp Review/Demo/Retrospective Sprint 2; giờ thực tế chưa được cung cấp.
 
 ## Theo dõi phần việc của An
 
@@ -18,6 +18,7 @@
 - Đức Anh 2.7 đã được Hưng approve và An kiểm tra bản ghép với `main@5d5940e`, backend 209/209 trên PostgreSQL 18. [#19](https://github.com/laian2006/MediQueue/pull/19) đã merge tại `f402cea`. Góp ý fixture router của Hưng được An sửa trong `1aa15b5`.
 - Hưng 2.4 đã ghép qua [#20](https://github.com/laian2006/MediQueue/pull/20) tại `021e80b`. Middleware chặn sai vai trò trước handler; kiểm tra PatientAccess tiếp tục nằm ở service. An chốt giữ 404 cho phiếu không tồn tại và 403 cho hồ sơ ngoài quyền theo hợp đồng v1.0.
 - Hoàng Anh 2.10 đã ghép qua [#21](https://github.com/laian2006/MediQueue/pull/21) tại `40d4c50`, backend 276/276. Ghi vắng 2.11 đã ghép qua [#22](https://github.com/laian2006/MediQueue/pull/22) tại `95b4d52`, backend 301/301. An review, chạy lại trên PostgreSQL 18.6 và dùng merge commit để giữ quan hệ phụ thuộc #21 → #22. Các trường trống trong mô tả PR và báo cáo đã được bổ sung bằng kết quả An thực sự chạy.
+- Đức Anh 2.8 đã ghép qua [#26](https://github.com/laian2006/MediQueue/pull/26) tại `733fd1b`. Hưng approve, An kiểm tra khóa/trạng thái phiên và chạy backend 309/309, thêm hai lần suite tranh chấp 8/8, E2E người bệnh 5/5 và bảng công khai 1/1. [Review và bằng chứng](../testing/reviews/2026-11-25-concurrency.md), [Issue #27](https://github.com/laian2006/MediQueue/issues/27).
 
 ## Phần việc của An
 
@@ -34,7 +35,7 @@ Lần tích hợp ngày 21/11 có backend 301/301, frontend 13/13, build và nă
 ## Bàn giao theo người phụ trách
 
 - **Hưng** Đã có 1.4–1.6, review #19 và ghép 2.4 qua #20. Tiếp tục 2.5 về nhiều đại diện, đăng xuất và chuyển tài khoản. Handler 2.10/2.11 đã có và các ca phân quyền trong bộ test vẫn đạt.
-- **Đức Anh** 2.7 đã ghép. API stop của 2.1 sẵn để làm 2.8, kiểm tra cấp/ngừng đồng thời. Sửa trong router vẫn tương thích với `issue()` của caller cũ; router dùng `issueWithStatus()`.
+- **Đức Anh** 2.7 và 2.8 đã ghép, có review Hưng và kiểm tra phiên của An. Tiếp tục cập nhật tài liệu/review 2.9, ghi giờ thực tế và các giới hạn kiểm thử đã nêu trong #26. Cấp/gọi/hủy cạnh tranh chung tiếp tục ở đợt kiểm thử tích hợp theo kế hoạch.
 - **Hoàng Anh** 1.10/1.11 và API 2.10/2.11 đã ghép, An đã kiểm tra. Bàn giao hợp đồng cho Trung, tiếp tục tài liệu/review 2.12 và phối hợp chạy toàn màn hình quầy. Phiên STOPPED vẫn xử lý phiếu; mọi thao tác ghi khóa phiên trước phiếu.
 - **Đạt** 2.13 đã ghép. [#16](https://github.com/laian2006/MediQueue/pull/16) cho 2.14 vẫn Draft ở `b00bb25`. Cập nhật nhánh từ main có 2.7 và API phiên, nối hủy/polling thật, chạy lại E2E và báo rõ phần phụ thuộc 2.11.
 - **Trung** 1.17 đã ghép. API 2.10/2.11 đã lên main để nối trực tiếp 2.16/2.17, gồm gọi lại/bắt đầu/hoàn tất và ghi vắng. `SessionPanel` đã có open/stop/close; giữ `currentSession` và callback `onSessionChange` khi cập nhật StaffPage. An đã kiểm tra phần phiên qua API thật, Trung còn nghiệm thu các nút nghiệp vụ mới trên quầy.
@@ -45,7 +46,7 @@ Các task nêu trên giữ nguyên chủ trì và lịch trong Excel. Chưa th�
 ## Trình tự nghiệm thu tiếp theo
 
 1. Dùng luồng `/patient` → `/staff` → `/board` đã ghép để thực hiện review/demo Sprint 1 và ghi kết quả thực tế.
-2. 2.8 dùng API stop thật; 2.14 dùng API hủy và requestId thật; Hưng bàn giao 2.5.
+2. 2.8 đã ghép; Đạt hoàn thiện 2.14 với API hủy và requestId thật, Hưng bàn giao 2.5.
 3. Trung ghép 2.16/2.17 với API 2.10/2.11 đã có, chạy lại luồng đầy đủ qua các nút trên quầy. Phần FF 2.2 với API thật đã được An kiểm tra.
 4. Ghi kết quả review/demo, phản hồi, việc chuyển tiếp và giờ thực tế vào hồ sơ sprint trước khi đánh dấu Done toàn bộ.
 

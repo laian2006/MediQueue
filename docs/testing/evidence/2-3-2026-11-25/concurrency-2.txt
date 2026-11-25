@@ -1,0 +1,20 @@
+▶ WBS 2.8: concurrent ticket issuance and stop on PostgreSQL
+  ✔ C-01 twenty patients at the same instant → 20 tickets numbered 1..20, 20 ISSUED events, counter 20 (589.6395ms)
+  ✔ C-02 two representatives, same patient, same instant (5 rounds) → always one active ticket, the other 409 (246.6256ms)
+  ✔ C-03a stop queued BEFORE ten issues → stop wins the lock, no ticket issued, all ten 409 INVALID_STATE (101.321ms)
+  ✔ C-03b ten issues queued BEFORE stop → they are served first, then stop; every ISSUED precedes stopped_at (138.7938ms)
+  ✔ C-04 after STOPPED is committed, ten simultaneous requests issue nothing (54.0974ms)
+  ✔ C-05 retries and stop together: same-key retries all get the stored ticket, a new key is refused after stop (71.7779ms)
+API request failed.
+  ✔ C-06 failed issue transaction leaves no ticket, counter or requestId behind; the same key succeeds later (42.7571ms)
+✔ WBS 2.8: concurrent ticket issuance and stop on PostgreSQL (2745.859ms)
+ℹ C-03a: 0/10 issued
+ℹ C-03b: 10/10 issued before the stop
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2858.287
