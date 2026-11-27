@@ -18,7 +18,52 @@ const accessErrors = {
   UNAUTHENTICATED: 'Bạn cần đăng nhập bằng tài khoản nhân viên để vận hành quầy.',
   FORBIDDEN: 'Tài khoản này không có quyền vận hành quầy. Chỉ nhân viên được dùng màn hình này.',
 };
-const unconfirmedCall ='Chưa nhận được xác nhận gọi số, số có thể đã hoặc chưa được gọi. Hãy kiểm tra lượt hiện tại trước khi thao tác tiếp.';
+// 2.16: lỗi của thao tác theo phiếu (gọi lại, bắt đầu, hoàn tất), hợp đồng 2.10.
+const ticketErrors = {
+  INVALID_STATE: 'Máy chủ từ chối: trạng thái phiếu đã thay đổi, có thể do cửa sổ khác vừa thao tác. Màn hình được tải lại theo dữ liệu máy chủ.',
+  NOT_FOUND: 'Máy chủ từ chối: không tìm thấy phiếu này. Màn hình được tải lại theo dữ liệu máy chủ.',
+};
+
+// Mỗi thao tác: gọi API nào, báo gì khi máy chủ xác nhận, báo gì khi chưa có xác nhận.
+const actions = {
+  callNext: {
+    label: 'Gọi số tiếp theo',
+    busyLabel: 'Đang gọi…',
+    send: (api, snapshot) => api.callNext({ sessionId: snapshot.session.sessionId }),
+    success: (ticket) => `Máy chủ đã xác nhận gọi số ${ticket.number}.`,
+    errors: callErrors,
+    unconfirmed: 'Chưa nhận được xác nhận gọi số, số có thể đã hoặc chưa được gọi. Hãy kiểm tra lượt hiện tại trước khi thao tác tiếp.',
+  },
+  recall: {
+    label: 'Gọi lại',
+    busyLabel: 'Đang gọi lại…',
+    send: (api, snapshot) => api.recall({ ticketId: snapshot.current.ticketId }),
+    success: (ticket) => `Máy chủ đã xác nhận gọi lại số ${ticket.number}. Số thứ tự giữ nguyên.`,
+    errors: ticketErrors,
+    unconfirmed: 'Chưa nhận được xác nhận gọi lại. Hãy kiểm tra lượt hiện tại trước khi thao tác tiếp.',
+  },
+  start: {
+    label: 'Bắt đầu tiếp nhận',
+    busyLabel: 'Đang bắt đầu…',
+    send: (api, snapshot) => api.start({ ticketId: snapshot.current.ticketId }),
+    success: (ticket) => `Máy chủ đã xác nhận bắt đầu tiếp nhận số ${ticket.number}.`,
+    errors: ticketErrors,
+    unconfirmed: 'Chưa nhận được xác nhận bắt đầu tiếp nhận. Hãy kiểm tra lượt hiện tại trước khi thao tác tiếp.',
+  },
+  complete: {
+    label: 'Hoàn tất đăng ký',
+    busyLabel: 'Đang hoàn tất…',
+    send: (api, snapshot) => api.complete({ ticketId: snapshot.current.ticketId }),
+    success: (ticket) => `Máy chủ đã xác nhận hoàn tất đăng ký số ${ticket.number}. Quầy rảnh để gọi số tiếp theo.`,
+    errors: ticketErrors,
+    unconfirmed: 'Chưa nhận được xác nhận hoàn tất, lượt có thể đã hoặc chưa hoàn tất. Hãy kiểm tra lượt hiện tại trước khi thao tác tiếp.',
+  },
+};
+// Thao tác theo phiếu được hiện theo trạng thái lượt hiện tại (CALLED → REGISTERING → COMPLETED).
+const ticketActionsByStatus = {
+  CALLED: ['start', 'recall'],
+  REGISTERING: ['complete'],
+};
 
 const sessionLabels = {
   OPEN: 'Đang nhận số',
@@ -26,7 +71,7 @@ const sessionLabels = {
 };
 
 function callBlockedReason({ session, current, waiting, stale }) {
-  if (stale) return 'Dữ liệu có thể đã cũ. Hãy tải lại trước khi gọi tiếp.';
+  if (stale) return 'Dữ liệu có thể đã cũ. Hãy tải lại trước khi thao tác tiếp.';
   if (!session) return 'Chưa có phiên. Cần mở phiên trước khi gọi.';
   if (current) return 'Quầy đang bận. Cần xử lý xong lượt hiện tại trước khi gọi tiếp.';
   if (waiting.length === 0) return 'Hàng chờ đang trống, chưa có số để gọi.';
@@ -40,7 +85,8 @@ export default function StaffPage({ api = staffApi, sessionPanel = null, demo = 
   const [refreshing, setRefreshing] = useState(true);
   const [loadError, setLoadError] = useState('');
   const [accessError, setAccessError] = useState('');
-  const [submitting, setSubmitting] = useState(false);
+  // Tên thao tác đang gửi (callNext, recall, start, complete) hoặc null.
+  const [submitting, setSubmitting] = useState(null);
   const [result, setResult] = useState(null);
   const submittingRef = useRef(false);
   const loadSeq = useRef(0);
@@ -125,27 +171,38 @@ export default function StaffPage({ api = staffApi, sessionPanel = null, demo = 
 
   const stale = Boolean(loadError);
   const blockedReason = snapshot ? callBlockedReason({ ...snapshot, stale }) : '';
-  const canCallNext = snapshot && !blockedReason && !refreshing && !submitting;
+  const ready = Boolean(snapshot) && !refreshing && !submitting;
+  const canCallNext = ready && !blockedReason;
+  // Thao tác theo phiếu cần dữ liệu mới; dữ liệu cũ thì khóa và nhắc tải lại.
+  const ticketActions = snapshot?.current ? ticketActionsByStatus[snapshot.current.status] ?? [] : [];
+  const canActOnTicket = ready && !stale;
 
-  async function callNext() {
-    if (submittingRef.current || !canCallNext) return;
+  async function run(name) {
+    const action = actions[name];
+    const allowed = name === 'callNext' ? canCallNext : canActOnTicket && ticketActions.includes(name);
+    if (submittingRef.current || !allowed) return;
     submittingRef.current = true;
-    setSubmitting(true);
+    setSubmitting(name);
     setResult(null);
     try {
-      const { data: ticket } = await api.callNext({ sessionId: snapshot.session.sessionId });
-      setResult({ type: 'success', text: `Máy chủ đã xác nhận gọi số ${ticket.number}.` });
+      const { data: ticket } = await action.send(api, snapshot);
+      setResult({ type: 'success', text: action.success(ticket) });
     } catch (error) {
-      if (accessErrors[error.code]) {
+      if (accessErrors[error?.code]) {
         // Máy chủ đã từ chối dứt khoát, không báo "chưa có xác nhận".
         setSnapshot(null);
         setAccessError(accessErrors[error.code]);
+      } else if (action.errors[error?.code]) {
+        setResult({ type: 'error', text: action.errors[error.code] });
+      } else if (error?.status >= 400 && error.status < 500) {
+        // Máy chủ đã trả lời từ chối với mã chưa có thông báo riêng: không đổi gì, không phải "chưa xác nhận".
+        setResult({ type: 'error', text: `Máy chủ từ chối thao tác (${error.code}). Màn hình được tải lại theo dữ liệu máy chủ.` });
       } else {
-        setResult({ type: 'error', text: callErrors[error.code] ?? unconfirmedCall });
+        setResult({ type: 'error', text: action.unconfirmed });
       }
     } finally {
       submittingRef.current = false;
-      setSubmitting(false);
+      setSubmitting(null);
       // Thành công hay bị từ chối đều đọc lại, UI không tự đổi trạng thái lượt.
       refresh();
     }
@@ -207,19 +264,33 @@ export default function StaffPage({ api = staffApi, sessionPanel = null, demo = 
             )}
 
             <div className="staff-layout">
-              <section className="staff-panel staff-panel--current" aria-labelledby="staff-current-heading" aria-busy={refreshing || submitting}>
+              <section className="staff-panel staff-panel--current" aria-labelledby="staff-current-heading" aria-busy={refreshing || Boolean(submitting)}>
                 <div className="staff-panel-heading">
                   <h2 id="staff-current-heading">Lượt hiện tại</h2>
                   <span className={`staff-counter staff-counter--${snapshot.current ? 'busy' : 'free'}`}>{snapshot.current ? 'Quầy bận' : 'Quầy rảnh'}</span>
                 </div>
                 <CurrentTicket ticket={snapshot.current} />
-                <button className="staff-button" onClick={callNext} disabled={!canCallNext}>
-                  {submitting ? 'Đang gọi…' : 'Gọi số tiếp theo'}
+                {ticketActions.length > 0 && (
+                  <div className="staff-actions" role="group" aria-label={`Thao tác với số ${snapshot.current.number}`}>
+                    {ticketActions.map((name, index) => (
+                      <button
+                        key={name}
+                        className={`staff-button${index > 0 ? ' staff-button--secondary' : ''}`}
+                        onClick={() => run(name)}
+                        disabled={!canActOnTicket}
+                      >
+                        {submitting === name ? actions[name].busyLabel : actions[name].label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+                <button className={`staff-button${ticketActions.length > 0 ? ' staff-button--secondary staff-button--block' : ''}`} onClick={() => run('callNext')} disabled={!canCallNext}>
+                  {submitting === 'callNext' ? actions.callNext.busyLabel : actions.callNext.label}
                 </button>
                 {blockedReason && <p className="staff-hint">{blockedReason}</p>}
               </section>
 
-              <section className="staff-panel" aria-labelledby="staff-waiting-heading" aria-busy={refreshing || submitting}>
+              <section className="staff-panel" aria-labelledby="staff-waiting-heading" aria-busy={refreshing || Boolean(submitting)}>
                 <div className="staff-panel-heading">
                   <h2 id="staff-waiting-heading">Hàng chờ</h2>
                   <span className="staff-count">{snapshot.waiting.length} số đang chờ</span>

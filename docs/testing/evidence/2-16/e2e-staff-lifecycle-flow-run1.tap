@@ -1,0 +1,66 @@
+TAP version 13
+# Subtest: 2.16: một lượt đi từ CALLED qua REGISTERING đến COMPLETED trên quầy thật
+    # Subtest: chuẩn bị: mở phiên, đại diện lấy hai số, quầy gọi số 1
+    ok 1 - chuẩn bị: mở phiên, đại diện lấy hai số, quầy gọi số 1
+      ---
+      duration_ms: 3407.0688
+      ...
+    # Subtest: CALLED: có Bắt đầu tiếp nhận và Gọi lại, không cho gọi số mới
+    ok 2 - CALLED: có Bắt đầu tiếp nhận và Gọi lại, không cho gọi số mới
+      ---
+      duration_ms: 105.5988
+      ...
+    # Subtest: gọi lại: giữ số 1, không sinh số mới, cập nhật thời điểm gọi gần nhất
+    ok 3 - gọi lại: giữ số 1, không sinh số mới, cập nhật thời điểm gọi gần nhất
+      ---
+      duration_ms: 102.7682
+      ...
+    # Subtest: bấm đúp Bắt đầu tiếp nhận: một yêu cầu, chuyển REGISTERING
+    ok 4 - bấm đúp Bắt đầu tiếp nhận: một yêu cầu, chuyển REGISTERING
+      ---
+      duration_ms: 168.1105
+      ...
+    # Subtest: cửa sổ cũ bấm Gọi lại khi phiếu đã REGISTERING: 409, không báo thành công, tải lại
+    ok 5 - cửa sổ cũ bấm Gọi lại khi phiếu đã REGISTERING: 409, không báo thành công, tải lại
+      ---
+      duration_ms: 100.8747
+      ...
+    # Subtest: tài khoản thường không bắt đầu hay hoàn tất được: 403
+    ok 6 - tài khoản thường không bắt đầu hay hoàn tất được: 403
+      ---
+      duration_ms: 55.4309
+      ...
+    # Subtest: mất phản hồi khi hoàn tất: báo chưa có xác nhận, không báo hoàn tất
+    ok 7 - mất phản hồi khi hoàn tất: báo chưa có xác nhận, không báo hoàn tất
+      ---
+      duration_ms: 59.8088
+      ...
+    # Subtest: hoàn tất: COMPLETED, quầy rảnh rồi mới gọi được số 2
+    ok 8 - hoàn tất: COMPLETED, quầy rảnh rồi mới gọi được số 2
+      ---
+      duration_ms: 163.7699
+      ...
+    # Subtest: phiên STOPPED vẫn tiếp nhận và hoàn tất phiếu cũ từ quầy
+    ok 9 - phiên STOPPED vẫn tiếp nhận và hoàn tất phiếu cũ từ quầy
+      ---
+      duration_ms: 359.0853
+      ...
+    # Subtest: 360 px: nút thao tác không tràn ngang
+    ok 10 - 360 px: nút thao tác không tràn ngang
+      ---
+      duration_ms: 581.625
+      ...
+    1..10
+ok 1 - 2.16: một lượt đi từ CALLED qua REGISTERING đến COMPLETED trên quầy thật
+  ---
+  duration_ms: 8214.3322
+  ...
+1..1
+# tests 11
+# suites 0
+# pass 11
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 8314.6679
