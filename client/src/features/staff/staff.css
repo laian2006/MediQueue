@@ -70,3 +70,8 @@
   .staff-panel h2 { font-size: 20px; }
   .staff-ticket-number { font-size: 72px; }
 }
+
+/* 2.16: thao tác với lượt hiện tại; nút chính trước, nút phụ sau. */
+.staff-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+.staff-actions .staff-button { flex: 1 1 160px; width: auto; min-height: 48px; margin-top: 0; }
+.staff-button--secondary.staff-button--block { display: block; width: 100%; min-height: 44px; margin-top: 12px; }

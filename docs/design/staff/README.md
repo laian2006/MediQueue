@@ -1,10 +1,12 @@
-# Thiết kế UI vận hành quầy task 1.16
+# Thiết kế UI vận hành quầy (1.16, 1.17, 2.16)
 
 Chủ trì: Trần Quang Trung. Reviewer: Đặng Thành Đạt.
 
-Trạng thái: 1.16 (UI, mock) đã merge. Task 1.17 nối `/staff` với API 1.11,
-SessionPanel 1.2 và PostgreSQL thật; bằng chứng ở `docs/testing/cases/1-17.md`.
-Chờ review, An nghiệm thu và chạy lại trên `main` sau merge; chưa Done.
+Trạng thái: 1.16 (UI, mock) và 1.17 (nối API 1.11, SessionPanel 1.2,
+PostgreSQL thật, PR #18) đã merge. Task 2.16 thêm gọi lại, bắt đầu tiếp nhận và
+hoàn tất theo API 2.10; bằng chứng ở `docs/testing/cases/2-16.md`. 2.16 chờ
+review, An nghiệm thu và chạy lại trên `main` sau merge; chưa Done. Ghi vắng và
+thời gian T thuộc 2.17.
 
 ## Luồng và wireframe
 
@@ -30,6 +32,9 @@ tại và hàng chờ → gọi số tiếp theo khi quầy rảnh → đọc l�
 | Tải lần đầu lỗi | Báo lỗi và Thử tải lại, không có số | | Chưa hiện |
 | Tải lại lỗi | Giữ dữ liệu cũ, cảnh báo kèm thời điểm | Giữ dữ liệu cũ | Khóa đến khi tải lại được |
 | Đang gửi | Giữ nguyên, không tự đổi số | Giữ nguyên | Khóa, ghi Đang gọi… |
+| Có CALLED (2.16) | Nút Bắt đầu tiếp nhận (chính) và Gọi lại | Danh sách số | Khóa, ghi lý do quầy bận |
+| Có REGISTERING (2.16) | Nút Hoàn tất đăng ký | Danh sách số | Khóa, ghi lý do quầy bận |
+| Dữ liệu cũ có lượt (2.16) | Khóa các nút thao tác, nhắc tải lại | Giữ dữ liệu cũ | Khóa |
 | 401 `UNAUTHENTICATED` | Báo cần đăng nhập tài khoản nhân viên, bỏ dữ liệu đang hiện | | Chưa hiện |
 | 403 `FORBIDDEN` | Báo tài khoản không có quyền vận hành quầy, bỏ dữ liệu đang hiện | | Chưa hiện |
 
@@ -38,7 +43,12 @@ Kết quả thao tác hiển thị phía trên hai panel:
 - Thành công: chỉ sau phản hồi API, số lấy từ Ticket trả về.
 - `COUNTER_BUSY`, `QUEUE_EMPTY`, `INVALID_STATE`: nêu lý do từ chối, giữ thông báo
   sau khi tải lại.
-- Lỗi khác hoặc mất phản hồi: báo chưa có xác nhận, không khẳng định đã gọi hay chưa.
+- Gọi lại, bắt đầu, hoàn tất (2.16): `INVALID_STATE` báo trạng thái phiếu đã đổi
+  (thường do cửa sổ khác), `NOT_FOUND` báo không tìm thấy phiếu; đều tải lại.
+- Máy chủ trả 4xx với mã chưa có thông báo riêng: báo máy chủ từ chối kèm mã.
+- Không có phản hồi hoặc 5xx: báo chưa có xác nhận, không khẳng định đã làm hay chưa.
+- Mọi thao tác dùng chung một cờ đang gửi: bấm lặp chỉ gửi một yêu cầu; xong thì
+  đọc lại lượt hiện tại và hàng chờ từ máy chủ.
 
 Màn hình chỉ hiển thị số và thời gian. DTO Ticket v1.0 không có tên hoặc mã hồ
 sơ, và UUID nội bộ không được hiện ra màn hình.
@@ -47,7 +57,8 @@ sơ, và UUID nội bộ không được hiện ra màn hình.
 
 - `client/src/features/staff/StaffPage.jsx`: màn hình quầy, export mặc định; mặc
   định dùng `staff.api.js`.
-- `staff.api.js` (1.17): bốn phương thức nối API thật qua `http.js`.
+- `staff.api.js`: nối API thật qua `http.js` (bốn phương thức từ 1.17, ba thao
+  tác theo phiếu từ 2.16).
 - `components/CurrentTicket.jsx`: lượt hiện tại, không suy ra quy tắc hàng chờ.
 - `components/WaitingList.jsx`: hàng chờ theo đúng thứ tự máy chủ trả về.
 - `mocks/staff.mock.js`: fixture và adapter Promise trả envelope `{data}`.
@@ -71,6 +82,9 @@ StaffPage đọc lại phiên và hàng chờ (chốt thiết kế, mục 2). Kh
 | `getWaitingQueue({sessionId})` | `GET /queue/waiting?sessionId=...` |
 | `getCurrentQueue({sessionId})` | `GET /queue/current?sessionId=...` |
 | `callNext({sessionId})` | `POST /queue/call-next`, body `{sessionId}` |
+| `recall({ticketId})` | `POST /queue/tickets/{ticketId}/recall`, không body |
+| `start({ticketId})` | `POST /queue/tickets/{ticketId}/start`, không body |
+| `complete({ticketId})` | `POST /queue/tickets/{ticketId}/complete`, không body |
 
 UI đọc `error.code` của `ApiError` (`http.js`). Ngoài các mã ở trên, `NOT_FOUND`
 khi gọi số được báo là phiên không còn tồn tại; lỗi mạng hoặc mã khác báo chưa có
@@ -109,3 +123,5 @@ khởi tạo lại sau mỗi render. Không coi mock là kiểm tra quyền ở 
 - UI mock 1.16: `docs/testing/cases/1-16.md`, ảnh `docs/testing/evidence/1-16/`.
 - Tích hợp thật 1.17: `docs/testing/cases/1-17.md`, E2E
   `tests/e2e/staff-flow.spec.js`, bằng chứng `docs/testing/evidence/1-17/`.
+- Thao tác tiếp nhận 2.16: `docs/testing/cases/2-16.md`, E2E
+  `tests/e2e/staff-lifecycle-flow.spec.js`, bằng chứng `docs/testing/evidence/2-16/`.
