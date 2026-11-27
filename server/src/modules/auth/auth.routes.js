@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { AuthError } from './auth.errors.js';
+import { SESSION_COOKIE_NAME } from '../../shared/config/session.config.js';
 
 function handle(operation) {
   return async (req, res, next) => {
@@ -53,6 +54,18 @@ export function createAuthRouter({ authService, authenticate }) {
   router.get('/me', authenticate, handle(async (req, res) => {
     const { userId, displayName, role } = req.user;
     res.status(200).json({ data: { userId, displayName, role } });
+  }));
+
+  // WBS 2.5: hủy phiên phía server rồi xóa cookie. Cần đăng nhập (401 nếu thiếu/đã hủy);
+  // authenticate chạy trước nên người chưa đăng nhập luôn nhận 401, không phải 400.
+  router.post('/logout', authenticate, handle(async (req, res) => {
+    if (req.body !== undefined) {
+      throw new AuthError(400, 'VALIDATION_ERROR', 'Đăng xuất không nhận dữ liệu gửi kèm.');
+    }
+    // Xóa bản ghi trong store: cookie cũ không còn dùng được kể cả khi kẻ khác đã sao chép nó.
+    await callbackToPromise((done) => req.session.destroy(done));
+    res.clearCookie(SESSION_COOKIE_NAME, { path: '/', httpOnly: true, sameSite: 'lax' });
+    res.status(200).json({ data: null });
   }));
 
   return router;
