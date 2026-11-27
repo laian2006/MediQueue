@@ -1,0 +1,21 @@
+9:13:35 PM [vite] (client) Re-optimizing dependencies because vite config has changed
+▶ 2.16: một lượt đi từ CALLED qua REGISTERING đến COMPLETED trên quầy thật
+  ✔ chuẩn bị: mở phiên, đại diện lấy hai số, quầy gọi số 1 (4255.6004ms)
+  ✔ CALLED: có Bắt đầu tiếp nhận và Gọi lại, không cho gọi số mới (42.9896ms)
+  ✔ gọi lại: giữ số 1, không sinh số mới, cập nhật thời điểm gọi gần nhất (165.8478ms)
+  ✔ bấm đúp Bắt đầu tiếp nhận: một yêu cầu, chuyển REGISTERING (144.1578ms)
+  ✔ cửa sổ cũ bấm Gọi lại khi phiếu đã REGISTERING: 409, không báo thành công, tải lại (152.2046ms)
+  ✔ tài khoản thường không bắt đầu hay hoàn tất được: 403 (81.3327ms)
+  ✔ mất phản hồi khi hoàn tất: báo chưa có xác nhận, không báo hoàn tất (114.5133ms)
+  ✔ hoàn tất: COMPLETED, quầy rảnh rồi mới gọi được số 2 (257.1467ms)
+  ✔ phiên STOPPED vẫn tiếp nhận và hoàn tất phiếu cũ từ quầy (531.8201ms)
+  ✔ 360 px: nút thao tác không tràn ngang (686.4847ms)
+✔ 2.16: một lượt đi từ CALLED qua REGISTERING đến COMPLETED trên quầy thật (12246.8009ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 11
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 12477.9445

@@ -1,6 +1,6 @@
 # Sprint 2 — Tiến độ và bàn giao của An
 
-Đối chiếu GitHub ngày 27/11/2026, mã nguồn `main@80f9264` sau khi ghép phần server 2.5. Sprint 2 theo kế hoạch là tuần 12–13, từ 16–29/11. Phân công, 20 giờ/người/sprint và các phụ thuộc theo [Sprint Plan EN](../planning/MediQueue_Group11_Sprint_Plan.xlsx) và [WBS](../planning/task-map.md). Ngày 23/11 An xác nhận nhóm chưa họp Review/Demo/Retrospective Sprint 2; giờ thực tế và biên bản mới chưa được cung cấp.
+Đối chiếu GitHub ngày 27/11/2026, mã nguồn `main@4b1b2f8` sau khi ghép giao diện tiếp nhận 2.16. Sprint 2 theo kế hoạch là tuần 12–13, từ 16–29/11. Phân công, 20 giờ/người/sprint và các phụ thuộc theo [Sprint Plan EN](../planning/MediQueue_Group11_Sprint_Plan.xlsx) và [WBS](../planning/task-map.md). Ngày 23/11 An xác nhận nhóm chưa họp Review/Demo/Retrospective Sprint 2; giờ thực tế và biên bản mới chưa được cung cấp.
 
 ## Theo dõi phần việc của An
 
@@ -20,12 +20,13 @@
 - Hoàng Anh 2.10 đã ghép qua [#21](https://github.com/laian2006/MediQueue/pull/21) tại `40d4c50`, backend 276/276. Ghi vắng 2.11 đã ghép qua [#22](https://github.com/laian2006/MediQueue/pull/22) tại `95b4d52`, backend 301/301. An review, chạy lại trên PostgreSQL 18.6 và dùng merge commit để giữ quan hệ phụ thuộc #21 → #22. Các trường trống trong mô tả PR và báo cáo đã được bổ sung bằng kết quả An thực sự chạy.
 - Đức Anh 2.8 đã ghép qua [#26](https://github.com/laian2006/MediQueue/pull/26) tại `733fd1b`. Hưng approve, An kiểm tra khóa/trạng thái phiên và chạy backend 309/309, thêm hai lần suite tranh chấp 8/8, E2E người bệnh 5/5 và bảng công khai 1/1. [Review và bằng chứng](../testing/reviews/2026-11-25-concurrency.md), [Issue #27](https://github.com/laian2006/MediQueue/issues/27).
 - Hưng bàn giao phần server 2.5 qua [#28](https://github.com/laian2006/MediQueue/pull/28). An review, kiểm tra bản ghép và merge tại `80f9264` ngày 27/11: backend 319/319, bộ quyền/đăng xuất 10/10, E2E người bệnh 5/5 và nhân viên 12/12; chạy lại main sau merge 319/319. API logout đã có; phần UI chuyển tài khoản chưa được nghiệm thu. [Báo cáo và log](../testing/reviews/2026-11-27-auth-logout.md), [Issue #29](https://github.com/laian2006/MediQueue/issues/29).
+- Trung bàn giao 2.16 qua [#34](https://github.com/laian2006/MediQueue/pull/34), An review và merge tại `4b1b2f8`: có nút gọi lại/bắt đầu/hoàn tất. Client 15/15, build đạt, backend 319/319, ticket API 20/20; E2E lifecycle 11/11 (cả sau merge), staff 12/12, session 7/7, session-queue 4/4. Lỗi API-14 tác giả báo đã được đối chứng là fixture đọc public khi DB có bảng trùng, không do UI mới. [Review và bằng chứng](../testing/reviews/2026-11-27-staff-controls.md), [Issue #30](https://github.com/laian2006/MediQueue/issues/30). Phần 2.17/no-show vẫn chờ theo #31.
 
 ## Phần việc của An
 
 - **2.1** Mã `b024364` bổ sung stop/close, khóa QueueSession và kiểm tra các phiếu hoạt động trong cùng giao dịch. STOPPED tiếp tục gọi/hủy phiếu cũ. Gửi lặp stop/close hợp lệ giữ nguyên audit. [AC](../requirements/sessions.md), [kiểm thử](../testing/cases/2-1.md)
 - **2.2** Mã `c4f4411` bổ sung nút ngừng/đóng, khóa thao tác đang gửi, đối chiếu trạng thái sau lỗi và đồng bộ cửa sổ từ polling của StaffPage. Ngày 21/11, An bổ sung test `63bcda2` và kiểm tra FF với API 2.10/2.11 thật, gồm chờ thực tế T=60 giây, xử lý hết phiếu rồi đóng/mở phiên mới. Bộ tích hợp đạt 4/4. Trung tiếp tục kiểm tra toàn màn hình khi có nút 2.16/2.17. [Kiểm thử](../testing/cases/2-2.md)
-- **2.3** Cập nhật mô đun phiên, AC, OpenAPI, README, kết quả kiểm tra và bàn giao phụ thuộc. Đã review/merge #19, #9, #20, #21, #22, #26 và #28; bổ sung kiểm tra test khởi tạo router, giới hạn số tệp test DB đồng thời và nghiệm thu phiên với API tiếp nhận/ghi vắng. Review chéo của Trực, demo/retro và giờ thực tế được ghi khi thực hiện. Server 2.5 đã bàn giao; còn chờ phần phối hợp/kiểm chứng UI theo #29.
+- **2.3** Cập nhật mô đun phiên, AC, OpenAPI, README, kết quả kiểm tra và bàn giao phụ thuộc. Đã review/merge #19, #9, #20, #21, #22, #26, #28 và #34; bổ sung kiểm tra test khởi tạo router, giới hạn số tệp test DB đồng thời và nghiệm thu phiên với API tiếp nhận/ghi vắng. Review chéo của Trực, demo/retro và giờ thực tế được ghi khi thực hiện. Server 2.5 đã bàn giao; còn chờ phần phối hợp/kiểm chứng UI theo #29.
 
 Kết quả trên bản mã tổng hợp `1aa15b5` gồm backend 216/216, frontend 9/9, E2E phiên 7/7, quầy 12/12, người bệnh 5/5; build đạt. Các bài thử không có ca bị bỏ qua. Đây là kết quả kiểm tra kỹ thuật; không thay thế bằng chứng demo/retro hoặc đo tải Sprint 3.
 
@@ -39,7 +40,7 @@ Lần tích hợp ngày 21/11 có backend 301/301, frontend 13/13, build và nă
 - **Đức Anh** 2.7 và 2.8 đã ghép, có review Hưng và kiểm tra phiên của An. Tiếp tục cập nhật tài liệu/review 2.9, ghi giờ thực tế và các giới hạn kiểm thử đã nêu trong #26. Cấp/gọi/hủy cạnh tranh chung tiếp tục ở đợt kiểm thử tích hợp theo kế hoạch.
 - **Hoàng Anh** 1.10/1.11 và API 2.10/2.11 đã ghép, An đã kiểm tra. Bàn giao hợp đồng cho Trung, tiếp tục tài liệu/review 2.12 và phối hợp chạy toàn màn hình quầy. Phiên STOPPED vẫn xử lý phiếu; mọi thao tác ghi khóa phiên trước phiếu.
 - **Đạt** 2.13 đã ghép. [#16](https://github.com/laian2006/MediQueue/pull/16) cho 2.14 vẫn Draft ở `b00bb25`. Cập nhật nhánh từ main có 2.7 và API phiên, nối hủy/polling thật, chạy lại E2E và báo rõ phần phụ thuộc 2.11.
-- **Trung** 1.17 đã ghép. API 2.10/2.11 đã lên main để nối trực tiếp 2.16/2.17, gồm gọi lại/bắt đầu/hoàn tất và ghi vắng. `SessionPanel` đã có open/stop/close; giữ `currentSession` và callback `onSessionChange` khi cập nhật StaffPage. An đã kiểm tra phần phiên qua API thật, Trung còn nghiệm thu các nút nghiệp vụ mới trên quầy.
+- **Trung** 1.17 và 2.16 đã ghép; các nút gọi lại/bắt đầu/hoàn tất đã chạy trên UI thật. Tiếp tục 2.17/ghi vắng và xung đột đầy đủ theo #31, lấy nhánh task/2.17 từ main mới. Giữ SessionPanel/currentSession/onSessionChange. 2.16 bàn giao muộn so hạn 20/11; giữ hạn gốc và bổ sung giờ thực tế, không tính việc code đã ghép là còn thiếu.
 - **Trực** 1.20 đã ghép qua #9. Tiếp tục nhật ký/bảng đầy đủ 2.19, môi trường tích hợp 2.20 và tài liệu 2.21. Test backend qua `npm test` hiện giới hạn tối đa bốn tệp chạy song song; các ca cạnh tranh trong từng tệp vẫn chạy theo kịch bản đã viết.
 
 Các task nêu trên giữ nguyên chủ trì và lịch trong Excel. Chưa thấy PR chỉ phản ánh bằng chứng trên GitHub; thành viên có thể đang làm ở máy riêng.
@@ -48,7 +49,7 @@ Các task nêu trên giữ nguyên chủ trì và lịch trong Excel. Chưa th�
 
 1. Dùng luồng `/patient` → `/staff` → `/board` đã ghép để thực hiện review/demo Sprint 1 và ghi kết quả thực tế.
 2. 2.8 và server 2.5 đã ghép; Đạt hoàn thiện 2.14 với API hủy và requestId thật. Hưng phối hợp Đạt/Trung hoàn thiện và kiểm chứng UI đăng xuất/chuyển tài khoản theo #29.
-3. Trung ghép 2.16/2.17 với API 2.10/2.11 đã có, chạy lại luồng đầy đủ qua các nút trên quầy. Phần FF 2.2 với API thật đã được An kiểm tra.
+3. 2.16 đã ghép; Trung tiếp tục 2.17 với API ghi vắng 2.11 và kiểm tra đủ ngoại lệ. Trực dùng đầu ra 2.16 tiếp tục 2.20; các blocker khác phải ghi rõ. Phần FF 2.2 với API thật đã được An kiểm tra.
 4. Ghi kết quả review/demo, phản hồi, việc chuyển tiếp và giờ thực tế vào hồ sơ sprint trước khi đánh dấu Done toàn bộ.
 
 ## Chuẩn bị Review/Demo/Retrospective Sprint 2

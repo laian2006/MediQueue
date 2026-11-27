@@ -1,0 +1,52 @@
+✔ WBS 1.8: router refuses to start without shared authentication or services (1196.2626ms)
+▶ WBS 1.8: ticket API on the shared app with real login and PostgreSQL
+  ✔ API-01 POST → 201 {data:{ticket, waitingAhead}}, ISSUED event by the logged-in user (146.3225ms)
+  ✔ API-02 second patient → #2 with one WAITING ahead (83.5965ms)
+  ✔ API-03 GET /:id by another representative of the same patient → 200 (27.0412ms)
+  ✔ API-04 GET /:id without PatientAccess → 403 and no ticket field in the body (25.3596ms)
+  ✔ API-05 GET /:id unknown → 404; malformed → 400; STAFF → 403; no cookie → 401 (84.5963ms)
+  ✔ API-06 GET /active: found, null, 403 outside access, 400 bad query, 403 STAFF (165.025ms)
+  ✔ API-07 second representative, same patient → 409 ACTIVE_TICKET_EXISTS with details.ticketId (46.5003ms)
+  ✔ API-08 waitingAhead skips CANCELLED and CALLED; CALLED ticket shows null (168.3127ms)
+  ✔ API-09 ended tickets stay readable by id but are not "active" (50.1339ms)
+  ✔ API-10 POST rejections write nothing and carry no-store (128.2364ms)
+  ✔ API-11 hostile Origin is refused before the ticket module runs (8.6717ms)
+  ✔ API-12 STOPPED session → 409 INVALID_STATE; existing tickets stay readable (33.1141ms)
+  ✔ API-13 restarting the API keeps tickets, events and the login session (50.6267ms)
+  ✔ API-15 sprint 1 flow: choose an allowed patient from /patients, issue, reload finds the same ticket (229.6452ms)
+  ✔ API-16 (2.7) retry with the same requestId: 201 then 200 same ticket; conflict 409; after cancel still 200 with CANCELLED (117.4285ms)
+  ✖ API-14 unexpected DB errors give the shared generic 500 without SQL detail (41.2173ms)
+  ✔ 2.13 checks ownership, state and records one cancellation for concurrent requests (338.7309ms)
+API request failed.
+  ✔ 2.13 cancels in STOPPED and rolls back when the audit write fails (89.5886ms)
+✖ WBS 1.8: ticket API on the shared app with real login and PostgreSQL (4685.8028ms)
+ℹ tests 20
+ℹ suites 0
+ℹ pass 18
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 6481.8998
+
+✖ failing tests:
+
+test at tests\integration\tickets.api.test.js:310:11
+✖ API-14 unexpected DB errors give the shared generic 500 without SQL detail (41.2173ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  404 !== 500
+  
+      at TestContext.<anonymous> (file:///C:/Users/Admin/Documents/ChatGPT/Intro%20to%20SE/.build-agile/leader-nov27-pr34/server/tests/integration/tickets.api.test.js:314:14)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async TestContext.<anonymous> (file:///C:/Users/Admin/Documents/ChatGPT/Intro%20to%20SE/.build-agile/leader-nov27-pr34/server/tests/integration/tickets.api.test.js:310:3)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 404,
+    expected: 500,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

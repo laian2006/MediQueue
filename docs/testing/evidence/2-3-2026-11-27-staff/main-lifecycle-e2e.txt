@@ -1,0 +1,20 @@
+▶ 2.16: một lượt đi từ CALLED qua REGISTERING đến COMPLETED trên quầy thật
+  ✔ chuẩn bị: mở phiên, đại diện lấy hai số, quầy gọi số 1 (4344.4348ms)
+  ✔ CALLED: có Bắt đầu tiếp nhận và Gọi lại, không cho gọi số mới (118.238ms)
+  ✔ gọi lại: giữ số 1, không sinh số mới, cập nhật thời điểm gọi gần nhất (311.2813ms)
+  ✔ bấm đúp Bắt đầu tiếp nhận: một yêu cầu, chuyển REGISTERING (128.539ms)
+  ✔ cửa sổ cũ bấm Gọi lại khi phiếu đã REGISTERING: 409, không báo thành công, tải lại (159.6088ms)
+  ✔ tài khoản thường không bắt đầu hay hoàn tất được: 403 (74.3678ms)
+  ✔ mất phản hồi khi hoàn tất: báo chưa có xác nhận, không báo hoàn tất (117.4449ms)
+  ✔ hoàn tất: COMPLETED, quầy rảnh rồi mới gọi được số 2 (198.6316ms)
+  ✔ phiên STOPPED vẫn tiếp nhận và hoàn tất phiếu cũ từ quầy (378.1417ms)
+  ✔ 360 px: nút thao tác không tràn ngang (586.6914ms)
+✔ 2.16: một lượt đi từ CALLED qua REGISTERING đến COMPLETED trên quầy thật (10571.6091ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 11
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 10884.4321
