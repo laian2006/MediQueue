@@ -8,6 +8,10 @@ import test from 'node:test';
 // Every scenario uses a barrier: the test holds the queue_sessions row lock, fires all
 // requests, waits until PostgreSQL reports each of them blocked on that lock, then releases
 // it. This guarantees real contention; firing requests one after another is not a race test.
+// Scope: these cases check responses and FINAL DATA (tickets, ISSUED events, counter, times).
+// They do not isolate the locking design on their own: the DB guards (allocateNumber's
+// `status = 'OPEN'`, uq_tickets_active_patient) would also block some failures. The lock
+// order itself was confirmed by source review (PR #26).
 const migrationsDir = fileURLToPath(new URL('../../../database/migrations/', import.meta.url));
 const seedsDir = fileURLToPath(new URL('../../../database/seeds/', import.meta.url));
 const P1 = '10000000-0000-4000-8000-000000000001'; // shared by rep_a and rep_b (seed)
@@ -97,7 +101,8 @@ test('WBS 2.8: concurrent ticket issuance and stop on PostgreSQL', {
 
   // Barrier: hold the session row lock, start the requests group by group, and after each group
   // wait until PostgreSQL reports that many of OUR backends blocked on a lock; then release so
-  // they compete at the same instant. Group order fixes the order in which they queue.
+  // they compete at the same instant. Group order only fixes the order in which requests START
+  // waiting; PostgreSQL does not guarantee that the lock is granted in that order.
   // `blocked` lets a group declare how many of its requests are EXPECTED to wait (retries don't).
   async function race(sessionId, groups) {
     const holder = await admin.connect();
@@ -198,16 +203,16 @@ test('WBS 2.8: concurrent ticket issuance and stop on PostgreSQL', {
     return created;
   }
 
-  await t.test('C-03a stop queued BEFORE ten issues → stop wins the lock, no ticket issued, all ten 409 INVALID_STATE', async () => {
+  // C-03a/b vary the order in which requests START waiting. How many issues complete before the
+  // stop depends on lock scheduling and is NOT asserted; the invariants in stopRace() are.
+  await t.test('C-03a stop starts waiting before ten issues → any split; no issue after stop, data and events consistent', async () => {
     const created = await stopRace(true);
-    t.diagnostic(`C-03a: ${created}/10 issued`);
-    assert.equal(created, 0);
+    t.diagnostic(`C-03a: ${created}/10 issued before the stop (not asserted)`);
   });
 
-  await t.test('C-03b ten issues queued BEFORE stop → they are served first, then stop; every ISSUED precedes stopped_at', async () => {
+  await t.test('C-03b ten issues start waiting before stop → any split; no issue after stop, data and events consistent', async () => {
     const created = await stopRace(false);
-    t.diagnostic(`C-03b: ${created}/10 issued before the stop`);
-    assert.ok(created >= 1, 'issues queued ahead of the stop must be able to complete');
+    t.diagnostic(`C-03b: ${created}/10 issued before the stop (not asserted)`);
   });
 
   await t.test('C-04 after STOPPED is committed, ten simultaneous requests issue nothing', async () => {
