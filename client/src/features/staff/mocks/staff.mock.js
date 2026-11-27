@@ -108,7 +108,20 @@ export function createStaffMockApi({ scenario = 'default', delay = 250 } = {}) {
       state.current = { ...next, status: 'CALLED', lastCalledAt: serverTime, updatedAt: serverTime };
       return response(() => state.current);
     },
+    // 2.16: chuyển trạng thái giống bảng 2.10 để xem thử nút; không thay kiểm thử API thật.
+    recall: ({ ticketId }) => lifecycle(ticketId, 'CALLED', 'CALLED', true),
+    start: ({ ticketId }) => lifecycle(ticketId, 'CALLED', 'REGISTERING'),
+    complete: ({ ticketId }) => lifecycle(ticketId, 'REGISTERING', 'COMPLETED'),
   };
+
+  function lifecycle(ticketId, from, to, refreshCalledAt = false) {
+    if (accessError) return response(null, accessError);
+    if (state.current?.ticketId !== ticketId) return response(null, apiError('NOT_FOUND', 'Không tìm thấy phiếu.', 404));
+    if (state.current.status !== from) return response(null, apiError('INVALID_STATE', 'Trạng thái không hợp lệ.'));
+    const updated = { ...state.current, status: to, lastCalledAt: refreshCalledAt ? serverTime : state.current.lastCalledAt };
+    state.current = to === 'COMPLETED' ? null : updated;
+    return response(() => updated);
+  }
 }
 
 export const staffMockApi = createStaffMockApi();

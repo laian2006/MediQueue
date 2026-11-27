@@ -1,0 +1,71 @@
+TAP version 13
+# Subtest: 1.17: gọi số từ màn hình quầy qua API 1.11 và PostgreSQL thật
+    # Subtest: chưa đăng nhập: không hiện dữ liệu quầy
+    ok 1 - chưa đăng nhập: không hiện dữ liệu quầy
+      ---
+      duration_ms: 519.184
+      ...
+    # Subtest: mở phiên bằng SessionPanel, StaffPage đọc lại qua onSessionChange
+    ok 2 - mở phiên bằng SessionPanel, StaffPage đọc lại qua onSessionChange
+      ---
+      duration_ms: 782.3152
+      ...
+    # Subtest: phiếu thật lấy từ tài khoản đại diện tự hiện trên quầy nhờ polling
+    ok 3 - phiếu thật lấy từ tài khoản đại diện tự hiện trên quầy nhờ polling
+      ---
+      duration_ms: 2253.6073
+      ...
+    # Subtest: hết phiên đăng nhập khi bấm gọi: 401, bỏ dữ liệu quầy, không đổi DB
+    ok 4 - hết phiên đăng nhập khi bấm gọi: 401, bỏ dữ liệu quầy, không đổi DB
+      ---
+      duration_ms: 5816.4891
+      ...
+    # Subtest: polling: /queue/current 500 khi /queue/waiting còn treo không gửi lượt chồng
+    ok 5 - polling: /queue/current 500 khi /queue/waiting còn treo không gửi lượt chồng
+      ---
+      duration_ms: 12747.8163
+      ...
+    # Subtest: hàng chờ vừa hết ở máy chủ: 409 QUEUE_EMPTY, tải lại thấy hàng rỗng
+    ok 6 - hàng chờ vừa hết ở máy chủ: 409 QUEUE_EMPTY, tải lại thấy hàng rỗng
+      ---
+      duration_ms: 494.6126
+      ...
+    # Subtest: phiếu mới sau khi hủy hiện lại nhờ polling
+    ok 7 - phiếu mới sau khi hủy hiện lại nhờ polling
+      ---
+      duration_ms: 2097.0754
+      ...
+    # Subtest: bấm hai lần nhanh: một yêu cầu, Ticket thành CALLED trong cơ sở dữ liệu
+    ok 8 - bấm hai lần nhanh: một yêu cầu, Ticket thành CALLED trong cơ sở dữ liệu
+      ---
+      duration_ms: 628.2104
+      ...
+    # Subtest: hai cửa sổ: cửa sổ dữ liệu cũ bị từ chối COUNTER_BUSY và tải lại theo máy chủ
+    ok 9 - hai cửa sổ: cửa sổ dữ liệu cũ bị từ chối COUNTER_BUSY và tải lại theo máy chủ
+      ---
+      duration_ms: 161.846
+      ...
+    # Subtest: tài khoản thường không vận hành được quầy
+    ok 10 - tài khoản thường không vận hành được quầy
+      ---
+      duration_ms: 616.4626
+      ...
+    # Subtest: 360 px không tràn ngang
+    ok 11 - 360 px không tràn ngang
+      ---
+      duration_ms: 5316.3802
+      ...
+    1..11
+ok 1 - 1.17: gọi số từ màn hình quầy qua API 1.11 và PostgreSQL thật
+  ---
+  duration_ms: 35646.4073
+  ...
+1..1
+# tests 12
+# suites 0
+# pass 12
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 35739.859

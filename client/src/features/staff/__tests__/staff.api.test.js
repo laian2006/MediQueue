@@ -43,3 +43,34 @@ test('server rejections keep error.code for StaffPage', async () => {
       && error.status === status && error.code === code);
   }
 });
+
+test('2.16 ticket actions post to the 2.10 endpoints without body or query', async () => {
+  const ticketId = '30000000-0000-4000-8000-000000000004';
+  const requests = [];
+  const fetchImpl = async (url, init) => {
+    requests.push({ url, method: init.method, body: init.body, contentType: init.headers.get('Content-Type') });
+    return { status: 200, ok: true, json: async () => ({ data: { ticketId, number: 4 } }) };
+  };
+  const api = createStaffApi(createHttpClient({ baseUrl: '/api/v1', fetchImpl }));
+  for (const name of ['recall', 'start', 'complete']) {
+    assert.deepEqual(await api[name]({ ticketId }), { data: { ticketId, number: 4 } });
+  }
+
+  assert.deepEqual(requests.map(({ method, url }) => `${method} ${url}`), [
+    `POST /api/v1/queue/tickets/${ticketId}/recall`,
+    `POST /api/v1/queue/tickets/${ticketId}/start`,
+    `POST /api/v1/queue/tickets/${ticketId}/complete`,
+  ]);
+  // Máy chủ trả 400 nếu có body hoặc Content-Type kèm body.
+  assert.ok(requests.every(({ body, contentType }) => body === undefined && contentType === null));
+});
+
+test('2.16 ticket action rejections keep error.code', async () => {
+  for (const [status, code] of [[409, 'INVALID_STATE'], [404, 'NOT_FOUND'], [401, 'UNAUTHENTICATED'], [403, 'FORBIDDEN']]) {
+    const { api } = fakeServer(() => ({ status, body: { error: { code, message: code } } }));
+    for (const name of ['recall', 'start', 'complete']) {
+      await assert.rejects(api[name]({ ticketId: '30000000-0000-4000-8000-000000000004' }),
+        (error) => error instanceof ApiError && error.status === status && error.code === code);
+    }
+  }
+});
