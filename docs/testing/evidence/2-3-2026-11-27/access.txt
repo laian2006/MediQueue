@@ -1,0 +1,19 @@
+▶ WBS 2.5: multi-representative access and logout on the shared app with PostgreSQL
+  ✔ MX-01 matrix: account × profile × operation (list, issue, active, view, cancel) (604.3998ms)
+  ✔ MX-02 two representatives of the same profile: rights follow the patient, not who issued (56.868ms)
+  ✔ MX-03 swapping ticketId, patientId or extra fields for data outside the grant changes nothing (74.7996ms)
+  ✔ LO-01 logout destroys the server session, clears the cookie and the old cookie gets 401 (211.7398ms)
+  ✔ LO-02 logout needs a session and takes no body; a bad request keeps the session alive (87.7717ms)
+  ✔ LO-03 logout only ends the caller's own session; other users and other browsers stay signed in (244.4756ms)
+  ✔ LO-04 new login after logout gets a NEW session id; the old one stays dead (163.3538ms)
+  ✔ SW-01 switching account in the same browser keeps nothing of the previous account (187.0723ms)
+  ✔ EX-01 absolute 8h expiry is fixed at login, never extended by activity, and expired sessions are destroyed (264.1989ms)
+✔ WBS 2.5: multi-representative access and logout on the shared app with PostgreSQL (3406.5571ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 10
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3534.5827
