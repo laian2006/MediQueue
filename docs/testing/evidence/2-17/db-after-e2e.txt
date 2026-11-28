@@ -1,0 +1,30 @@
+ number |  status   | called 
+--------+-----------+--------
+      1 | NO_SHOW   | t
+      1 | CALLED    | t
+      2 | COMPLETED | t
+      3 | COMPLETED | t
+      4 | NO_SHOW   | t
+(5 rows)
+
+ number |  action   | from_status |  to_status  | username 
+--------+-----------+-------------+-------------+----------
+      1 | ISSUED    |             | WAITING     | rep_a
+      2 | ISSUED    |             | WAITING     | rep_a
+      3 | ISSUED    |             | WAITING     | rep_b
+      1 | CALLED    | WAITING     | CALLED      | staff_01
+      1 | RECALLED  | CALLED      | CALLED      | staff_01
+      1 | NO_SHOW   | CALLED      | NO_SHOW     | staff_01
+      2 | CALLED    | WAITING     | CALLED      | staff_01
+      2 | STARTED   | CALLED      | REGISTERING | staff_01
+      2 | COMPLETED | REGISTERING | COMPLETED   | staff_01
+      3 | CALLED    | WAITING     | CALLED      | staff_01
+      3 | STARTED   | CALLED      | REGISTERING | staff_01
+      3 | COMPLETED | REGISTERING | COMPLETED   | staff_01
+      4 | ISSUED    |             | WAITING     | rep_a
+      4 | CALLED    | WAITING     | CALLED      | staff_01
+      4 | NO_SHOW   | CALLED      | NO_SHOW     | staff_01
+      1 | ISSUED    |             | WAITING     | rep_a
+      1 | CALLED    | WAITING     | CALLED      | staff_01
+(17 rows)
+

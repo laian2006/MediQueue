@@ -1,12 +1,12 @@
-# Thiết kế UI vận hành quầy (1.16, 1.17, 2.16)
+# Thiết kế UI vận hành quầy (1.16, 1.17, 2.16, 2.17)
 
 Chủ trì: Trần Quang Trung. Reviewer: Đặng Thành Đạt.
 
-Trạng thái: 1.16 (UI, mock) và 1.17 (nối API 1.11, SessionPanel 1.2,
-PostgreSQL thật, PR #18) đã merge. Task 2.16 thêm gọi lại, bắt đầu tiếp nhận và
-hoàn tất theo API 2.10; bằng chứng ở `docs/testing/cases/2-16.md`. 2.16 chờ
-review, An nghiệm thu và chạy lại trên `main` sau merge; chưa Done. Ghi vắng và
-thời gian T thuộc 2.17.
+Trạng thái: 1.16 (UI, mock), 1.17 (nối API 1.11, SessionPanel 1.2, PostgreSQL
+thật, PR #18) và 2.16 (gọi lại, bắt đầu, hoàn tất theo API 2.10, PR #34) đã
+merge. Task 2.17 thêm ghi vắng theo API 2.11, hiển thị thời gian T và xử lý xung
+đột hai cửa sổ; bằng chứng ở `docs/testing/cases/2-17.md`. 2.17 chờ review, An
+nghiệm thu và chạy lại trên `main` sau merge; chưa Done.
 
 ## Luồng và wireframe
 
@@ -32,7 +32,9 @@ tại và hàng chờ → gọi số tiếp theo khi quầy rảnh → đọc l�
 | Tải lần đầu lỗi | Báo lỗi và Thử tải lại, không có số | | Chưa hiện |
 | Tải lại lỗi | Giữ dữ liệu cũ, cảnh báo kèm thời điểm | Giữ dữ liệu cũ | Khóa đến khi tải lại được |
 | Đang gửi | Giữ nguyên, không tự đổi số | Giữ nguyên | Khóa, ghi Đang gọi… |
-| Có CALLED (2.16) | Nút Bắt đầu tiếp nhận (chính) và Gọi lại | Danh sách số | Khóa, ghi lý do quầy bận |
+| Có CALLED (2.16, 2.17) | Nút Bắt đầu tiếp nhận (chính), Gọi lại, Ghi vắng; dòng Ghi vắng đếm ngược T | Danh sách số | Khóa, ghi lý do quầy bận |
+| CALLED chưa đủ T (2.17) | Ghi vắng khóa, hiện "Còn N giây (T = … giây)" | Danh sách số | Khóa |
+| CALLED đã đủ T (2.17) | Ghi vắng mở, hiện "Đã đủ … giây, có thể ghi vắng" | Danh sách số | Khóa |
 | Có REGISTERING (2.16) | Nút Hoàn tất đăng ký | Danh sách số | Khóa, ghi lý do quầy bận |
 | Dữ liệu cũ có lượt (2.16) | Khóa các nút thao tác, nhắc tải lại | Giữ dữ liệu cũ | Khóa |
 | 401 `UNAUTHENTICATED` | Báo cần đăng nhập tài khoản nhân viên, bỏ dữ liệu đang hiện | | Chưa hiện |
@@ -45,6 +47,9 @@ Kết quả thao tác hiển thị phía trên hai panel:
   sau khi tải lại.
 - Gọi lại, bắt đầu, hoàn tất (2.16): `INVALID_STATE` báo trạng thái phiếu đã đổi
   (thường do cửa sổ khác), `NOT_FOUND` báo không tìm thấy phiếu; đều tải lại.
+- Ghi vắng (2.17): `NO_SHOW_TOO_EARLY` báo chưa đủ thời gian chờ kể từ lần gọi
+  gần nhất, kèm số giây còn lại từ `details.remainingSeconds`, gợi ý cửa sổ khác
+  vừa gọi lại; tải lại để đếm ngược theo lần gọi mới.
 - Máy chủ trả 4xx với mã chưa có thông báo riêng: báo máy chủ từ chối kèm mã.
 - Không có phản hồi hoặc 5xx: báo chưa có xác nhận, không khẳng định đã làm hay chưa.
 - Mọi thao tác dùng chung một cờ đang gửi: bấm lặp chỉ gửi một yêu cầu; xong thì
@@ -85,6 +90,7 @@ StaffPage đọc lại phiên và hàng chờ (chốt thiết kế, mục 2). Kh
 | `recall({ticketId})` | `POST /queue/tickets/{ticketId}/recall`, không body |
 | `start({ticketId})` | `POST /queue/tickets/{ticketId}/start`, không body |
 | `complete({ticketId})` | `POST /queue/tickets/{ticketId}/complete`, không body |
+| `noShow({ticketId})` | `POST /queue/tickets/{ticketId}/no-show`, không body |
 
 UI đọc `error.code` của `ApiError` (`http.js`). Ngoài các mã ở trên, `NOT_FOUND`
 khi gọi số được báo là phiên không còn tồn tại; lỗi mạng hoặc mã khác báo chưa có
@@ -92,6 +98,16 @@ xác nhận. Màn hình đọc lại mỗi 3 giây khi đã có dữ liệu, kh�
 lần đọc trước hoặc thao tác gọi chưa xong, dừng khi rời trang hoặc gặp 401/403
 (chốt thiết kế, mục 3). Lượt polling không bật trạng thái đang tải để màn hình
 không nhấp nháy; lỗi polling hiện cảnh báo dữ liệu cũ như tải lại thủ công.
+
+## Thời gian T ghi vắng (2.17)
+
+`GET /queue/current` trả `noShowTimeoutSeconds` (T, cấu hình
+`NO_SHOW_TIMEOUT_SECONDS` ở server) và `serverTime`. `noShowTiming.js` tính hạn
+ghi vắng = `lastCalledAt` + T theo đồng hồ máy chủ: lệch giữa `serverTime` và
+đồng hồ trình duyệt được đo mỗi lần đọc, nên máy nhân viên chạy nhanh hay chậm
+không làm mở nút sớm. Đếm ngược chỉ để hiển thị và khóa nút; máy chủ vẫn kiểm tra
+lại T bằng đồng hồ PostgreSQL. Gọi lại đổi `lastCalledAt` nên T tính lại từ đầu.
+Không có T từ máy chủ thì nút Ghi vắng khóa.
 
 ## Dữ liệu và cách thử trạng thái
 
@@ -125,3 +141,5 @@ khởi tạo lại sau mỗi render. Không coi mock là kiểm tra quyền ở 
   `tests/e2e/staff-flow.spec.js`, bằng chứng `docs/testing/evidence/1-17/`.
 - Thao tác tiếp nhận 2.16: `docs/testing/cases/2-16.md`, E2E
   `tests/e2e/staff-lifecycle-flow.spec.js`, bằng chứng `docs/testing/evidence/2-16/`.
+- Ghi vắng và xung đột 2.17: `docs/testing/cases/2-17.md`, E2E
+  `tests/e2e/staff-conflict.spec.js`, bằng chứng `docs/testing/evidence/2-17/`.

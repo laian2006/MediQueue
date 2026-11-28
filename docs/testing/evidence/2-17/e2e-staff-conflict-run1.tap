@@ -1,0 +1,66 @@
+TAP version 13
+# Subtest: 2.17: ghi vắng, gọi lại tính lại T và hai cửa sổ không làm lệch quầy
+    # Subtest: chuẩn bị: mở phiên, ba số, cửa sổ A gọi số 1
+    ok 1 - chuẩn bị: mở phiên, ba số, cửa sổ A gọi số 1
+      ---
+      duration_ms: 3642.7058
+      ...
+    # Subtest: trước T: Ghi vắng bị khóa, hiện đếm ngược; API cũng từ chối NO_SHOW_TOO_EARLY
+    ok 2 - trước T: Ghi vắng bị khóa, hiện đếm ngược; API cũng từ chối NO_SHOW_TOO_EARLY
+      ---
+      duration_ms: 243.3024
+      ...
+    # Subtest: đủ T: nút mở; cửa sổ B gọi lại thì cửa sổ A cũ bấm Ghi vắng bị từ chối, T tính lại
+    ok 3 - đủ T: nút mở; cửa sổ B gọi lại thì cửa sổ A cũ bấm Ghi vắng bị từ chối, T tính lại
+      ---
+      duration_ms: 11017.2782
+      ...
+    # Subtest: đủ T mới: ghi vắng thành công, quầy rảnh ở cả hai cửa sổ
+    ok 4 - đủ T mới: ghi vắng thành công, quầy rảnh ở cả hai cửa sổ
+      ---
+      duration_ms: 10465.8226
+      ...
+    # Subtest: cửa sổ cũ bấm Hoàn tất sau khi cửa sổ khác đã hoàn tất: 409, không báo hoàn tất giả
+    ok 5 - cửa sổ cũ bấm Hoàn tất sau khi cửa sổ khác đã hoàn tất: 409, không báo hoàn tất giả
+      ---
+      duration_ms: 5720.1742
+      ...
+    # Subtest: hai cửa sổ bấm cùng lúc Ghi vắng và Bắt đầu: đúng một thao tác được nhận, hai màn hình khớp máy chủ
+    ok 6 - hai cửa sổ bấm cùng lúc Ghi vắng và Bắt đầu: đúng một thao tác được nhận, hai màn hình khớp máy chủ
+      ---
+      duration_ms: 9045.0984
+      ...
+    # Subtest: phiên STOPPED: đóng khi còn phiếu bị báo rõ, vẫn gọi và ghi vắng phiếu cũ, xử lý hết mới đóng được
+    ok 7 - phiên STOPPED: đóng khi còn phiếu bị báo rõ, vẫn gọi và ghi vắng phiếu cũ, xử lý hết mới đóng được
+      ---
+      duration_ms: 10760.0423
+      ...
+    # Subtest: mất phản hồi khi ghi vắng: báo chưa có xác nhận, không báo ghi vắng
+    ok 8 - mất phản hồi khi ghi vắng: báo chưa có xác nhận, không báo ghi vắng
+      ---
+      duration_ms: 53.5239
+      ...
+    # Subtest: ghi vắng trong STOPPED rồi đóng phiên thành công
+    ok 9 - ghi vắng trong STOPPED rồi đóng phiên thành công
+      ---
+      duration_ms: 170.306
+      ...
+    # Subtest: 360 px khi đang đếm ngược: không tràn ngang
+    ok 10 - 360 px khi đang đếm ngược: không tràn ngang
+      ---
+      duration_ms: 584.7037
+      ...
+    1..10
+ok 1 - 2.17: ghi vắng, gọi lại tính lại T và hai cửa sổ không làm lệch quầy
+  ---
+  duration_ms: 53893.8015
+  ...
+1..1
+# tests 11
+# suites 0
+# pass 11
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 53978.8681

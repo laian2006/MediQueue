@@ -2,6 +2,7 @@ import { cloneElement, isValidElement, useCallback, useEffect, useRef, useState 
 import CurrentTicket from './components/CurrentTicket.jsx';
 import WaitingList from './components/WaitingList.jsx';
 import { staffApi } from './staff.api.js';
+import { noShowRemainingSeconds, serverOffsetMs } from './noShowTiming.js';
 import './staff.css';
 
 // Chốt thiết kế màn hình quầy, mục 3: đọc lại mỗi 3 giây khi đang mở.
@@ -60,8 +61,24 @@ const actions = {
   },
 };
 // Thao tác theo phiếu được hiện theo trạng thái lượt hiện tại (CALLED → REGISTERING → COMPLETED).
+// 2.17: ghi vắng theo hợp đồng 2.11; máy chủ quyết định đã đủ T hay chưa.
+actions.noShow = {
+  label: 'Ghi vắng',
+  busyLabel: 'Đang ghi vắng…',
+  send: (api, snapshot) => api.noShow({ ticketId: snapshot.current.ticketId }),
+  success: (ticket) => `Máy chủ đã xác nhận ghi vắng số ${ticket.number}. Quầy rảnh để gọi số tiếp theo.`,
+  errors: {
+    ...ticketErrors,
+    NO_SHOW_TOO_EARLY: (error) => {
+      const left = Number.isFinite(error?.details?.remainingSeconds) ? ` (còn ${error.details.remainingSeconds} giây)` : '';
+      return `Máy chủ từ chối ghi vắng: chưa đủ thời gian chờ kể từ lần gọi gần nhất${left}, có thể do cửa sổ khác vừa gọi lại. Màn hình được tải lại theo dữ liệu máy chủ.`;
+    },
+  },
+  unconfirmed: 'Chưa nhận được xác nhận ghi vắng, lượt có thể đã hoặc chưa được ghi vắng. Hãy kiểm tra lượt hiện tại trước khi thao tác tiếp.',
+};
+
 const ticketActionsByStatus = {
-  CALLED: ['start', 'recall'],
+  CALLED: ['start', 'recall', 'noShow'],
   REGISTERING: ['complete'],
 };
 
@@ -88,6 +105,8 @@ export default function StaffPage({ api = staffApi, sessionPanel = null, demo = 
   // Tên thao tác đang gửi (callNext, recall, start, complete) hoặc null.
   const [submitting, setSubmitting] = useState(null);
   const [result, setResult] = useState(null);
+  // 2.17: đồng hồ hiển thị đếm ngược ghi vắng, chỉ chạy khi có lượt CALLED.
+  const [now, setNow] = useState(() => Date.now());
   const submittingRef = useRef(false);
   const loadSeq = useRef(0);
   const activeLoads = useRef(0);
@@ -116,6 +135,7 @@ export default function StaffPage({ api = staffApi, sessionPanel = null, demo = 
       const { data: session } = await api.getCurrentSession(options);
       let waiting = [];
       let current = null;
+      let timing = { noShowTimeoutSeconds: null, serverOffsetMs: 0 };
       if (session) {
         const query = { sessionId: session.sessionId };
         const requests = [api.getWaitingQueue(query, options), api.getCurrentQueue(query, options)];
@@ -123,6 +143,11 @@ export default function StaffPage({ api = staffApi, sessionPanel = null, demo = 
           const [waitingResponse, currentResponse] = await Promise.all(requests);
           waiting = waitingResponse.data.tickets;
           current = currentResponse.data.ticket;
+          timing = {
+            noShowTimeoutSeconds: currentResponse.data.noShowTimeoutSeconds,
+            // Lệch giữa đồng hồ máy chủ và trình duyệt tại lúc nhận phản hồi.
+            serverOffsetMs: serverOffsetMs(currentResponse.data.serverTime, Date.now()),
+          };
         } catch (error) {
           // Một request lỗi: báo ngay, hủy request còn treo và chờ nó kết thúc
           // trước khi giảm activeLoads, để polling không gửi lượt chồng lên.
@@ -134,7 +159,7 @@ export default function StaffPage({ api = staffApi, sessionPanel = null, demo = 
       }
       // Phản hồi của lần đọc cũ về trễ không được ghi đè lần đọc mới.
       if (seq !== loadSeq.current) return;
-      setSnapshot({ session, waiting, current, receivedAt: new Date().toISOString() });
+      setSnapshot({ session, waiting, current, ...timing, receivedAt: new Date().toISOString() });
       setLoadError('');
       setAccessError('');
     } catch (error) {
@@ -169,6 +194,14 @@ export default function StaffPage({ api = staffApi, sessionPanel = null, demo = 
     return () => clearInterval(timer);
   }, [polling, refresh]);
 
+  const countingDown = snapshot?.current?.status === 'CALLED';
+  useEffect(() => {
+    if (!countingDown) return undefined;
+    setNow(Date.now());
+    const timer = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(timer);
+  }, [countingDown, snapshot]);
+
   const stale = Boolean(loadError);
   const blockedReason = snapshot ? callBlockedReason({ ...snapshot, stale }) : '';
   const ready = Boolean(snapshot) && !refreshing && !submitting;
@@ -176,10 +209,12 @@ export default function StaffPage({ api = staffApi, sessionPanel = null, demo = 
   // Thao tác theo phiếu cần dữ liệu mới; dữ liệu cũ thì khóa và nhắc tải lại.
   const ticketActions = snapshot?.current ? ticketActionsByStatus[snapshot.current.status] ?? [] : [];
   const canActOnTicket = ready && !stale;
+  const noShowRemaining = noShowRemainingSeconds(snapshot, now);
+  const isEnabled = (name) => canActOnTicket && (name !== 'noShow' || noShowRemaining === 0);
 
   async function run(name) {
     const action = actions[name];
-    const allowed = name === 'callNext' ? canCallNext : canActOnTicket && ticketActions.includes(name);
+    const allowed = name === 'callNext' ? canCallNext : isEnabled(name) && ticketActions.includes(name);
     if (submittingRef.current || !allowed) return;
     submittingRef.current = true;
     setSubmitting(name);
@@ -193,7 +228,8 @@ export default function StaffPage({ api = staffApi, sessionPanel = null, demo = 
         setSnapshot(null);
         setAccessError(accessErrors[error.code]);
       } else if (action.errors[error?.code]) {
-        setResult({ type: 'error', text: action.errors[error.code] });
+        const message = action.errors[error.code];
+        setResult({ type: 'error', text: typeof message === 'function' ? message(error) : message });
       } else if (error?.status >= 400 && error.status < 500) {
         // Máy chủ đã trả lời từ chối với mã chưa có thông báo riêng: không đổi gì, không phải "chưa xác nhận".
         setResult({ type: 'error', text: `Máy chủ từ chối thao tác (${error.code}). Màn hình được tải lại theo dữ liệu máy chủ.` });
@@ -269,7 +305,7 @@ export default function StaffPage({ api = staffApi, sessionPanel = null, demo = 
                   <h2 id="staff-current-heading">Lượt hiện tại</h2>
                   <span className={`staff-counter staff-counter--${snapshot.current ? 'busy' : 'free'}`}>{snapshot.current ? 'Quầy bận' : 'Quầy rảnh'}</span>
                 </div>
-                <CurrentTicket ticket={snapshot.current} />
+                <CurrentTicket ticket={snapshot.current} noShowRemaining={noShowRemaining} noShowTimeoutSeconds={snapshot.noShowTimeoutSeconds} />
                 {ticketActions.length > 0 && (
                   <div className="staff-actions" role="group" aria-label={`Thao tác với số ${snapshot.current.number}`}>
                     {ticketActions.map((name, index) => (
@@ -277,7 +313,7 @@ export default function StaffPage({ api = staffApi, sessionPanel = null, demo = 
                         key={name}
                         className={`staff-button${index > 0 ? ' staff-button--secondary' : ''}`}
                         onClick={() => run(name)}
-                        disabled={!canActOnTicket}
+                        disabled={!isEnabled(name)}
                       >
                         {submitting === name ? actions[name].busyLabel : actions[name].label}
                       </button>

@@ -52,7 +52,7 @@ test('2.16 ticket actions post to the 2.10 endpoints without body or query', asy
     return { status: 200, ok: true, json: async () => ({ data: { ticketId, number: 4 } }) };
   };
   const api = createStaffApi(createHttpClient({ baseUrl: '/api/v1', fetchImpl }));
-  for (const name of ['recall', 'start', 'complete']) {
+  for (const name of ['recall', 'start', 'complete', 'noShow']) {
     assert.deepEqual(await api[name]({ ticketId }), { data: { ticketId, number: 4 } });
   }
 
@@ -60,6 +60,7 @@ test('2.16 ticket actions post to the 2.10 endpoints without body or query', asy
     `POST /api/v1/queue/tickets/${ticketId}/recall`,
     `POST /api/v1/queue/tickets/${ticketId}/start`,
     `POST /api/v1/queue/tickets/${ticketId}/complete`,
+    `POST /api/v1/queue/tickets/${ticketId}/no-show`,
   ]);
   // Máy chủ trả 400 nếu có body hoặc Content-Type kèm body.
   assert.ok(requests.every(({ body, contentType }) => body === undefined && contentType === null));
@@ -68,9 +69,15 @@ test('2.16 ticket actions post to the 2.10 endpoints without body or query', asy
 test('2.16 ticket action rejections keep error.code', async () => {
   for (const [status, code] of [[409, 'INVALID_STATE'], [404, 'NOT_FOUND'], [401, 'UNAUTHENTICATED'], [403, 'FORBIDDEN']]) {
     const { api } = fakeServer(() => ({ status, body: { error: { code, message: code } } }));
-    for (const name of ['recall', 'start', 'complete']) {
+    for (const name of ['recall', 'start', 'complete', 'noShow']) {
       await assert.rejects(api[name]({ ticketId: '30000000-0000-4000-8000-000000000004' }),
         (error) => error instanceof ApiError && error.status === status && error.code === code);
     }
   }
+});
+
+test('2.17 NO_SHOW_TOO_EARLY keeps details.remainingSeconds for the message', async () => {
+  const { api } = fakeServer(() => ({ status: 409, body: { error: { code: 'NO_SHOW_TOO_EARLY', message: 'early', details: { remainingSeconds: 42 } } } }));
+  await assert.rejects(api.noShow({ ticketId: '30000000-0000-4000-8000-000000000004' }),
+    (error) => error.code === 'NO_SHOW_TOO_EARLY' && error.details.remainingSeconds === 42);
 });

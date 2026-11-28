@@ -14,6 +14,8 @@ export function createStaffApi(client = http) {
     recall: ticketAction('recall'),
     start: ticketAction('start'),
     complete: ticketAction('complete'),
+    // 2.17: ghi vắng (2.11), cùng quy ước không body.
+    noShow: ticketAction('no-show'),
   };
 }
 

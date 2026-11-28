@@ -1,0 +1,110 @@
+TAP version 13
+# Subtest: each role goes to its own area; unknown role goes home
+ok 1 - each role goes to its own area; unknown role goes home
+  ---
+  duration_ms: 0.8053
+  ...
+# Subtest: form validation asks for both fields; the password is not trimmed
+ok 2 - form validation asks for both fields; the password is not trimmed
+  ---
+  duration_ms: 0.343
+  ...
+# Subtest: error messages: wrong credentials, bad input, forbidden origin, network
+ok 3 - error messages: wrong credentials, bad input, forbidden origin, network
+  ---
+  duration_ms: 0.2697
+  ...
+# Subtest: only 401 counts as unauthenticated
+ok 4 - only 401 counts as unauthenticated
+  ---
+  duration_ms: 0.7509
+  ...
+# Subtest: board uses the public endpoint, preserves cancellation and validates successful responses
+ok 5 - board uses the public endpoint, preserves cancellation and validates successful responses
+  ---
+  duration_ms: 2.2733
+  ...
+# Subtest: slow request never overlaps; next successful snapshot replaces old numbers
+ok 6 - slow request never overlaps; next successful snapshot replaces old numbers
+  ---
+  duration_ms: 2.7796
+  ...
+# Subtest: failure reports an error, retries and recovers without synthesizing data
+ok 7 - failure reports an error, retries and recovers without synthesizing data
+  ---
+  duration_ms: 1.2643
+  ...
+# Subtest: cleanup aborts pending fetch and ignores late completion
+ok 8 - cleanup aborts pending fetch and ignores late completion
+  ---
+  duration_ms: 0.5333
+  ...
+# Subtest: 2.17 counts down T from the last call and reaches 0 exactly at T
+ok 9 - 2.17 counts down T from the last call and reaches 0 exactly at T
+  ---
+  duration_ms: 1.0389
+  ...
+# Subtest: 2.17 uses the server clock offset, not the browser clock
+ok 10 - 2.17 uses the server clock offset, not the browser clock
+  ---
+  duration_ms: 0.2127
+  ...
+# Subtest: 2.17 recall restarts T because lastCalledAt moves
+ok 11 - 2.17 recall restarts T because lastCalledAt moves
+  ---
+  duration_ms: 0.0947
+  ...
+# Subtest: 2.17 no countdown without a CALLED ticket or server T
+ok 12 - 2.17 no countdown without a CALLED ticket or server T
+  ---
+  duration_ms: 0.9769
+  ...
+# Subtest: staff API uses the 1.11 endpoints through http.js with cookies
+ok 13 - staff API uses the 1.11 endpoints through http.js with cookies
+  ---
+  duration_ms: 19.2265
+  ...
+# Subtest: server rejections keep error.code for StaffPage
+ok 14 - server rejections keep error.code for StaffPage
+  ---
+  duration_ms: 0.7896
+  ...
+# Subtest: 2.16 ticket actions post to the 2.10 endpoints without body or query
+ok 15 - 2.16 ticket actions post to the 2.10 endpoints without body or query
+  ---
+  duration_ms: 0.5949
+  ...
+# Subtest: 2.16 ticket action rejections keep error.code
+ok 16 - 2.16 ticket action rejections keep error.code
+  ---
+  duration_ms: 0.7046
+  ...
+# Subtest: 2.17 NO_SHOW_TOO_EARLY keeps details.remainingSeconds for the message
+ok 17 - 2.17 NO_SHOW_TOO_EARLY keeps details.remainingSeconds for the message
+  ---
+  duration_ms: 0.1864
+  ...
+# Subtest: JSON, session credentials and AbortSignal are preserved
+ok 18 - JSON, session credentials and AbortSignal are preserved
+  ---
+  duration_ms: 19.2664
+  ...
+# Subtest: structured API failures and invalid JSON are errors, never success
+ok 19 - structured API failures and invalid JSON are errors, never success
+  ---
+  duration_ms: 1.7955
+  ...
+# Subtest: network errors propagate and 204 has no body
+ok 20 - network errors propagate and 204 has no body
+  ---
+  duration_ms: 0.3454
+  ...
+1..20
+# tests 20
+# suites 0
+# pass 20
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 137.2233

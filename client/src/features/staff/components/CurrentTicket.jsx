@@ -7,7 +7,14 @@ function formatTime(value) {
   return value ? new Date(value).toLocaleTimeString('vi-VN') : 'Chưa có';
 }
 
-export default function CurrentTicket({ ticket }) {
+// 2.17: thời gian T do máy chủ cấp; remaining là số giây còn lại tính theo đồng hồ máy chủ.
+function noShowText(remaining, timeout) {
+  if (remaining === null || remaining === undefined) return 'Chưa có thông tin từ máy chủ';
+  if (remaining > 0) return `Còn ${remaining} giây (T = ${timeout} giây)`;
+  return `Đã đủ ${timeout} giây, có thể ghi vắng`;
+}
+
+export default function CurrentTicket({ ticket, noShowRemaining = null, noShowTimeoutSeconds = null }) {
   if (!ticket) {
     return <p className="staff-empty">Chưa có lượt nào đang được gọi.</p>;
   }
@@ -21,6 +28,9 @@ export default function CurrentTicket({ ticket }) {
       <p className="staff-ticket-message">{status.message}</p>
       <dl className="staff-ticket-details">
         <div><dt>Gọi gần nhất</dt><dd>{formatTime(ticket.lastCalledAt)}</dd></div>
+        {ticket.status === 'CALLED' && (
+          <div><dt>Ghi vắng</dt><dd className="staff-no-show" aria-live="off">{noShowText(noShowRemaining, noShowTimeoutSeconds)}</dd></div>
+        )}
       </dl>
     </div>
   );
